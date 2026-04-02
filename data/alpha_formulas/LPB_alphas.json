@@ -1,0 +1,332 @@
+{
+  "ticker": "LPB",
+  "n_rows": 727,
+  "n_rounds": 4,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi volume giao dịch tăng vượt mức trung bình trong khi giá không tăng tương ứng, cho thấy có sự phân phối và kỳ vọng giảm giá.",
+      "expression": "alpha = minus(ts_mean(df['volume'], 20), df['volume'])",
+      "ic": 0.075599,
+      "ic_5d": 0.008154,
+      "sharpe": 0.668,
+      "turnover": 1.0421,
+      "status": "OK",
+      "score": 0.098797,
+      "flipped": true
+    },
+    {
+      "id": 2,
+      "idea": "Khi momentum 10 ngày của LPB giảm nhưng khối lượng giao dịch lại tăng, điều này có thể cho thấy sự phân phối và có thể dẫn đến một đợt điều chỉnh giảm. Kết hợp với sentiment tiêu cực từ các ngân hàng cùng ngành để tăng cường độ tin cậy của tín hiệu này.",
+      "expression": "alpha = cwise_mul(ts_corr(ts_delta(df['close'], 5), df['Momentum_10'], 20), ts_zscore_scale(df['MBB_S'], 15))",
+      "ic": 0.02815,
+      "ic_5d": 0.083658,
+      "sharpe": 0.5517,
+      "turnover": 1.1753,
+      "status": "OK",
+      "score": 0.061026,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi sentiment của LPB (LPB_S) đang ở mức cao nhưng giá không tăng tương ứng, điều này có thể báo hiệu sự thất vọng và khả năng giá sẽ giảm.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 15), minus(ts_delta(df['close'], 5), 0))",
+      "ic": 0.039571,
+      "ic_5d": 0.044342,
+      "sharpe": 0.1794,
+      "turnover": 1.2738,
+      "status": "OK",
+      "score": 0.038097,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi giá LPB đang ở mức thấp hơn so với đường trung bình động (SMA_20) nhưng khối lượng giao dịch lại tăng đột biến, cho thấy có sự quan tâm từ thị trường, cho thấy có thể sự chuyển biến tâm lý tích cực sắp diễn ra. Kết hợp với sentiment tích cực từ ngành ngân hàng có thể tạo ra một tín hiệu mua mạnh mẽ.",
+      "expression": "alpha = add(cwise_mul(greater(df['volume'], ts_mean(df['volume'], 20)), minus(df['close'], ts_mean(df['close'], 20))), cwise_mul(ts_zscore_scale(df['MBB_S'], 15), 0.3))",
+      "ic": 0.024178,
+      "ic_5d": 0.024093,
+      "sharpe": 0.4379,
+      "turnover": 0.7785,
+      "status": "OK",
+      "score": 0.049539,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi sentiment của LPB (LPB_S) đang ở mức thấp trong khi giá không thay đổi, điều này cho thấy tâm lý thị trường yếu, có thể dẫn đến sự giảm giá. Kết hợp với momentum 3 ngày để tăng cường tín hiệu và xác nhận khả năng điều chỉnh giảm.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 10), ts_delta(df['Momentum_3'], 5))",
+      "ic": 0.050833,
+      "ic_5d": 0.026092,
+      "sharpe": 0.3385,
+      "turnover": 1.2887,
+      "status": "OK",
+      "score": 0.057579,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi volume giao dịch tăng vượt mức trung bình trong khi giá không tăng tương ứng, cho thấy có sự phân phối và kỳ vọng giảm giá.",
+          "expression": "alpha = minus(ts_mean(df['volume'], 20), df['volume'])",
+          "ic": 0.075599,
+          "ic_5d": 0.008154,
+          "sharpe": 0.668,
+          "turnover": 1.0421,
+          "status": "OK",
+          "score": 0.098797,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa momentum 10 ngày và giá cho thấy nếu momentum giảm trong khi giá vẫn tăng, có thể dẫn đến sự điều chỉnh giảm giá.",
+          "expression": "alpha = ts_corr(ts_delta(df['close'], 5), df['Momentum_10'], 20)",
+          "ic": 0.03417,
+          "ic_5d": 0.036814,
+          "sharpe": 0.5783,
+          "turnover": 0.3286,
+          "status": "OK",
+          "score": 0.066769,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức cao nhưng giá không tăng tương ứng, điều này có thể báo hiệu sự thất vọng và khả năng giá sẽ giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 15), minus(ts_delta(df['close'], 5), 0))",
+          "ic": 0.039571,
+          "ic_5d": 0.044342,
+          "sharpe": 0.1794,
+          "turnover": 1.2738,
+          "status": "OK",
+          "score": 0.038097,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi có sự phân kỳ giữa giá và chỉ số Momentum 10 ngày, đặc biệt là khi sentiment của ngành ngân hàng đang ở mức thấp, điều này có thể cho thấy một tín hiệu mạnh mẽ cho khả năng giảm giá. Nếu giá đang tăng trong khi momentum giảm và sentiment ngành ngân hàng tiêu cực, thì có khả năng cao rằng giá sẽ điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['Momentum_10'], 5), 0), ts_zscore_scale(df['MBB_S'], 20))",
+          "ic": 0.047473,
+          "ic_5d": 0.04597,
+          "sharpe": -1.2405,
+          "turnover": 1.2872,
+          "status": "OK",
+          "score": 0.028484,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức thấp trong khi giá không thay đổi, điều này cho thấy tâm lý thị trường yếu, có thể dẫn đến sự giảm giá. Kết hợp với momentum 3 ngày để tăng cường tín hiệu và xác nhận khả năng điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 10), ts_delta(df['Momentum_3'], 5))",
+          "ic": 0.050833,
+          "ic_5d": 0.026092,
+          "sharpe": 0.3385,
+          "turnover": 1.2887,
+          "status": "OK",
+          "score": 0.057579,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi volume giao dịch tăng vượt mức trung bình trong khi giá không tăng tương ứng, cho thấy có sự phân phối và kỳ vọng giảm giá.",
+          "expression": "alpha = minus(ts_mean(df['volume'], 20), df['volume'])",
+          "ic": 0.075599,
+          "ic_5d": 0.008154,
+          "sharpe": 0.668,
+          "turnover": 1.0421,
+          "status": "OK",
+          "score": 0.098797,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa momentum 10 ngày và giá cho thấy nếu momentum giảm trong khi giá vẫn tăng, có thể dẫn đến sự điều chỉnh giảm giá.",
+          "expression": "alpha = ts_corr(ts_delta(df['close'], 5), df['Momentum_10'], 20)",
+          "ic": 0.03417,
+          "ic_5d": 0.036814,
+          "sharpe": 0.5783,
+          "turnover": 0.3286,
+          "status": "OK",
+          "score": 0.066769,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức cao nhưng giá không tăng tương ứng, điều này có thể báo hiệu sự thất vọng và khả năng giá sẽ giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 15), minus(ts_delta(df['close'], 5), 0))",
+          "ic": 0.039571,
+          "ic_5d": 0.044342,
+          "sharpe": 0.1794,
+          "turnover": 1.2738,
+          "status": "OK",
+          "score": 0.038097,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá đã tăng vượt ngưỡng trung bình (SMA_20) nhưng khối lượng giao dịch (volume) lại thấp hơn mức trung bình 20 ngày, điều này có thể cho thấy thị trường đang có sự phân phối. Việc kết hợp với sentiment tiêu cực từ LPB_S có thể làm tăng độ tin cậy của tín hiệu điều chỉnh giảm, cho thấy khả năng bán ra mạnh mẽ.",
+          "expression": "alpha = cwise_mul(less(df['volume'], ts_mean(df['volume'], 20)), ts_zscore_scale(df['LPB_S'], 15))",
+          "ic": 0.066392,
+          "ic_5d": 0.029967,
+          "sharpe": -0.5868,
+          "turnover": 1.2871,
+          "status": "OK",
+          "score": 0.039835,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức thấp trong khi giá không thay đổi, điều này cho thấy tâm lý thị trường yếu, có thể dẫn đến sự giảm giá. Kết hợp với momentum 3 ngày để tăng cường tín hiệu và xác nhận khả năng điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 10), ts_delta(df['Momentum_3'], 5))",
+          "ic": 0.050833,
+          "ic_5d": 0.026092,
+          "sharpe": 0.3385,
+          "turnover": 1.2887,
+          "status": "OK",
+          "score": 0.057579,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi volume giao dịch tăng vượt mức trung bình trong khi giá không tăng tương ứng, cho thấy có sự phân phối và kỳ vọng giảm giá.",
+          "expression": "alpha = minus(ts_mean(df['volume'], 20), df['volume'])",
+          "ic": 0.075599,
+          "ic_5d": 0.008154,
+          "sharpe": 0.668,
+          "turnover": 1.0421,
+          "status": "OK",
+          "score": 0.098797,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi momentum 10 ngày của LPB giảm nhưng khối lượng giao dịch lại tăng, điều này có thể cho thấy sự phân phối và có thể dẫn đến một đợt điều chỉnh giảm. Kết hợp với sentiment tiêu cực từ các ngân hàng cùng ngành để tăng cường độ tin cậy của tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_corr(ts_delta(df['close'], 5), df['Momentum_10'], 20), ts_zscore_scale(df['MBB_S'], 15))",
+          "ic": 0.02815,
+          "ic_5d": 0.083658,
+          "sharpe": 0.5517,
+          "turnover": 1.1753,
+          "status": "OK",
+          "score": 0.061026,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức cao nhưng giá không tăng tương ứng, điều này có thể báo hiệu sự thất vọng và khả năng giá sẽ giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 15), minus(ts_delta(df['close'], 5), 0))",
+          "ic": 0.039571,
+          "ic_5d": 0.044342,
+          "sharpe": 0.1794,
+          "turnover": 1.2738,
+          "status": "OK",
+          "score": 0.038097,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá đã tăng vượt ngưỡng trung bình (SMA_20) nhưng khối lượng giao dịch (volume) lại thấp hơn mức trung bình 20 ngày, điều này có thể cho thấy thị trường đang có sự phân phối. Việc kết hợp với sentiment tiêu cực từ LPB_S có thể làm tăng độ tin cậy của tín hiệu điều chỉnh giảm, cho thấy khả năng bán ra mạnh mẽ.",
+          "expression": "alpha = cwise_mul(less(df['volume'], ts_mean(df['volume'], 20)), ts_zscore_scale(df['LPB_S'], 15))",
+          "ic": 0.066392,
+          "ic_5d": 0.029967,
+          "sharpe": -0.5868,
+          "turnover": 1.2871,
+          "status": "OK",
+          "score": 0.039835,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức thấp trong khi giá không thay đổi, điều này cho thấy tâm lý thị trường yếu, có thể dẫn đến sự giảm giá. Kết hợp với momentum 3 ngày để tăng cường tín hiệu và xác nhận khả năng điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 10), ts_delta(df['Momentum_3'], 5))",
+          "ic": 0.050833,
+          "ic_5d": 0.026092,
+          "sharpe": 0.3385,
+          "turnover": 1.2887,
+          "status": "OK",
+          "score": 0.057579,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi volume giao dịch tăng vượt mức trung bình trong khi giá không tăng tương ứng, cho thấy có sự phân phối và kỳ vọng giảm giá.",
+          "expression": "alpha = minus(ts_mean(df['volume'], 20), df['volume'])",
+          "ic": 0.075599,
+          "ic_5d": 0.008154,
+          "sharpe": 0.668,
+          "turnover": 1.0421,
+          "status": "OK",
+          "score": 0.098797,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi momentum 10 ngày của LPB giảm nhưng khối lượng giao dịch lại tăng, điều này có thể cho thấy sự phân phối và có thể dẫn đến một đợt điều chỉnh giảm. Kết hợp với sentiment tiêu cực từ các ngân hàng cùng ngành để tăng cường độ tin cậy của tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_corr(ts_delta(df['close'], 5), df['Momentum_10'], 20), ts_zscore_scale(df['MBB_S'], 15))",
+          "ic": 0.02815,
+          "ic_5d": 0.083658,
+          "sharpe": 0.5517,
+          "turnover": 1.1753,
+          "status": "OK",
+          "score": 0.061026,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức cao nhưng giá không tăng tương ứng, điều này có thể báo hiệu sự thất vọng và khả năng giá sẽ giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 15), minus(ts_delta(df['close'], 5), 0))",
+          "ic": 0.039571,
+          "ic_5d": 0.044342,
+          "sharpe": 0.1794,
+          "turnover": 1.2738,
+          "status": "OK",
+          "score": 0.038097,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá LPB đang ở mức thấp hơn so với đường trung bình động (SMA_20) nhưng khối lượng giao dịch lại tăng đột biến, cho thấy có sự quan tâm từ thị trường, cho thấy có thể sự chuyển biến tâm lý tích cực sắp diễn ra. Kết hợp với sentiment tích cực từ ngành ngân hàng có thể tạo ra một tín hiệu mua mạnh mẽ.",
+          "expression": "alpha = add(cwise_mul(greater(df['volume'], ts_mean(df['volume'], 20)), minus(df['close'], ts_mean(df['close'], 20))), cwise_mul(ts_zscore_scale(df['MBB_S'], 15), 0.3))",
+          "ic": 0.024178,
+          "ic_5d": 0.024093,
+          "sharpe": 0.4379,
+          "turnover": 0.7785,
+          "status": "OK",
+          "score": 0.049539,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi sentiment của LPB (LPB_S) đang ở mức thấp trong khi giá không thay đổi, điều này cho thấy tâm lý thị trường yếu, có thể dẫn đến sự giảm giá. Kết hợp với momentum 3 ngày để tăng cường tín hiệu và xác nhận khả năng điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['LPB_S'], 10), ts_delta(df['Momentum_3'], 5))",
+          "ic": 0.050833,
+          "ic_5d": 0.026092,
+          "sharpe": 0.3385,
+          "turnover": 1.2887,
+          "status": "OK",
+          "score": 0.057579,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

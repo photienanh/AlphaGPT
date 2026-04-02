@@ -1,0 +1,200 @@
+{
+  "ticker": "TCB",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Sự tương quan giữa giá TCB và giá của VIC (cùng ngành) có thể cung cấp thông tin về thị trường. Khi TCB có giá cao hơn VIC nhưng lại có momentum thấp hơn, điều này có thể cho thấy sự điều chỉnh.",
+      "expression": "alpha = minus(ts_corr(df['close'], df['VIC_S'], 20), ts_corr(df['Momentum_10'], df['close'], 20))",
+      "ic": 0.019625,
+      "ic_5d": 0.008656,
+      "sharpe": 0.2864,
+      "turnover": 0.3263,
+      "status": "OK",
+      "score": 0.034688,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Sự chênh lệch giữa volume giao dịch của TCB và VIC (cùng ngành) có thể chỉ ra sự phân phối. Nếu TCB có volume thấp hơn VIC và giá đang giảm, điều này cho thấy áp lực bán.",
+      "expression": "alpha = minus(ts_delta(df['volume'], 5), ts_delta(df['VIC_S'], 5))",
+      "ic": 0.021273,
+      "ic_5d": 0.040803,
+      "sharpe": -0.1293,
+      "turnover": 1.331,
+      "status": "OK",
+      "score": 0.012764,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Trong ngành ngân hàng, sự phân tán của chỉ số RSI giữa các cổ phiếu có thể cho thấy áp lực bán hoặc mua trong ngành. Khi RSI của TCB ở mức quá mua nhưng RSI của MBB và HDB thấp hơn, điều này có thể chỉ ra rằng TCB có thể gặp áp lực điều chỉnh giá.",
+      "expression": "alpha = minus(ts_zscore_scale(df['RSI_14'], 20), ts_zscore_scale(df['MBB_S'], 20))",
+      "ic": 0.034262,
+      "ic_5d": 0.046398,
+      "sharpe": 0.5747,
+      "turnover": 0.8475,
+      "status": "OK",
+      "score": 0.066529,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Khi RSI của TCB ở mức quá mua nhưng giá của TCB vẫn đang giảm, điều này có thể cho thấy sự áp lực bán mạnh ở cổ phiếu này. Mặt khác, nếu giá của VIC (cùng ngành) không tăng tương ứng trong khi volume của TCB giảm, điều này cho thấy một thị trường điều chỉnh. Sự khác biệt này có thể cho thấy rằng TCB sẽ trải qua một điều chỉnh giá trong tương lai gần.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['RSI_14'], 70), 14), cwise_mul(ts_mean(df['volume'], 20), ts_zscore_scale(df['VIC_S'], 10)))",
+      "ic": 0.044266,
+      "ic_5d": 0.052922,
+      "sharpe": -0.2931,
+      "turnover": 1.3432,
+      "status": "OK",
+      "score": 0.026559,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi có sự tích cực trong sentiment ngành ngân hàng, điều này có thể làm tăng áp lực mua ở TCB. Nếu giá TCB đang có xu hướng giảm nhưng sentiment ngành lại tích cực, điều này có thể chỉ ra rằng áp lực giảm giá sẽ bị giảm đi, tạo cơ hội cho một đợt phục hồi. Sự phân tán giữa momentum ngắn hạn và dài hạn cũng có thể giúp xác định được sự chuyển biến này.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), add(1.0, cwise_mul(0.5, ts_ema(df['HDB_S'], 5))))",
+      "ic": 0.011553,
+      "ic_5d": 0.037425,
+      "sharpe": 0.3506,
+      "turnover": 0.8134,
+      "status": "OK",
+      "score": 0.034981,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự tương quan giữa giá TCB và giá của VIC (cùng ngành) có thể cung cấp thông tin về thị trường. Khi TCB có giá cao hơn VIC nhưng lại có momentum thấp hơn, điều này có thể cho thấy sự điều chỉnh.",
+          "expression": "alpha = minus(ts_corr(df['close'], df['VIC_S'], 20), ts_corr(df['Momentum_10'], df['close'], 20))",
+          "ic": 0.019625,
+          "ic_5d": 0.008656,
+          "sharpe": 0.2864,
+          "turnover": 0.3263,
+          "status": "OK",
+          "score": 0.034688,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Sự chênh lệch giữa volume giao dịch của TCB và VIC (cùng ngành) có thể chỉ ra sự phân phối. Nếu TCB có volume thấp hơn VIC và giá đang giảm, điều này cho thấy áp lực bán.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 5), ts_delta(df['VIC_S'], 5))",
+          "ic": 0.021273,
+          "ic_5d": 0.040803,
+          "sharpe": -0.1293,
+          "turnover": 1.331,
+          "status": "OK",
+          "score": 0.012764,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Trong ngành ngân hàng, sự phân tán của chỉ số RSI giữa các cổ phiếu có thể cho thấy áp lực bán hoặc mua trong ngành. Khi RSI của TCB ở mức quá mua nhưng RSI của MBB và HDB thấp hơn, điều này có thể chỉ ra rằng TCB có thể gặp áp lực điều chỉnh giá.",
+          "expression": "alpha = minus(ts_zscore_scale(df['RSI_14'], 20), ts_zscore_scale(df['MBB_S'], 20))",
+          "ic": 0.034262,
+          "ic_5d": 0.046398,
+          "sharpe": 0.5747,
+          "turnover": 0.8475,
+          "status": "OK",
+          "score": 0.066529,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi RSI của TCB ở mức quá mua nhưng giá của TCB vẫn đang giảm, điều này có thể cho thấy sự áp lực bán mạnh ở cổ phiếu này. Mặt khác, nếu giá của VIC (cùng ngành) không tăng tương ứng trong khi volume của TCB giảm, điều này cho thấy một thị trường điều chỉnh. Sự khác biệt này có thể cho thấy rằng TCB sẽ trải qua một điều chỉnh giá trong tương lai gần.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['RSI_14'], 70), 14), cwise_mul(ts_mean(df['volume'], 20), ts_zscore_scale(df['VIC_S'], 10)))",
+          "ic": 0.044266,
+          "ic_5d": 0.052922,
+          "sharpe": -0.2931,
+          "turnover": 1.3432,
+          "status": "OK",
+          "score": 0.026559,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.012408,
+          "ic_5d": 0.000218,
+          "sharpe": -0.3177,
+          "turnover": 0.6106,
+          "status": "OK",
+          "score": 0.007445,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự tương quan giữa giá TCB và giá của VIC (cùng ngành) có thể cung cấp thông tin về thị trường. Khi TCB có giá cao hơn VIC nhưng lại có momentum thấp hơn, điều này có thể cho thấy sự điều chỉnh.",
+          "expression": "alpha = minus(ts_corr(df['close'], df['VIC_S'], 20), ts_corr(df['Momentum_10'], df['close'], 20))",
+          "ic": 0.019625,
+          "ic_5d": 0.008656,
+          "sharpe": 0.2864,
+          "turnover": 0.3263,
+          "status": "OK",
+          "score": 0.034688,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Sự chênh lệch giữa volume giao dịch của TCB và VIC (cùng ngành) có thể chỉ ra sự phân phối. Nếu TCB có volume thấp hơn VIC và giá đang giảm, điều này cho thấy áp lực bán.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 5), ts_delta(df['VIC_S'], 5))",
+          "ic": 0.021273,
+          "ic_5d": 0.040803,
+          "sharpe": -0.1293,
+          "turnover": 1.331,
+          "status": "OK",
+          "score": 0.012764,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Trong ngành ngân hàng, sự phân tán của chỉ số RSI giữa các cổ phiếu có thể cho thấy áp lực bán hoặc mua trong ngành. Khi RSI của TCB ở mức quá mua nhưng RSI của MBB và HDB thấp hơn, điều này có thể chỉ ra rằng TCB có thể gặp áp lực điều chỉnh giá.",
+          "expression": "alpha = minus(ts_zscore_scale(df['RSI_14'], 20), ts_zscore_scale(df['MBB_S'], 20))",
+          "ic": 0.034262,
+          "ic_5d": 0.046398,
+          "sharpe": 0.5747,
+          "turnover": 0.8475,
+          "status": "OK",
+          "score": 0.066529,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi RSI của TCB ở mức quá mua nhưng giá của TCB vẫn đang giảm, điều này có thể cho thấy sự áp lực bán mạnh ở cổ phiếu này. Mặt khác, nếu giá của VIC (cùng ngành) không tăng tương ứng trong khi volume của TCB giảm, điều này cho thấy một thị trường điều chỉnh. Sự khác biệt này có thể cho thấy rằng TCB sẽ trải qua một điều chỉnh giá trong tương lai gần.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['RSI_14'], 70), 14), cwise_mul(ts_mean(df['volume'], 20), ts_zscore_scale(df['VIC_S'], 10)))",
+          "ic": 0.044266,
+          "ic_5d": 0.052922,
+          "sharpe": -0.2931,
+          "turnover": 1.3432,
+          "status": "OK",
+          "score": 0.026559,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi có sự tích cực trong sentiment ngành ngân hàng, điều này có thể làm tăng áp lực mua ở TCB. Nếu giá TCB đang có xu hướng giảm nhưng sentiment ngành lại tích cực, điều này có thể chỉ ra rằng áp lực giảm giá sẽ bị giảm đi, tạo cơ hội cho một đợt phục hồi. Sự phân tán giữa momentum ngắn hạn và dài hạn cũng có thể giúp xác định được sự chuyển biến này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), add(1.0, cwise_mul(0.5, ts_ema(df['HDB_S'], 5))))",
+          "ic": 0.011553,
+          "ic_5d": 0.037425,
+          "sharpe": 0.3506,
+          "turnover": 0.8134,
+          "status": "OK",
+          "score": 0.034981,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

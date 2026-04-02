@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpha-GPT · VN30 Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset & Variables ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0a0c0f;
+  --bg2:      #0f1215;
+  --bg3:      #161a1f;
+  --bg4:      #1c2128;
+  --border:   #1e2430;
+  --border2:  #2a3340;
+  --text:     #c8d0db;
+  --text2:    #7a8694;
+  --text3:    #3d4a56;
+  --accent:   #00d4aa;
+  --accent2:  #0099cc;
+  --buy:      #00c896;
+  --sell:     #e05050;
+  --hold:     #7a8694;
+  --warn:     #d4a017;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'IBM Plex Sans', sans-serif;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────── */
+.app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+/* ── Sidebar ─────────────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.logo-title {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.logo-sub {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 2px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.nav { padding: 12px 0; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 12px;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+.nav-item:hover { color: var(--text); background: var(--bg3); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,212,170,0.05); }
+.nav-icon { width: 14px; height: 14px; opacity: 0.7; }
+
+.nav-section {
+  padding: 12px 20px 6px;
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ticker-list { padding: 4px 0 12px; }
+.ticker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 20px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  transition: all 0.12s;
+}
+.ticker-item:hover { color: var(--text); background: var(--bg3); }
+.ticker-item.active { color: var(--accent); background: rgba(0,212,170,0.05); }
+.ticker-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--text3);
+}
+.ticker-dot.buy  { background: var(--buy); }
+.ticker-dot.sell { background: var(--sell); }
+.ticker-dot.hold { background: var(--hold); }
+
+/* ── Main ─────────────────────────────────────────────────────────────── */
+.main { display: flex; flex-direction: column; min-height: 100vh; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.page-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.badge-green { background: rgba(0,200,150,0.12); color: var(--buy); border: 1px solid rgba(0,200,150,0.2); }
+.badge-red   { background: rgba(224,80,80,0.12);  color: var(--sell); border: 1px solid rgba(224,80,80,0.2); }
+.badge-gray  { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+.badge-blue  { background: rgba(0,153,204,0.12); color: var(--accent2); border: 1px solid rgba(0,153,204,0.2); }
+
+.btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 500; }
+.btn-primary:hover { background: #00bfa0; color: var(--bg); }
+
+.content { padding: 24px; flex: 1; }
+
+/* ── Panels ──────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.panel-body { padding: 16px; }
+
+/* ── Stat cards ──────────────────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+
+.stat-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 14px 16px;
+}
+.stat-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.stat-value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--text); }
+.stat-sub   { font-size: 10px; color: var(--text3); margin-top: 3px; }
+
+/* ── Signal table ────────────────────────────────────────────────────── */
+.signal-table { width: 100%; border-collapse: collapse; }
+.signal-table th {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.signal-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.signal-table tr:last-child td { border-bottom: none; }
+.signal-table tr:hover td { background: rgba(255,255,255,0.02); }
+.signal-table tr.clickable { cursor: pointer; }
+
+.ticker-cell { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--text); }
+.industry-cell { font-size: 11px; color: var(--text2); }
+.signal-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.signal-bar { height: 4px; border-radius: 2px; min-width: 2px; max-width: 80px; }
+.signal-num { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+
+.action-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+.action-buy  { background: rgba(0,200,150,0.12); color: var(--buy);  border: 1px solid rgba(0,200,150,0.25); }
+.action-sell { background: rgba(224,80,80,0.12);  color: var(--sell); border: 1px solid rgba(224,80,80,0.25); }
+.action-hold { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
+
+/* ── Ticker detail ───────────────────────────────────────────────────── */
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.detail-full { grid-column: 1 / -1; }
+
+.alpha-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 72px 72px 72px 72px 64px 80px;
+  gap: 0;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.alpha-row:last-child { border-bottom: none; }
+.alpha-row:hover { background: rgba(255,255,255,0.015); }
+.alpha-id { font-family: var(--mono); font-weight: 500; color: var(--accent); }
+.alpha-idea { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
+.alpha-metric { font-family: var(--mono); font-size: 11px; text-align: right; }
+.metric-good { color: var(--buy); }
+.metric-bad  { color: var(--sell); }
+.metric-ok   { color: var(--text2); }
+
+.chart-wrap { position: relative; width: 100%; height: 180px; }
+
+/* ── Tabs ────────────────────────────────────────────────────────────── */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab {
+  padding: 10px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  letter-spacing: 0.05em;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Views ───────────────────────────────────────────────────────────── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Signal meter ────────────────────────────────────────────────────── */
+.signal-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+.signal-value {
+  font-family: var(--mono);
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1;
+}
+.signal-action {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 6px;
+  padding: 4px 16px;
+  border-radius: 4px;
+}
+
+/* ── IC bar small ────────────────────────────────────────────────────── */
+.ic-bar-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.ic-bar-bg { flex: 1; height: 4px; background: var(--bg4); border-radius: 2px; position: relative; }
+.ic-bar-fill { height: 100%; border-radius: 2px; position: absolute; top: 0; left: 0; }
+
+/* ── Responsive chart tooltip ────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* ── Decay badge ─────────────────────────────────────────────────────── */
+.decay-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--warn);
+  background: rgba(212,160,23,0.08);
+  border: 1px solid rgba(212,160,23,0.2);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-family: var(--mono);
+}
+
+/* ── Gen button ──────────────────────────────────────────────────────── */
+.gen-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 5px 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,212,170,0.3);
+  background: rgba(0,212,170,0.05);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.gen-btn:hover { background: rgba(0,212,170,0.1); }
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── Sidebar ─────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-title">α Alpha-GPT</div>
+    <div class="logo-sub">VN30 · Quant Dashboard</div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-item active" onclick="showView('overview')" id="nav-overview">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
+        <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
+      </svg>
+      Overview
+    </div>
+    <div class="nav-item" onclick="showView('signals')" id="nav-signals">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <polyline points="1,12 5,7 8,9 11,4 15,4"/>
+        <line x1="11" y1="4" x2="15" y2="4"/><line x1="15" y1="4" x2="15" y2="8"/>
+      </svg>
+      Trade Signals
+    </div>
+    <div class="nav-item" onclick="showView('decay')" id="nav-decay">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="6"/>
+        <line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/>
+      </svg>
+      Alpha Decay
+    </div>
+
+    <div class="nav-section">VN30 Tickers</div>
+    <div class="ticker-list" id="sidebar-tickers">
+      <div class="loading"><div class="spinner"></div>loading...</div>
+    </div>
+  </nav>
+</aside>
+
+<!-- ── Main ───────────────────────────────────────────────── -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title" id="page-title">Overview</div>
+      <div class="badge badge-gray" id="last-updated">—</div>
+    </div>
+    <div class="topbar-right">
+      <div class="badge badge-blue" id="available-count">0 / 30 tickers</div>
+      <button class="btn" onclick="refreshAll()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Overview View -->
+    <div class="view active" id="view-overview">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Tickers có data</div><div class="stat-value" id="st-available">—</div><div class="stat-sub">/ 30 VN30</div></div>
+        <div class="stat-card"><div class="stat-label">Tín hiệu MUA</div><div class="stat-value" style="color:var(--buy)" id="st-buy">—</div><div class="stat-sub">signal &gt; +1σ</div></div>
+        <div class="stat-card"><div class="stat-label">Tín hiệu BÁN</div><div class="stat-value" style="color:var(--sell)" id="st-sell">—</div><div class="stat-sub">signal &lt; −1σ</div></div>
+        <div class="stat-card"><div class="stat-label">Avg IC (tất cả)</div><div class="stat-value" id="st-ic">—</div><div class="stat-sub">information coeff</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Tất cả mã — xếp hạng theo Composite Signal</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="filter-action" onchange="filterTable()" style="font-family:var(--mono);font-size:10px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:4px 8px;border-radius:3px">
+              <option value="all">All actions</option>
+              <option value="BUY">BUY only</option>
+              <option value="SELL">SELL only</option>
+              <option value="HOLD">HOLD only</option>
+            </select>
+            <select id="filter-industry" onchange="filterTable()" style="font-family:var(--mono);font-size:10px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:4px 8px;border-radius:3px">
+              <option value="all">All industries</option>
+            </select>
+          </div>
+        </div>
+        <div id="overview-table-wrap">
+          <div class="loading"><div class="spinner"></div>Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signals View -->
+    <div class="view" id="view-signals">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title" style="color:var(--buy)">▲ Top Buy Signals</div></div>
+          <div id="buy-list"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title" style="color:var(--sell)">▼ Top Sell Signals</div></div>
+          <div id="sell-list"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Hướng dẫn giao dịch hôm nay</div></div>
+        <div class="panel-body" id="trade-guide">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ticker Detail View -->
+    <div class="view" id="view-ticker">
+      <div id="ticker-detail-content">
+        <div class="empty-state">← Chọn một mã từ sidebar để xem chi tiết</div>
+      </div>
+    </div>
+
+    <!-- Decay View -->
+    <div class="view" id="view-decay">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Alpha Decay Monitor</div>
+          <button class="btn" onclick="loadDecay()">↻ Check now</button>
+        </div>
+        <div id="decay-content"><div class="loading"><div class="spinner"></div>Đang kiểm tra...</div></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+</div>
+
+<script>
+/* ── State ──────────────────────────────────────────────────────────── */
+const API = 'http://localhost:5000/api';
+let allTickers = [];
+let currentTicker = null;
+let charts = {};
+
+/* ── Navigation ─────────────────────────────────────────────────────── */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
+  const titles = { overview: 'Overview', signals: 'Trade Signals', decay: 'Alpha Decay Monitor' };
+  document.getElementById('page-title').textContent = titles[name] || name;
+  if (name === 'signals') loadSignals();
+  if (name === 'decay') loadDecay();
+}
+
+function showTicker(ticker) {
+  const t = allTickers.find(x => x.ticker === ticker);
+  if (t && t.status !== 'ok') {
+    return;
+  }
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-ticker').classList.add('active');
+  document.getElementById('page-title').textContent = ticker;
+  currentTicker = ticker;
+  document.querySelectorAll('.ticker-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.ticker === ticker);
+  });
+  loadTickerDetail(ticker);
+}
+
+/* ── API helpers ─────────────────────────────────────────────────────── */
+async function apiFetch(path) {
+  try {
+    const r = await fetch(API + path);
+    return await r.json();
+  } catch (e) {
+    console.error('API error:', e);
+    return null;
+  }
+}
+
+/* ── Overview ────────────────────────────────────────────────────────── */
+async function loadOverview() {
+  const data = await apiFetch('/overview');
+  if (!data) return;
+
+  allTickers = data.tickers;
+  const available = data.n_available;
+  const buyCount  = allTickers.filter(t => t.action === 'BUY').length;
+  const sellCount = allTickers.filter(t => t.action === 'SELL').length;
+  const avgIc = allTickers.filter(t => t.avg_ic).reduce((s, t) => s + t.avg_ic, 0) / (available || 1);
+
+  document.getElementById('st-available').textContent = available;
+  document.getElementById('st-buy').textContent  = buyCount;
+  document.getElementById('st-sell').textContent = sellCount;
+  document.getElementById('st-ic').textContent   = avgIc.toFixed(4);
+  document.getElementById('available-count').textContent = `${available} / 30 tickers`;
+  document.getElementById('last-updated').textContent = new Date(data.updated_at).toLocaleTimeString('vi-VN');
+
+  // Populate industry filter
+  const industries = [...new Set(allTickers.map(t => t.industry))].sort();
+  const sel = document.getElementById('filter-industry');
+  industries.forEach(ind => {
+    const opt = document.createElement('option');
+    opt.value = ind; opt.textContent = ind;
+    sel.appendChild(opt);
+  });
+
+  renderOverviewTable(allTickers);
+  renderSidebarTickers(allTickers);
+}
+
+function renderSidebarTickers(tickers) {
+  const availableTickers = tickers.filter(t => t.status === 'ok');
+  const el = document.getElementById('sidebar-tickers');
+  el.innerHTML = availableTickers.map(t => `
+    <div class="ticker-item ${t.ticker === currentTicker ? 'active' : ''}" 
+         data-ticker="${t.ticker}" onclick="showTicker('${t.ticker}')">
+      <span>${t.ticker}</span>
+      <span class="ticker-dot ${(t.action||'hold').toLowerCase()}"></span>
+    </div>
+  `).join('');
+}
+
+function filterTable() {
+  const actionFilter   = document.getElementById('filter-action').value;
+  const industryFilter = document.getElementById('filter-industry').value;
+  let filtered = allTickers;
+  if (actionFilter !== 'all') filtered = filtered.filter(t => t.action === actionFilter);
+  if (industryFilter !== 'all') filtered = filtered.filter(t => t.industry === industryFilter);
+  renderOverviewTable(filtered);
+}
+
+function renderOverviewTable(tickers) {
+  const maxAbsSignal = Math.max(...tickers.map(t => Math.abs(t.signal || 0)), 1);
+
+  const html = `
+    <table class="signal-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Mã</th>
+          <th>Ngành</th>
+          <th>Signal</th>
+          <th>Action</th>
+          <th>Avg IC</th>
+          <th>Avg Sharpe</th>
+          <th>Alphas</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tickers.map(t => {
+          const sig = t.signal ?? 0;
+          const barW = Math.round(Math.abs(sig) / maxAbsSignal * 80);
+          const barColor = sig > 0 ? 'var(--buy)' : 'var(--sell)';
+          const icClass = !t.avg_ic ? '' : t.avg_ic > 0.05 ? 'metric-good' : t.avg_ic > 0.02 ? 'metric-ok' : 'metric-bad';
+          const shClass = !t.avg_sharpe ? '' : t.avg_sharpe > 0.5 ? 'metric-good' : t.avg_sharpe < 0 ? 'metric-bad' : 'metric-ok';
+          return `
+          <tr class="clickable" onclick="showTicker('${t.ticker}')">
+            <td><span style="font-family:var(--mono);color:var(--text3);font-size:10px">${t.rank || ''}</span></td>
+            <td><span class="ticker-cell">${t.ticker}</span></td>
+            <td><span class="industry-cell">${t.industry}</span></td>
+            <td>
+              <div class="signal-bar-wrap">
+                <div class="signal-bar" style="width:${barW}px;background:${barColor}"></div>
+                <span class="signal-num">${sig != null ? sig.toFixed(3) : '—'}</span>
+              </div>
+            </td>
+            <td><span class="action-badge action-${(t.action||'hold').toLowerCase()}">${t.action || '—'}</span></td>
+            <td><span class="alpha-metric ${icClass}">${t.avg_ic != null ? t.avg_ic.toFixed(4) : '—'}</span></td>
+            <td><span class="alpha-metric ${shClass}">${t.avg_sharpe != null ? t.avg_sharpe.toFixed(3) : '—'}</span></td>
+            <td><span style="font-family:var(--mono);color:var(--text3);font-size:11px">${t.n_alphas}/5</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+  document.getElementById('overview-table-wrap').innerHTML = html;
+}
+
+/* ── Signals View ────────────────────────────────────────────────────── */
+async function loadSignals() {
+  const data = await apiFetch('/signals');
+  if (!data) return;
+
+  function renderSignalList(rows, el) {
+    if (!rows.length) { el.innerHTML = '<div class="empty-state">Không có tín hiệu</div>'; return; }
+    el.innerHTML = rows.map((r, i) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer" onclick="showTicker('${r.ticker}')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text3);min-width:18px">${i+1}</span>
+          <div>
+            <div style="font-family:var(--mono);font-size:13px;font-weight:500">${r.ticker}</div>
+            <div style="font-size:10px;color:var(--text2)">${r.industry}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:14px;font-weight:500;color:${r.action==='BUY'?'var(--buy)':'var(--sell)'}">${r.signal > 0 ? '+' : ''}${r.signal.toFixed(3)}</div>
+          ${r.price ? `<div style="font-size:10px;color:var(--text3)">${r.price.toLocaleString()} VND</div>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  renderSignalList(data.top_buy  || [], document.getElementById('buy-list'));
+  renderSignalList(data.top_sell || [], document.getElementById('sell-list'));
+
+  const buy  = data.top_buy?.map(t => t.ticker).join(', ') || '—';
+  const sell = data.top_sell?.map(t => t.ticker).join(', ') || '—';
+  document.getElementById('trade-guide').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Mua vào hôm nay (ATO 9:00)</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--buy)">${buy}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">Signal composite &gt; +1σ — top ${(data.top_buy||[]).length} mã</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Tránh / Bán hôm nay</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--sell)">${sell}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">Signal composite &lt; −1σ — top ${(data.top_sell||[]).length} mã</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px;background:var(--bg3);border-radius:4px;border:1px solid var(--border)">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Ghi chú thực tế</div>
+      <div style="font-size:11px;color:var(--text2);line-height:1.7">
+        • Đặt lệnh ATO (9:00–9:15) hoặc ATC (14:30–14:45) để tránh spread cao giữa phiên<br>
+        • Chia đều vốn cho top 5 mã BUY — không overfit vào 1 mã dù signal cao<br>
+        • Composite signal &gt; +2σ: tín hiệu rất mạnh, có thể tăng sizing<br>
+        • Luôn đặt stop-loss −3% so với giá vào lệnh
+      </div>
+    </div>`;
+}
+
+/* ── Ticker Detail ───────────────────────────────────────────────────── */
+async function loadTickerDetail(ticker) {
+  document.getElementById('ticker-detail-content').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Đang tải ' + ticker + '...</div>';
+
+  // Destroy old charts
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+
+  const data = await apiFetch('/ticker/' + ticker);
+  if (!data) { document.getElementById('ticker-detail-content').innerHTML = '<div class="empty-state">Không có dữ liệu cho ' + ticker + '</div>'; return; }
+
+  const sigColor = data.action === 'BUY' ? 'var(--buy)' : data.action === 'SELL' ? 'var(--sell)' : 'var(--hold)';
+  const ok = data.alphas.filter(a => a.status === 'OK');
+
+  const html = `
+    <!-- Header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-family:var(--mono);font-size:24px;font-weight:500">${ticker}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${data.industry} · ${data.n_rows} ngày dữ liệu · ${data.n_rounds} vòng refinement</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="gen-btn" onclick="triggerGen('${ticker}')">
+          ⚡ Regenerate Alpha
+        </button>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:28px;font-weight:500;color:${sigColor}">${data.latest_signal > 0 ? '+' : ''}${data.latest_signal.toFixed(3)}</div>
+          <span class="action-badge action-${data.action.toLowerCase()}">${data.action}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-label">Avg IC</div>
+        <div class="stat-value" style="font-size:18px;color:${ok.length && ok.reduce((s,a)=>s+Math.abs(a.ic||0),0)/ok.length > 0.05 ? 'var(--buy)' : 'var(--text)'}">${ok.length ? (ok.reduce((s,a)=>s+Math.abs(a.ic||0),0)/ok.length).toFixed(4) : '—'}</div>
+        <div class="stat-sub">Spearman corr · 1d</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Sharpe</div>
+        <div class="stat-value" style="font-size:18px">${ok.length ? (ok.reduce((s,a)=>s+(a.sharpe||0),0)/ok.length).toFixed(3) : '—'}</div>
+        <div class="stat-sub">long/short backtest</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Alphas OK</div>
+        <div class="stat-value" style="font-size:18px">${ok.length} / 5</div>
+        <div class="stat-sub">valid formulas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Signal strength</div>
+        <div class="stat-value" style="font-size:18px;color:${sigColor}">${data.strength}%</div>
+        <div class="stat-sub">abs(signal) / threshold</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Composite Signal vs Close Price</div></div>
+        <div class="panel-body" style="padding:12px">
+          <div class="chart-wrap" style="height:200px"><canvas id="chart-composite"></canvas></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Rolling IC (20d)</div></div>
+        <div class="panel-body" style="padding:12px">
+          <div class="chart-wrap" style="height:200px"><canvas id="chart-rolling-ic"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alpha table -->
+    <div class="panel">
+      <div class="panel-header"><div class="panel-title">Alpha Formulas</div></div>
+      <div style="padding:0">
+        <div class="alpha-row" style="background:var(--bg3);font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase">
+          <div>#</div><div>Ý tưởng & công thức</div>
+          <div style="text-align:right">IC</div><div style="text-align:right">IC_5d</div>
+          <div style="text-align:right">Sharpe</div><div style="text-align:right">Turn</div>
+          <div style="text-align:right">Score</div><div style="text-align:right">Status</div>
+        </div>
+        ${data.alphas.map(a => {
+          const ok = a.status === 'OK';
+          const icClass = !a.ic ? '' : a.ic > 0.05 ? 'metric-good' : a.ic > 0.02 ? 'metric-ok' : 'metric-bad';
+          const shClass = !a.sharpe ? '' : a.sharpe > 0.5 ? 'metric-good' : a.sharpe < -0.3 ? 'metric-bad' : 'metric-ok';
+          return `
+          <div class="alpha-row">
+            <div class="alpha-id">α${a.id}</div>
+            <div>
+              <div class="alpha-idea">${a.idea}</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.expression}</div>
+            </div>
+            <div class="alpha-metric ${icClass}">${a.ic != null ? a.ic.toFixed(4) : '—'}</div>
+            <div class="alpha-metric ${a.ic_5d > 0.1 ? 'metric-good' : 'metric-ok'}">${a.ic_5d != null ? a.ic_5d.toFixed(4) : '—'}</div>
+            <div class="alpha-metric ${shClass}">${a.sharpe != null ? a.sharpe.toFixed(3) : '—'}</div>
+            <div class="alpha-metric">${a.turnover != null ? a.turnover.toFixed(3) : '—'}</div>
+            <div class="alpha-metric metric-good">${a.score != null ? a.score.toFixed(4) : '—'}</div>
+            <div>${ok ? `<span class="badge badge-green">OK${a.flipped ? ' ↕' : ''}</span>` : `<span class="badge badge-red">ERROR</span>`}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('ticker-detail-content').innerHTML = html;
+
+  // ── Render charts ──────────────────────────────────────────────────
+  const CHART_DEFAULTS = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+    scales: {
+      x: { ticks: { color: '#3d4a56', font: { family: 'IBM Plex Mono', size: 9 }, maxTicksLimit: 8 },
+           grid: { color: '#1e2430' } },
+      y: { ticks: { color: '#3d4a56', font: { family: 'IBM Plex Mono', size: 9 } },
+           grid: { color: '#1e2430' } },
+    },
+    animation: { duration: 400 },
+  };
+
+  // Composite + close chart (dual axis)
+  if (data.composite.length && document.getElementById('chart-composite')) {
+    const labels = data.composite.map(d => d.date);
+    const sigVals = data.composite.map(d => d.value);
+    const closeMap = Object.fromEntries((data.close || []).map(d => [d.date, d.value]));
+    const closeVals = labels.map(d => closeMap[d] ?? null);
+
+    charts['composite'] = new Chart(document.getElementById('chart-composite'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Signal',
+            data: sigVals,
+            borderColor: '#00d4aa',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            tension: 0.3,
+            yAxisID: 'y',
+          },
+          {
+            label: 'Close',
+            data: closeVals,
+            borderColor: '#2a3340',
+            borderWidth: 1,
+            pointRadius: 0,
+            tension: 0.2,
+            yAxisID: 'y2',
+          },
+        ],
+      },
+      options: {
+        ...CHART_DEFAULTS,
+        scales: {
+          ...CHART_DEFAULTS.scales,
+          y:  { ...CHART_DEFAULTS.scales.y, position: 'left' },
+          y2: { ...CHART_DEFAULTS.scales.y, position: 'right', grid: { display: false } },
+        },
+      },
+    });
+  }
+
+  // Rolling IC chart
+  if (data.rolling_ic?.length && document.getElementById('chart-rolling-ic')) {
+    const colors = ['#00d4aa', '#0099cc', '#d4a017', '#e05050', '#7a8694'];
+    const datasets = data.rolling_ic.map((series, i) => ({
+      label: `α${series.alpha_id}`,
+      data: series.values,
+      borderColor: colors[i % colors.length],
+      borderWidth: 1.5,
+      pointRadius: 0,
+      tension: 0.2,
+    }));
+    const labels = data.rolling_ic[0]?.dates || [];
+    charts['rollingIc'] = new Chart(document.getElementById('chart-rolling-ic'), {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { color: '#7a8694', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 12 },
+          },
+          tooltip: { mode: 'index', intersect: false },
+        },
+      },
+    });
+  }
+}
+
+/* ── Decay View ──────────────────────────────────────────────────────── */
+async function loadDecay() {
+  document.getElementById('decay-content').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Kiểm tra decay...</div>';
+  const data = await apiFetch('/decay');
+  if (!data) { document.getElementById('decay-content').innerHTML = '<div class="empty-state">API không khả dụng</div>'; return; }
+
+  if (!data.needs_refinement?.length) {
+    document.getElementById('decay-content').innerHTML = `
+      <div style="padding:32px;text-align:center">
+        <div style="font-family:var(--mono);font-size:32px;color:var(--buy);margin-bottom:8px">✓</div>
+        <div style="font-family:var(--mono);font-size:13px;color:var(--text2)">Tất cả alphas đang hoạt động tốt</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">Không có alpha nào bị decay ≥ 30%</div>
+      </div>`;
+    return;
+  }
+
+  const html = data.needs_refinement.map(item => `
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-family:var(--mono);font-weight:500">${item.ticker}</span>
+          <span class="decay-warn">⚠ ${item.decaying.length} alpha decaying</span>
+        </div>
+        <button class="gen-btn" onclick="triggerGen('${item.ticker}',true,true)">↻ Refinement</button>
+      </div>
+      ${item.decaying.map(d => `
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-left:12px;margin-bottom:3px">
+          α${d.alpha_id}: IC ${d.hist_ic?.toFixed(4)} → ${d.recent_ic?.toFixed(4)} (−${d.drop_pct}%)
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.getElementById('decay-content').innerHTML = html;
+}
+
+/* ── Gen alpha trigger ───────────────────────────────────────────────── */
+async function triggerGen(ticker, force = false, refineOnly = false) {
+  const btn = event.target;
+  btn.textContent = '⟳ Running...';
+  btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/gen/${ticker}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force, refine_only: refineOnly }),
+    });
+    const data = await r.json();
+    if (!r.ok || !data.job_id) {
+      throw new Error(data.error || 'Cannot start generation job');
+    }
+    await pollGenJob(data.job_id, btn, refineOnly);
+  } catch (e) {
+    btn.textContent = '✗ Error';
+    setTimeout(() => { btn.textContent = '⚡ Regenerate Alpha'; btn.disabled = false; }, 2500);
+  }
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function pollGenJob(jobId, btn, refineOnly) {
+  const maxPoll = 180; // ~6 minutes with 2s interval
+  for (let i = 0; i < maxPoll; i++) {
+    await sleep(2000);
+    const r = await fetch(`${API}/gen/status/${jobId}`);
+    const job = await r.json();
+    if (!r.ok) {
+      btn.textContent = '✗ Error';
+      setTimeout(() => { btn.textContent = '⚡ Regenerate Alpha'; btn.disabled = false; }, 2500);
+      return;
+    }
+
+    if (job.status === 'running') {
+      btn.textContent = `⟳ Running ${Math.floor((i + 1) * 2)}s`;
+      continue;
+    }
+
+    if (job.status === 'completed') {
+      btn.textContent = '✓ Completed';
+      btn.disabled = false;
+      if (refineOnly) {
+        await loadDecay();
+      } else {
+        refreshAll();
+      }
+      setTimeout(() => { btn.textContent = '⚡ Regenerate Alpha'; }, 2500);
+      return;
+    }
+
+    btn.textContent = '✗ Failed';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = '⚡ Regenerate Alpha'; }, 3000);
+    return;
+  }
+
+  btn.textContent = '⌛ Timeout';
+  btn.disabled = false;
+  setTimeout(() => { btn.textContent = '⚡ Regenerate Alpha'; }, 3000);
+}
+
+/* ── Refresh ─────────────────────────────────────────────────────────── */
+function refreshAll() {
+  const currentView = document.querySelector('.view.active')?.id;
+  if (currentView === 'view-overview') loadOverview();
+  else if (currentView === 'view-signals') loadSignals();
+  else if (currentView === 'view-ticker' && currentTicker) loadTickerDetail(currentTicker);
+  else if (currentView === 'view-decay') loadDecay();
+}
+
+/* ── Init ────────────────────────────────────────────────────────────── */
+loadOverview();
+</script>
+</body>
+</html>

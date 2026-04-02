@@ -1,0 +1,200 @@
+{
+  "ticker": "SAB",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi giá giảm mạnh hơn so với mức trung bình (SMA_20) nhưng có sự gia tăng trong khối lượng, điều này có thể cho thấy một sự điều chỉnh giá sắp tới.",
+      "expression": "alpha = cwise_mul(less(df['close'], df['SMA_20']), ts_zscore_scale(df['volume'], 20))",
+      "ic": 0.074088,
+      "ic_5d": 0.095426,
+      "sharpe": 1.4276,
+      "turnover": 1.0397,
+      "status": "OK",
+      "score": 0.158664,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi có sự tương quan mạnh giữa giá và khối lượng trong quá khứ (ví dụ, 20 ngày), điều này chỉ ra rằng hành động giá có thể được củng cố bởi khối lượng, cho thấy xu hướng tăng.",
+      "expression": "alpha = ts_corr(df['close'], df['volume'], 20)",
+      "ic": 0.102228,
+      "ic_5d": 0.187845,
+      "sharpe": 0.8259,
+      "turnover": 0.1947,
+      "status": "OK",
+      "score": 0.127406,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi momentum 3 ngày tăng trong khi momentum 10 ngày giảm, điều này cho thấy có thể có một sự đảo chiều trong ngắn hạn.",
+      "expression": "alpha = cwise_mul(greater(ts_rank(df['Momentum_3'], 5), ts_rank(df['Momentum_10'], 10)), 1)",
+      "ic": 0.063576,
+      "ic_5d": 0.089168,
+      "sharpe": 0.5183,
+      "turnover": 0.3967,
+      "status": "OK",
+      "score": 0.079609,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi momentum 3 ngày và 10 ngày cho thấy một divergence (momentum ngắn hạn giảm trong khi momentum dài hạn tăng), điều này cho thấy có thể có một sự điều chỉnh giá. Đây là tín hiệu giảm giá.",
+      "expression": "alpha = minus(ts_rank(df['Momentum_3'], 5), ts_rank(df['Momentum_10'], 5))",
+      "ic": 0.029864,
+      "ic_5d": 0.013139,
+      "sharpe": 0.2676,
+      "turnover": 0.9724,
+      "status": "OK",
+      "score": 0.039323,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá hiện tại nằm dưới vị trí trung bình động SMA_20, nhưng khối lượng giao dịch tăng mạnh, điều này cho thấy áp lực bán có thể đang tăng lên và có khả năng xảy ra một điều chỉnh giá xuống.",
+      "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 20), ts_mean(df['volume'], 10))",
+      "ic": 0.051622,
+      "ic_5d": 0.133789,
+      "sharpe": -0.2778,
+      "turnover": 0.3409,
+      "status": "OK",
+      "score": 0.030973,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá giảm mạnh hơn so với mức trung bình (SMA_20) nhưng có sự gia tăng trong khối lượng, điều này có thể cho thấy một sự điều chỉnh giá sắp tới.",
+          "expression": "alpha = cwise_mul(less(df['close'], df['SMA_20']), ts_zscore_scale(df['volume'], 20))",
+          "ic": 0.074088,
+          "ic_5d": 0.095426,
+          "sharpe": 1.4276,
+          "turnover": 1.0397,
+          "status": "OK",
+          "score": 0.158664,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi có sự tương quan mạnh giữa giá và khối lượng trong quá khứ (ví dụ, 20 ngày), điều này chỉ ra rằng hành động giá có thể được củng cố bởi khối lượng, cho thấy xu hướng tăng.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20)",
+          "ic": 0.102228,
+          "ic_5d": 0.187845,
+          "sharpe": 0.8259,
+          "turnover": 0.1947,
+          "status": "OK",
+          "score": 0.127406,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi momentum 3 ngày tăng trong khi momentum 10 ngày giảm, điều này cho thấy có thể có một sự đảo chiều trong ngắn hạn.",
+          "expression": "alpha = cwise_mul(greater(ts_rank(df['Momentum_3'], 5), ts_rank(df['Momentum_10'], 10)), 1)",
+          "ic": 0.063576,
+          "ic_5d": 0.089168,
+          "sharpe": 0.5183,
+          "turnover": 0.3967,
+          "status": "OK",
+          "score": 0.079609,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi momentum 3 ngày và 10 ngày cho thấy một divergence (momentum ngắn hạn giảm trong khi momentum dài hạn tăng), điều này cho thấy có thể có một sự điều chỉnh giá. Đây là tín hiệu giảm giá.",
+          "expression": "alpha = minus(ts_rank(df['Momentum_3'], 5), ts_rank(df['Momentum_10'], 5))",
+          "ic": 0.029864,
+          "ic_5d": 0.013139,
+          "sharpe": 0.2676,
+          "turnover": 0.9724,
+          "status": "OK",
+          "score": 0.039323,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá hiện tại nằm dưới vị trí trung bình động SMA_20, nhưng khối lượng giao dịch tăng mạnh, điều này cho thấy áp lực bán có thể đang tăng lên và có khả năng xảy ra một điều chỉnh giá xuống.",
+          "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 20), ts_mean(df['volume'], 10))",
+          "ic": 0.051622,
+          "ic_5d": 0.133789,
+          "sharpe": -0.2778,
+          "turnover": 0.3409,
+          "status": "OK",
+          "score": 0.030973,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá giảm mạnh hơn so với mức trung bình (SMA_20) nhưng có sự gia tăng trong khối lượng, điều này có thể cho thấy một sự điều chỉnh giá sắp tới.",
+          "expression": "alpha = cwise_mul(less(df['close'], df['SMA_20']), ts_zscore_scale(df['volume'], 20))",
+          "ic": 0.074088,
+          "ic_5d": 0.095426,
+          "sharpe": 1.4276,
+          "turnover": 1.0397,
+          "status": "OK",
+          "score": 0.158664,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi có sự tương quan mạnh giữa giá và khối lượng trong quá khứ (ví dụ, 20 ngày), điều này chỉ ra rằng hành động giá có thể được củng cố bởi khối lượng, cho thấy xu hướng tăng.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20)",
+          "ic": 0.102228,
+          "ic_5d": 0.187845,
+          "sharpe": 0.8259,
+          "turnover": 0.1947,
+          "status": "OK",
+          "score": 0.127406,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi momentum 3 ngày tăng trong khi momentum 10 ngày giảm, điều này cho thấy có thể có một sự đảo chiều trong ngắn hạn.",
+          "expression": "alpha = cwise_mul(greater(ts_rank(df['Momentum_3'], 5), ts_rank(df['Momentum_10'], 10)), 1)",
+          "ic": 0.063576,
+          "ic_5d": 0.089168,
+          "sharpe": 0.5183,
+          "turnover": 0.3967,
+          "status": "OK",
+          "score": 0.079609,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi momentum 3 ngày và 10 ngày cho thấy một divergence (momentum ngắn hạn giảm trong khi momentum dài hạn tăng), điều này cho thấy có thể có một sự điều chỉnh giá. Đây là tín hiệu giảm giá.",
+          "expression": "alpha = minus(ts_rank(df['Momentum_3'], 5), ts_rank(df['Momentum_10'], 5))",
+          "ic": 0.029864,
+          "ic_5d": 0.013139,
+          "sharpe": 0.2676,
+          "turnover": 0.9724,
+          "status": "OK",
+          "score": 0.039323,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá hiện tại nằm dưới vị trí trung bình động SMA_20, nhưng khối lượng giao dịch tăng mạnh, điều này cho thấy áp lực bán có thể đang tăng lên và có khả năng xảy ra một điều chỉnh giá xuống.",
+          "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 20), ts_mean(df['volume'], 10))",
+          "ic": 0.051622,
+          "ic_5d": 0.133789,
+          "sharpe": -0.2778,
+          "turnover": 0.3409,
+          "status": "OK",
+          "score": 0.030973,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

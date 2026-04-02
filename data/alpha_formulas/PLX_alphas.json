@@ -1,0 +1,200 @@
+{
+  "ticker": "PLX",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi MACD cắt lên trên MACD_Signal, điều này thường báo hiệu một xu hướng tăng giá tiềm ẩn. Nếu đồng thời momentum 10 ngày cũng đang tăng, điều này cho thấy một động lực mạnh mẽ cho xu hướng tăng.",
+      "expression": "alpha = add(greater(df['MACD'], df['MACD_Signal']), ts_zscore_scale(df['Momentum_10'], 10))",
+      "ic": 0.023236,
+      "ic_5d": 0.095294,
+      "sharpe": 1.1448,
+      "turnover": 0.5374,
+      "status": "OK",
+      "score": 0.105526,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi có sự giảm giá mạnh (sự thay đổi giá âm lớn) nhưng khối lượng giao dịch lại tăng mạnh, điều này có thể cho thấy rằng thị trường đang trải qua một sự phân phối, tức là có sự bán ra mạnh mẽ. Điều này thường dẫn đến kỳ vọng giá sẽ tiếp tục giảm. Tôi sử dụng sự kết hợp của ts_delta và volume để xác định sự phân bổ này.",
+      "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 10))",
+      "ic": 0.042312,
+      "ic_5d": 0.039929,
+      "sharpe": 0.055,
+      "turnover": 1.1761,
+      "status": "OK",
+      "score": 0.029785,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Sự kết hợp giữa khối lượng giao dịch tăng và động lực giá giảm có thể cho thấy một tín hiệu đảo chiều. Nếu khối lượng giao dịch tăng trong khi giá giảm, điều này thường báo hiệu rằng có sự tham gia mạnh mẽ từ bên bán, dẫn đến khả năng giá sẽ tiếp tục giảm. Tôi sử dụng tỷ lệ khối lượng giao dịch trong 10 ngày và sự giảm giá trong 5 ngày để xác định tín hiệu này.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['volume'], 10), minus(0, ts_zscore_scale(ts_delta(df['close'], 5), 5)))",
+      "ic": 0.012655,
+      "ic_5d": 0.000464,
+      "sharpe": 1.3263,
+      "turnover": 1.3499,
+      "status": "OK",
+      "score": 0.113694,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.045958,
+      "ic_5d": 0.014942,
+      "sharpe": 0.761,
+      "turnover": 0.6303,
+      "status": "OK",
+      "score": 0.088454,
+      "flipped": true
+    },
+    {
+      "id": 5,
+      "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+      "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+      "ic": 0.032909,
+      "ic_5d": 0.025679,
+      "sharpe": 0.812,
+      "turnover": 1.0069,
+      "status": "OK",
+      "score": 0.084709,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi MACD cắt lên trên MACD_Signal, điều này thường báo hiệu một xu hướng tăng giá tiềm ẩn. Nếu đồng thời momentum 10 ngày cũng đang tăng, điều này cho thấy một động lực mạnh mẽ cho xu hướng tăng.",
+          "expression": "alpha = add(greater(df['MACD'], df['MACD_Signal']), ts_zscore_scale(df['Momentum_10'], 10))",
+          "ic": 0.023236,
+          "ic_5d": 0.095294,
+          "sharpe": 1.1448,
+          "turnover": 0.5374,
+          "status": "OK",
+          "score": 0.105526,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi có sự giảm giá mạnh (sự thay đổi giá âm lớn) nhưng khối lượng giao dịch lại tăng mạnh, điều này có thể cho thấy rằng thị trường đang trải qua một sự phân phối, tức là có sự bán ra mạnh mẽ. Điều này thường dẫn đến kỳ vọng giá sẽ tiếp tục giảm. Tôi sử dụng sự kết hợp của ts_delta và volume để xác định sự phân bổ này.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 10))",
+          "ic": 0.042312,
+          "ic_5d": 0.039929,
+          "sharpe": 0.055,
+          "turnover": 1.1761,
+          "status": "OK",
+          "score": 0.029785,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Sự phân kỳ giữa Momentum và giá có thể báo hiệu sự đảo chiều. Nếu momentum giảm trong khi giá vẫn ổn định hoặc tăng nhẹ, đó là dấu hiệu thị trường sắp điều chỉnh giảm. Tôi sử dụng sự khác biệt giữa momentum 10 ngày và giá để xác định sự phân kỳ này.",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_10'], 20), ts_zscore_scale(df['close'], 20))",
+          "ic": 0.019468,
+          "ic_5d": 0.012396,
+          "sharpe": -0.9105,
+          "turnover": 0.5115,
+          "status": "OK",
+          "score": 0.011681,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.045958,
+          "ic_5d": 0.014942,
+          "sharpe": 0.761,
+          "turnover": 0.6303,
+          "status": "OK",
+          "score": 0.088454,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+          "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+          "ic": 0.032909,
+          "ic_5d": 0.025679,
+          "sharpe": 0.812,
+          "turnover": 1.0069,
+          "status": "OK",
+          "score": 0.084709,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi MACD cắt lên trên MACD_Signal, điều này thường báo hiệu một xu hướng tăng giá tiềm ẩn. Nếu đồng thời momentum 10 ngày cũng đang tăng, điều này cho thấy một động lực mạnh mẽ cho xu hướng tăng.",
+          "expression": "alpha = add(greater(df['MACD'], df['MACD_Signal']), ts_zscore_scale(df['Momentum_10'], 10))",
+          "ic": 0.023236,
+          "ic_5d": 0.095294,
+          "sharpe": 1.1448,
+          "turnover": 0.5374,
+          "status": "OK",
+          "score": 0.105526,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi có sự giảm giá mạnh (sự thay đổi giá âm lớn) nhưng khối lượng giao dịch lại tăng mạnh, điều này có thể cho thấy rằng thị trường đang trải qua một sự phân phối, tức là có sự bán ra mạnh mẽ. Điều này thường dẫn đến kỳ vọng giá sẽ tiếp tục giảm. Tôi sử dụng sự kết hợp của ts_delta và volume để xác định sự phân bổ này.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 10))",
+          "ic": 0.042312,
+          "ic_5d": 0.039929,
+          "sharpe": 0.055,
+          "turnover": 1.1761,
+          "status": "OK",
+          "score": 0.029785,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Sự kết hợp giữa khối lượng giao dịch tăng và động lực giá giảm có thể cho thấy một tín hiệu đảo chiều. Nếu khối lượng giao dịch tăng trong khi giá giảm, điều này thường báo hiệu rằng có sự tham gia mạnh mẽ từ bên bán, dẫn đến khả năng giá sẽ tiếp tục giảm. Tôi sử dụng tỷ lệ khối lượng giao dịch trong 10 ngày và sự giảm giá trong 5 ngày để xác định tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['volume'], 10), minus(0, ts_zscore_scale(ts_delta(df['close'], 5), 5)))",
+          "ic": 0.012655,
+          "ic_5d": 0.000464,
+          "sharpe": 1.3263,
+          "turnover": 1.3499,
+          "status": "OK",
+          "score": 0.113694,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.045958,
+          "ic_5d": 0.014942,
+          "sharpe": 0.761,
+          "turnover": 0.6303,
+          "status": "OK",
+          "score": 0.088454,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+          "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+          "ic": 0.032909,
+          "ic_5d": 0.025679,
+          "sharpe": 0.812,
+          "turnover": 1.0069,
+          "status": "OK",
+          "score": 0.084709,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

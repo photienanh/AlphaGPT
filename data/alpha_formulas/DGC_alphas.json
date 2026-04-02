@@ -1,0 +1,266 @@
+{
+  "ticker": "DGC",
+  "n_rows": 727,
+  "n_rounds": 3,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi giá có sự phục hồi nhẹ sau một giai đoạn giảm mạnh và khối lượng giao dịch tăng lên, điều này có thể cho thấy sự quay trở lại của động lực mua vào, dẫn đến kỳ vọng tăng giá. Công thức này kết hợp giữa sự phục hồi giá và khối lượng để phát hiện tín hiệu tăng giá.",
+      "expression": "alpha = cwise_mul(greater(ts_delta(df['close'], 5), 0), ts_zscore_scale(ts_delta(df['volume'], 10), 20))",
+      "ic": 0.040484,
+      "ic_5d": 0.108187,
+      "sharpe": 0.6492,
+      "turnover": 1.381,
+      "status": "OK",
+      "score": 0.07623,
+      "flipped": true
+    },
+    {
+      "id": 2,
+      "idea": "Khi Momentum_3 đang tăng trong khi giá không vượt qua mức cao của 5 ngày trước, điều này cho thấy có sự chững lại trong đà tăng và có thể dẫn đến một sự điều chỉnh giá.",
+      "expression": "alpha = cwise_mul(greater(ts_delta(df['Momentum_3'], 5), 0), less(df['close'], ts_max(df['high'], 5)))",
+      "ic": 0.0229,
+      "ic_5d": 0.039259,
+      "sharpe": -0.2327,
+      "turnover": 0.5257,
+      "status": "OK",
+      "score": 0.01374,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi giá vượt qua đường SMA_20 và MACD cho thấy xu hướng tăng mạnh, điều này cho thấy động lực tăng giá có thể tiếp tục, dẫn đến kỳ vọng tăng giá.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['MACD'] - df['MACD_Signal'], 20))",
+      "ic": 0.050699,
+      "ic_5d": 0.037722,
+      "sharpe": 1.1557,
+      "turnover": 0.4985,
+      "status": "OK",
+      "score": 0.122876,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Khi giá nằm ở vị trí gần mức thấp nhất của dải Bollinger Bands trong khi volume tăng, điều này cho thấy có khả năng phục hồi, dẫn đến kỳ vọng tăng giá.",
+      "expression": "alpha = add(ts_zscore_scale(df['BB_Lower'] - df['close'], 10), ts_zscore_scale(df['volume'], 20))",
+      "ic": 0.027922,
+      "ic_5d": 0.120083,
+      "sharpe": 0.7525,
+      "turnover": 0.8815,
+      "status": "OK",
+      "score": 0.076954,
+      "flipped": true
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá đang giao dịch gần mức cao của dải Bollinger Bands trong khi Momentum_10 cho thấy xu hướng tăng, điều này cho thấy có khả năng điều chỉnh giá, dẫn đến kỳ vọng giảm giá. Công thức này kết hợp giữa động lực giá và các mức giá kỹ thuật để phát hiện tín hiệu giảm giá.",
+      "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['BB_Upper'] - df['close'], 10), 0), ts_zscore_scale(df['Momentum_10'], 10))",
+      "ic": 0.018402,
+      "ic_5d": 0.022019,
+      "sharpe": -0.397,
+      "turnover": 0.5987,
+      "status": "OK",
+      "score": 0.011041,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi volume tăng đột biến trong khi giá không thay đổi, đây có thể là dấu hiệu của sự phân phối, dẫn đến kỳ vọng giảm giá.",
+          "expression": "alpha = cwise_mul(ts_delta(df['volume'], 5), less(ts_delta(df['close'], 5), 0))",
+          "ic": 0.006874,
+          "ic_5d": 0.00595,
+          "sharpe": -0.6747,
+          "turnover": 1.4181,
+          "status": "OK",
+          "score": 0.004124,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi Momentum_3 đang tăng trong khi giá không vượt qua mức cao của 5 ngày trước, điều này cho thấy có sự chững lại trong đà tăng và có thể dẫn đến một sự điều chỉnh giá.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['Momentum_3'], 5), 0), less(df['close'], ts_max(df['high'], 5)))",
+          "ic": 0.0229,
+          "ic_5d": 0.039259,
+          "sharpe": -0.2327,
+          "turnover": 0.5257,
+          "status": "OK",
+          "score": 0.01374,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá vượt qua đường SMA_20 và MACD cho thấy xu hướng tăng mạnh, điều này cho thấy động lực tăng giá có thể tiếp tục, dẫn đến kỳ vọng tăng giá.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['MACD'] - df['MACD_Signal'], 20))",
+          "ic": 0.050699,
+          "ic_5d": 0.037722,
+          "sharpe": 1.1557,
+          "turnover": 0.4985,
+          "status": "OK",
+          "score": 0.122876,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá nằm ở vị trí gần mức thấp nhất của dải Bollinger Bands trong khi volume tăng, điều này cho thấy có khả năng phục hồi, dẫn đến kỳ vọng tăng giá.",
+          "expression": "alpha = add(ts_zscore_scale(df['BB_Lower'] - df['close'], 10), ts_zscore_scale(df['volume'], 20))",
+          "ic": 0.027922,
+          "ic_5d": 0.120083,
+          "sharpe": 0.7525,
+          "turnover": 0.8815,
+          "status": "OK",
+          "score": 0.076954,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi RSI_14 vượt qua 70 trong khi Momentum_10 cho thấy xu hướng giảm, điều này cho thấy có thể xảy ra điều chỉnh giá, dẫn đến kỳ vọng giảm giá.",
+          "expression": "alpha = minus(ts_zscore_scale(df['RSI_14'], 20), ts_zscore_scale(df['Momentum_10'], 10))",
+          "ic": 0.000837,
+          "ic_5d": 0.038049,
+          "sharpe": -0.4971,
+          "turnover": 0.5813,
+          "status": "OK",
+          "score": 0.000502,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 2,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự gia tăng đột biến trong volume trong khi giá giảm nhẹ, điều này có thể cho thấy sự phân phối mạnh mẽ đang diễn ra và có thể dẫn đến xu hướng giảm giá. Công thức này kết hợp giữa biến động giá và khối lượng để phát hiện tín hiệu giảm giá.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['close'], 5), 0), ts_zscore_scale(ts_delta(df['volume'], 5), 20))",
+          "ic": 0.008636,
+          "ic_5d": 0.005713,
+          "sharpe": -0.4985,
+          "turnover": 1.3547,
+          "status": "OK",
+          "score": 0.005181,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi Momentum_3 đang tăng trong khi giá không vượt qua mức cao của 5 ngày trước, điều này cho thấy có sự chững lại trong đà tăng và có thể dẫn đến một sự điều chỉnh giá.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['Momentum_3'], 5), 0), less(df['close'], ts_max(df['high'], 5)))",
+          "ic": 0.0229,
+          "ic_5d": 0.039259,
+          "sharpe": -0.2327,
+          "turnover": 0.5257,
+          "status": "OK",
+          "score": 0.01374,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá vượt qua đường SMA_20 và MACD cho thấy xu hướng tăng mạnh, điều này cho thấy động lực tăng giá có thể tiếp tục, dẫn đến kỳ vọng tăng giá.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['MACD'] - df['MACD_Signal'], 20))",
+          "ic": 0.050699,
+          "ic_5d": 0.037722,
+          "sharpe": 1.1557,
+          "turnover": 0.4985,
+          "status": "OK",
+          "score": 0.122876,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá nằm ở vị trí gần mức thấp nhất của dải Bollinger Bands trong khi volume tăng, điều này cho thấy có khả năng phục hồi, dẫn đến kỳ vọng tăng giá.",
+          "expression": "alpha = add(ts_zscore_scale(df['BB_Lower'] - df['close'], 10), ts_zscore_scale(df['volume'], 20))",
+          "ic": 0.027922,
+          "ic_5d": 0.120083,
+          "sharpe": 0.7525,
+          "turnover": 0.8815,
+          "status": "OK",
+          "score": 0.076954,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá đang giao dịch gần mức cao của dải Bollinger Bands trong khi Momentum_10 cho thấy xu hướng tăng, điều này cho thấy có khả năng điều chỉnh giá, dẫn đến kỳ vọng giảm giá. Công thức này kết hợp giữa động lực giá và các mức giá kỹ thuật để phát hiện tín hiệu giảm giá.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['BB_Upper'] - df['close'], 10), 0), ts_zscore_scale(df['Momentum_10'], 10))",
+          "ic": 0.018402,
+          "ic_5d": 0.022019,
+          "sharpe": -0.397,
+          "turnover": 0.5987,
+          "status": "OK",
+          "score": 0.011041,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá có sự phục hồi nhẹ sau một giai đoạn giảm mạnh và khối lượng giao dịch tăng lên, điều này có thể cho thấy sự quay trở lại của động lực mua vào, dẫn đến kỳ vọng tăng giá. Công thức này kết hợp giữa sự phục hồi giá và khối lượng để phát hiện tín hiệu tăng giá.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['close'], 5), 0), ts_zscore_scale(ts_delta(df['volume'], 10), 20))",
+          "ic": 0.040484,
+          "ic_5d": 0.108187,
+          "sharpe": 0.6492,
+          "turnover": 1.381,
+          "status": "OK",
+          "score": 0.07623,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi Momentum_3 đang tăng trong khi giá không vượt qua mức cao của 5 ngày trước, điều này cho thấy có sự chững lại trong đà tăng và có thể dẫn đến một sự điều chỉnh giá.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['Momentum_3'], 5), 0), less(df['close'], ts_max(df['high'], 5)))",
+          "ic": 0.0229,
+          "ic_5d": 0.039259,
+          "sharpe": -0.2327,
+          "turnover": 0.5257,
+          "status": "OK",
+          "score": 0.01374,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá vượt qua đường SMA_20 và MACD cho thấy xu hướng tăng mạnh, điều này cho thấy động lực tăng giá có thể tiếp tục, dẫn đến kỳ vọng tăng giá.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['MACD'] - df['MACD_Signal'], 20))",
+          "ic": 0.050699,
+          "ic_5d": 0.037722,
+          "sharpe": 1.1557,
+          "turnover": 0.4985,
+          "status": "OK",
+          "score": 0.122876,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá nằm ở vị trí gần mức thấp nhất của dải Bollinger Bands trong khi volume tăng, điều này cho thấy có khả năng phục hồi, dẫn đến kỳ vọng tăng giá.",
+          "expression": "alpha = add(ts_zscore_scale(df['BB_Lower'] - df['close'], 10), ts_zscore_scale(df['volume'], 20))",
+          "ic": 0.027922,
+          "ic_5d": 0.120083,
+          "sharpe": 0.7525,
+          "turnover": 0.8815,
+          "status": "OK",
+          "score": 0.076954,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá đang giao dịch gần mức cao của dải Bollinger Bands trong khi Momentum_10 cho thấy xu hướng tăng, điều này cho thấy có khả năng điều chỉnh giá, dẫn đến kỳ vọng giảm giá. Công thức này kết hợp giữa động lực giá và các mức giá kỹ thuật để phát hiện tín hiệu giảm giá.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['BB_Upper'] - df['close'], 10), 0), ts_zscore_scale(df['Momentum_10'], 10))",
+          "ic": 0.018402,
+          "ic_5d": 0.022019,
+          "sharpe": -0.397,
+          "turnover": 0.5987,
+          "status": "OK",
+          "score": 0.011041,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "ticker": "VHM",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi MACD đạt điểm cắt xuống dưới đường tín hiệu (MACD_Signal) trong khi giá vẫn đang trong một xu hướng tăng, điều này cho thấy có thể có sự suy yếu và khả năng điều chỉnh giảm. MACD cho thấy sức mạnh hoặc yếu của động lực giá.",
+      "expression": "alpha = minus(ts_zscore_scale(df['MACD'], 20), ts_zscore_scale(df['MACD_Signal'], 20))",
+      "ic": 0.008245,
+      "ic_5d": 0.060804,
+      "sharpe": 0.3234,
+      "turnover": 0.3489,
+      "status": "OK",
+      "score": 0.030817,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi Momentum_10 tăng lên trong khi RSI_14 vẫn ở mức thấp (dưới 30), điều này cho thấy rằng giá có khả năng hồi phục mạnh từ vùng quá bán, dẫn đến kỳ vọng tăng trưởng.",
+      "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), ts_zscore_scale(df['RSI_14'], 14))",
+      "ic": 0.059319,
+      "ic_5d": 0.009188,
+      "sharpe": 0.4624,
+      "turnover": 0.5333,
+      "status": "OK",
+      "score": 0.072585,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi giá đang giao dịch gần với BB_Lower trong khi khối lượng giao dịch (volume) giảm, điều này cho thấy có thể có một sự điều chỉnh tăng trong tương lai gần do tình trạng quá bán.",
+      "expression": "alpha = cwise_mul(greater(df['close'], df['BB_Lower']), ts_zscore_scale(df['volume'], 20))",
+      "ic": 0.033655,
+      "ic_5d": 0.031804,
+      "sharpe": 0.4156,
+      "turnover": 1.0138,
+      "status": "OK",
+      "score": 0.05344,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi MACD vượt qua đường tín hiệu (MACD_Signal) nhưng trong một môi trường sentiment tích cực đồng thời, điều này cho thấy rằng sự tăng trưởng có thể sẽ tiếp diễn và giá sẽ tiếp tục tăng.",
+      "expression": "alpha = cwise_mul(greater(df['MACD'], df['MACD_Signal']), ts_ema(df['TCB_S'], 5))",
+      "ic": 0.012493,
+      "ic_5d": 0.091039,
+      "sharpe": -0.3198,
+      "turnover": 0.5273,
+      "status": "OK",
+      "score": 0.007496,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá vượt qua SMA_20 trong bối cảnh khối lượng giao dịch tăng, điều này cho thấy có sự tham gia mạnh mẽ từ bên mua và có thể dẫn đến xu hướng tăng trong tương lai. Sự xác nhận từ Volume cho thấy rằng không chỉ có sự thay đổi giá tiềm năng mà còn có sự hỗ trợ của động lực thị trường.",
+      "expression": "alpha = ts_delta(df['close'], 5) * ts_mean(df['volume'], 10)",
+      "ic": 0.067065,
+      "ic_5d": 0.011202,
+      "sharpe": 1.4451,
+      "turnover": 0.5392,
+      "status": "OK",
+      "score": 0.155848,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi MACD đạt điểm cắt xuống dưới đường tín hiệu (MACD_Signal) trong khi giá vẫn đang trong một xu hướng tăng, điều này cho thấy có thể có sự suy yếu và khả năng điều chỉnh giảm. MACD cho thấy sức mạnh hoặc yếu của động lực giá.",
+          "expression": "alpha = minus(ts_zscore_scale(df['MACD'], 20), ts_zscore_scale(df['MACD_Signal'], 20))",
+          "ic": 0.008245,
+          "ic_5d": 0.060804,
+          "sharpe": 0.3234,
+          "turnover": 0.3489,
+          "status": "OK",
+          "score": 0.030817,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi Momentum_10 tăng lên trong khi RSI_14 vẫn ở mức thấp (dưới 30), điều này cho thấy rằng giá có khả năng hồi phục mạnh từ vùng quá bán, dẫn đến kỳ vọng tăng trưởng.",
+          "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), ts_zscore_scale(df['RSI_14'], 14))",
+          "ic": 0.059319,
+          "ic_5d": 0.009188,
+          "sharpe": 0.4624,
+          "turnover": 0.5333,
+          "status": "OK",
+          "score": 0.072585,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá đang giao dịch gần với BB_Lower trong khi khối lượng giao dịch (volume) giảm, điều này cho thấy có thể có một sự điều chỉnh tăng trong tương lai gần do tình trạng quá bán.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['BB_Lower']), ts_zscore_scale(df['volume'], 20))",
+          "ic": 0.033655,
+          "ic_5d": 0.031804,
+          "sharpe": 0.4156,
+          "turnover": 1.0138,
+          "status": "OK",
+          "score": 0.05344,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi MACD vượt qua đường tín hiệu (MACD_Signal) nhưng trong một môi trường sentiment tích cực đồng thời, điều này cho thấy rằng sự tăng trưởng có thể sẽ tiếp diễn và giá sẽ tiếp tục tăng.",
+          "expression": "alpha = cwise_mul(greater(df['MACD'], df['MACD_Signal']), ts_ema(df['TCB_S'], 5))",
+          "ic": 0.012493,
+          "ic_5d": 0.091039,
+          "sharpe": -0.3198,
+          "turnover": 0.5273,
+          "status": "OK",
+          "score": 0.007496,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá vượt qua SMA_20 trong bối cảnh khối lượng giao dịch tăng, điều này cho thấy có sự tham gia mạnh mẽ từ bên mua và có thể dẫn đến xu hướng tăng trong tương lai. Sự xác nhận từ Volume cho thấy rằng không chỉ có sự thay đổi giá tiềm năng mà còn có sự hỗ trợ của động lực thị trường.",
+          "expression": "alpha = ts_delta(df['close'], 5) * ts_mean(df['volume'], 10)",
+          "ic": 0.067065,
+          "ic_5d": 0.011202,
+          "sharpe": 1.4451,
+          "turnover": 0.5392,
+          "status": "OK",
+          "score": 0.155848,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi MACD đạt điểm cắt xuống dưới đường tín hiệu (MACD_Signal) trong khi giá vẫn đang trong một xu hướng tăng, điều này cho thấy có thể có sự suy yếu và khả năng điều chỉnh giảm. MACD cho thấy sức mạnh hoặc yếu của động lực giá.",
+          "expression": "alpha = minus(ts_zscore_scale(df['MACD'], 20), ts_zscore_scale(df['MACD_Signal'], 20))",
+          "ic": 0.008245,
+          "ic_5d": 0.060804,
+          "sharpe": 0.3234,
+          "turnover": 0.3489,
+          "status": "OK",
+          "score": 0.030817,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi Momentum_10 tăng lên trong khi RSI_14 vẫn ở mức thấp (dưới 30), điều này cho thấy rằng giá có khả năng hồi phục mạnh từ vùng quá bán, dẫn đến kỳ vọng tăng trưởng.",
+          "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), ts_zscore_scale(df['RSI_14'], 14))",
+          "ic": 0.059319,
+          "ic_5d": 0.009188,
+          "sharpe": 0.4624,
+          "turnover": 0.5333,
+          "status": "OK",
+          "score": 0.072585,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá đang giao dịch gần với BB_Lower trong khi khối lượng giao dịch (volume) giảm, điều này cho thấy có thể có một sự điều chỉnh tăng trong tương lai gần do tình trạng quá bán.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['BB_Lower']), ts_zscore_scale(df['volume'], 20))",
+          "ic": 0.033655,
+          "ic_5d": 0.031804,
+          "sharpe": 0.4156,
+          "turnover": 1.0138,
+          "status": "OK",
+          "score": 0.05344,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi MACD vượt qua đường tín hiệu (MACD_Signal) nhưng trong một môi trường sentiment tích cực đồng thời, điều này cho thấy rằng sự tăng trưởng có thể sẽ tiếp diễn và giá sẽ tiếp tục tăng.",
+          "expression": "alpha = cwise_mul(greater(df['MACD'], df['MACD_Signal']), ts_ema(df['TCB_S'], 5))",
+          "ic": 0.012493,
+          "ic_5d": 0.091039,
+          "sharpe": -0.3198,
+          "turnover": 0.5273,
+          "status": "OK",
+          "score": 0.007496,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá vượt qua SMA_20 trong bối cảnh khối lượng giao dịch tăng, điều này cho thấy có sự tham gia mạnh mẽ từ bên mua và có thể dẫn đến xu hướng tăng trong tương lai. Sự xác nhận từ Volume cho thấy rằng không chỉ có sự thay đổi giá tiềm năng mà còn có sự hỗ trợ của động lực thị trường.",
+          "expression": "alpha = ts_delta(df['close'], 5) * ts_mean(df['volume'], 10)",
+          "ic": 0.067065,
+          "ic_5d": 0.011202,
+          "sharpe": 1.4451,
+          "turnover": 0.5392,
+          "status": "OK",
+          "score": 0.155848,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

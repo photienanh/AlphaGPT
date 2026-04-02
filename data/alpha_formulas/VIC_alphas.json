@@ -1,0 +1,266 @@
+{
+  "ticker": "VIC",
+  "n_rows": 727,
+  "n_rounds": 3,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi có sự gia tăng đột biến trong momentum (Momentum_10) trong khi giá không tăng tương ứng, điều này có thể chỉ ra rằng giá sẽ sớm điều chỉnh. Sự phân kỳ giữa momentum và giá cho thấy một tín hiệu giảm giá mạnh.",
+      "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 5))",
+      "ic": 0.039517,
+      "ic_5d": 0.082144,
+      "sharpe": 0.891,
+      "turnover": 0.471,
+      "status": "OK",
+      "score": 0.094993,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi có sự phân kỳ giữa chỉ số RSI và giá, đặc biệt là khi RSI đang tăng mà giá không theo kịp, điều này có thể chỉ ra rằng thị trường đang bị quá mua và có khả năng điều chỉnh giảm. Sự không đồng nhất này có thể dẫn đến sự điều chỉnh trong tương lai, và khi sentiment ngành ngân hàng (TCB_S) cũng trở nên tiêu cực, điều này càng củng cố cho tín hiệu giảm giá.",
+      "expression": "alpha = cwise_mul(minus(ts_delta(df['close'], 5), ts_delta(df['RSI_14'], 5)), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+      "ic": 0.095325,
+      "ic_5d": 0.087674,
+      "sharpe": 1.6321,
+      "turnover": 0.4897,
+      "status": "OK",
+      "score": 0.187759,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi sentiment của VIC (VIC_S) tích cực trong khi momentum đang tăng, điều này cho thấy rằng sự hỗ trợ từ tâm lý thị trường có thể thúc đẩy giá tăng nhanh hơn.",
+      "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), add(1.0, cwise_mul(0.3, ts_ema(df['VIC_S'], 5))))",
+      "ic": 0.016821,
+      "ic_5d": 0.021931,
+      "sharpe": 0.5812,
+      "turnover": 0.5502,
+      "status": "OK",
+      "score": 0.056591,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi có sự phân kỳ giữa giá và khối lượng (volume), đặc biệt là khi giá tăng nhưng khối lượng giảm, điều này cho thấy sự yếu kém trong xu hướng tăng. Sự không đồng nhất này có thể dẫn đến sự điều chỉnh giảm trong tương lai.",
+      "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['volume'], 5))",
+      "ic": 0.028301,
+      "ic_5d": 0.051625,
+      "sharpe": -0.2354,
+      "turnover": 1.2758,
+      "status": "OK",
+      "score": 0.016981,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Một sự tăng trưởng trong momentum trong khi sentiment ngành ngân hàng (TCB_S) đang tiêu cực có thể cho thấy rằng xu hướng tăng không bền vững và có khả năng điều chỉnh giảm.",
+      "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), neg(ts_ema(df['TCB_S'], 5)))",
+      "ic": 0.035023,
+      "ic_5d": 0.021888,
+      "sharpe": -0.0585,
+      "turnover": 0.8924,
+      "status": "OK",
+      "score": 0.021014,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự gia tăng đột biến trong momentum (Momentum_10) trong khi giá không tăng tương ứng, điều này có thể chỉ ra rằng giá sẽ sớm điều chỉnh. Sự phân kỳ giữa momentum và giá cho thấy một tín hiệu giảm giá mạnh.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 5))",
+          "ic": 0.039517,
+          "ic_5d": 0.082144,
+          "sharpe": 0.891,
+          "turnover": 0.471,
+          "status": "OK",
+          "score": 0.094993,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi có sự tương quan dương giữa volume và giá trong một khoảng thời gian ngắn, điều này cho thấy rằng có nhiều người tham gia vào thị trường, làm tăng khả năng giá sẽ tiếp tục tăng.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 10)",
+          "ic": 0.015452,
+          "ic_5d": 0.006348,
+          "sharpe": 0.7293,
+          "turnover": 0.4063,
+          "status": "OK",
+          "score": 0.067617,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment của VIC (VIC_S) tích cực trong khi momentum đang tăng, điều này cho thấy rằng sự hỗ trợ từ tâm lý thị trường có thể thúc đẩy giá tăng nhanh hơn.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), add(1.0, cwise_mul(0.3, ts_ema(df['VIC_S'], 5))))",
+          "ic": 0.016821,
+          "ic_5d": 0.021931,
+          "sharpe": 0.5812,
+          "turnover": 0.5502,
+          "status": "OK",
+          "score": 0.056591,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi có sự phân kỳ giữa giá và khối lượng (volume), đặc biệt là khi giá tăng nhưng khối lượng giảm, điều này cho thấy sự yếu kém trong xu hướng tăng. Sự không đồng nhất này có thể dẫn đến sự điều chỉnh giảm trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['volume'], 5))",
+          "ic": 0.028301,
+          "ic_5d": 0.051625,
+          "sharpe": -0.2354,
+          "turnover": 1.2758,
+          "status": "OK",
+          "score": 0.016981,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Một sự tăng trưởng trong momentum trong khi sentiment ngành ngân hàng (TCB_S) đang tiêu cực có thể cho thấy rằng xu hướng tăng không bền vững và có khả năng điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), neg(ts_ema(df['TCB_S'], 5)))",
+          "ic": 0.035023,
+          "ic_5d": 0.021888,
+          "sharpe": -0.0585,
+          "turnover": 0.8924,
+          "status": "OK",
+          "score": 0.021014,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự gia tăng đột biến trong momentum (Momentum_10) trong khi giá không tăng tương ứng, điều này có thể chỉ ra rằng giá sẽ sớm điều chỉnh. Sự phân kỳ giữa momentum và giá cho thấy một tín hiệu giảm giá mạnh.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 5))",
+          "ic": 0.039517,
+          "ic_5d": 0.082144,
+          "sharpe": 0.891,
+          "turnover": 0.471,
+          "status": "OK",
+          "score": 0.094993,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi có sự phân kỳ giữa chỉ số RSI và giá, đặc biệt là khi RSI đang tăng mà giá không theo kịp, điều này có thể chỉ ra rằng thị trường đang bị quá mua và có khả năng điều chỉnh giảm. Sự không đồng nhất này có thể dẫn đến sự điều chỉnh trong tương lai, và khi sentiment ngành ngân hàng (TCB_S) cũng trở nên tiêu cực, điều này càng củng cố cho tín hiệu giảm giá.",
+          "expression": "alpha = cwise_mul(minus(ts_delta(df['close'], 5), ts_delta(df['RSI_14'], 5)), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.095325,
+          "ic_5d": 0.087674,
+          "sharpe": 1.6321,
+          "turnover": 0.4897,
+          "status": "OK",
+          "score": 0.187759,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment của VIC (VIC_S) tích cực trong khi momentum đang tăng, điều này cho thấy rằng sự hỗ trợ từ tâm lý thị trường có thể thúc đẩy giá tăng nhanh hơn.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), add(1.0, cwise_mul(0.3, ts_ema(df['VIC_S'], 5))))",
+          "ic": 0.016821,
+          "ic_5d": 0.021931,
+          "sharpe": 0.5812,
+          "turnover": 0.5502,
+          "status": "OK",
+          "score": 0.056591,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi có sự phân kỳ giữa giá và khối lượng (volume), đặc biệt là khi giá tăng nhưng khối lượng giảm, điều này cho thấy sự yếu kém trong xu hướng tăng. Sự không đồng nhất này có thể dẫn đến sự điều chỉnh giảm trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['volume'], 5))",
+          "ic": 0.028301,
+          "ic_5d": 0.051625,
+          "sharpe": -0.2354,
+          "turnover": 1.2758,
+          "status": "OK",
+          "score": 0.016981,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Một sự tăng trưởng trong momentum trong khi sentiment ngành ngân hàng (TCB_S) đang tiêu cực có thể cho thấy rằng xu hướng tăng không bền vững và có khả năng điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), neg(ts_ema(df['TCB_S'], 5)))",
+          "ic": 0.035023,
+          "ic_5d": 0.021888,
+          "sharpe": -0.0585,
+          "turnover": 0.8924,
+          "status": "OK",
+          "score": 0.021014,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự gia tăng đột biến trong momentum (Momentum_10) trong khi giá không tăng tương ứng, điều này có thể chỉ ra rằng giá sẽ sớm điều chỉnh. Sự phân kỳ giữa momentum và giá cho thấy một tín hiệu giảm giá mạnh.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 5))",
+          "ic": 0.039517,
+          "ic_5d": 0.082144,
+          "sharpe": 0.891,
+          "turnover": 0.471,
+          "status": "OK",
+          "score": 0.094993,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi có sự phân kỳ giữa chỉ số RSI và giá, đặc biệt là khi RSI đang tăng mà giá không theo kịp, điều này có thể chỉ ra rằng thị trường đang bị quá mua và có khả năng điều chỉnh giảm. Sự không đồng nhất này có thể dẫn đến sự điều chỉnh trong tương lai, và khi sentiment ngành ngân hàng (TCB_S) cũng trở nên tiêu cực, điều này càng củng cố cho tín hiệu giảm giá.",
+          "expression": "alpha = cwise_mul(minus(ts_delta(df['close'], 5), ts_delta(df['RSI_14'], 5)), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.095325,
+          "ic_5d": 0.087674,
+          "sharpe": 1.6321,
+          "turnover": 0.4897,
+          "status": "OK",
+          "score": 0.187759,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment của VIC (VIC_S) tích cực trong khi momentum đang tăng, điều này cho thấy rằng sự hỗ trợ từ tâm lý thị trường có thể thúc đẩy giá tăng nhanh hơn.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), add(1.0, cwise_mul(0.3, ts_ema(df['VIC_S'], 5))))",
+          "ic": 0.016821,
+          "ic_5d": 0.021931,
+          "sharpe": 0.5812,
+          "turnover": 0.5502,
+          "status": "OK",
+          "score": 0.056591,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi có sự phân kỳ giữa giá và khối lượng (volume), đặc biệt là khi giá tăng nhưng khối lượng giảm, điều này cho thấy sự yếu kém trong xu hướng tăng. Sự không đồng nhất này có thể dẫn đến sự điều chỉnh giảm trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['volume'], 5))",
+          "ic": 0.028301,
+          "ic_5d": 0.051625,
+          "sharpe": -0.2354,
+          "turnover": 1.2758,
+          "status": "OK",
+          "score": 0.016981,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Một sự tăng trưởng trong momentum trong khi sentiment ngành ngân hàng (TCB_S) đang tiêu cực có thể cho thấy rằng xu hướng tăng không bền vững và có khả năng điều chỉnh giảm.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), neg(ts_ema(df['TCB_S'], 5)))",
+          "ic": 0.035023,
+          "ic_5d": 0.021888,
+          "sharpe": -0.0585,
+          "turnover": 0.8924,
+          "status": "OK",
+          "score": 0.021014,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "ticker": "HDB",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi HDB có xu hướng giảm giá trong khi sentiment của ngành ngân hàng trở nên tiêu cực, điều này có thể cho thấy áp lực bán gia tăng và khả năng tiếp tục giảm giá.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['HDB_S'], 20), less(ts_rank(df['close'], 20), 50))",
+      "ic": 0.012594,
+      "ic_5d": 0.060985,
+      "sharpe": 0.0164,
+      "turnover": 1.1759,
+      "status": "OK",
+      "score": 0.008868,
+      "flipped": true
+    },
+    {
+      "id": 2,
+      "idea": "Khi giá HDB tăng trong khi RSI cho thấy vùng quá mua (overbought), có thể thấy sự điều chỉnh sắp xảy ra. Điều này được xác nhận khi MACD giảm xuống dưới đường tín hiệu, cho thấy sức mạnh xu hướng đang yếu đi.",
+      "expression": "alpha = minus(ts_rank(df['RSI_14'], 14), ts_rank(df['MACD'] - df['MACD_Signal'], 10))",
+      "ic": 0.011753,
+      "ic_5d": 0.023777,
+      "sharpe": -0.6292,
+      "turnover": 0.6868,
+      "status": "OK",
+      "score": 0.007052,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi HDB có xu hướng giảm trong khi chỉ báo MACD cho thấy sự phân kỳ với tín hiệu, có nghĩa là áp lực bán đang yếu đi. Điều này có thể xuất hiện như một tín hiệu mua trong một xu hướng giảm tiềm năng.",
+      "expression": "alpha = cwise_mul(less(ts_delta(df['close'], 5), 0), ts_zscore_scale(minus(df['MACD'], df['MACD_Signal']), 20))",
+      "ic": 0.00066,
+      "ic_5d": 0.007846,
+      "sharpe": -1.0732,
+      "turnover": 0.4475,
+      "status": "OK",
+      "score": 0.000396,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.031417,
+      "ic_5d": 0.009599,
+      "sharpe": 0.6663,
+      "turnover": 0.6363,
+      "status": "OK",
+      "score": 0.072151,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+      "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+      "ic": 0.045677,
+      "ic_5d": 0.010428,
+      "sharpe": 0.2235,
+      "turnover": 0.9378,
+      "status": "OK",
+      "score": 0.045283,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi HDB có xu hướng giảm giá trong khi sentiment của ngành ngân hàng trở nên tiêu cực, điều này có thể cho thấy áp lực bán gia tăng và khả năng tiếp tục giảm giá.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['HDB_S'], 20), less(ts_rank(df['close'], 20), 50))",
+          "ic": 0.012594,
+          "ic_5d": 0.060985,
+          "sharpe": 0.0164,
+          "turnover": 1.1759,
+          "status": "OK",
+          "score": 0.008868,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá HDB tăng trong khi RSI cho thấy vùng quá mua (overbought), có thể thấy sự điều chỉnh sắp xảy ra. Điều này được xác nhận khi MACD giảm xuống dưới đường tín hiệu, cho thấy sức mạnh xu hướng đang yếu đi.",
+          "expression": "alpha = minus(ts_rank(df['RSI_14'], 14), ts_rank(df['MACD'] - df['MACD_Signal'], 10))",
+          "ic": 0.011753,
+          "ic_5d": 0.023777,
+          "sharpe": -0.6292,
+          "turnover": 0.6868,
+          "status": "OK",
+          "score": 0.007052,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi HDB có xu hướng giảm trong khi chỉ báo MACD cho thấy sự phân kỳ với tín hiệu, có nghĩa là áp lực bán đang yếu đi. Điều này có thể xuất hiện như một tín hiệu mua trong một xu hướng giảm tiềm năng.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['close'], 5), 0), ts_zscore_scale(minus(df['MACD'], df['MACD_Signal']), 20))",
+          "ic": 0.00066,
+          "ic_5d": 0.007846,
+          "sharpe": -1.0732,
+          "turnover": 0.4475,
+          "status": "OK",
+          "score": 0.000396,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.031417,
+          "ic_5d": 0.009599,
+          "sharpe": 0.6663,
+          "turnover": 0.6363,
+          "status": "OK",
+          "score": 0.072151,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+          "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+          "ic": 0.045677,
+          "ic_5d": 0.010428,
+          "sharpe": 0.2235,
+          "turnover": 0.9378,
+          "status": "OK",
+          "score": 0.045283,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi HDB có xu hướng giảm giá trong khi sentiment của ngành ngân hàng trở nên tiêu cực, điều này có thể cho thấy áp lực bán gia tăng và khả năng tiếp tục giảm giá.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['HDB_S'], 20), less(ts_rank(df['close'], 20), 50))",
+          "ic": 0.012594,
+          "ic_5d": 0.060985,
+          "sharpe": 0.0164,
+          "turnover": 1.1759,
+          "status": "OK",
+          "score": 0.008868,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá HDB tăng trong khi RSI cho thấy vùng quá mua (overbought), có thể thấy sự điều chỉnh sắp xảy ra. Điều này được xác nhận khi MACD giảm xuống dưới đường tín hiệu, cho thấy sức mạnh xu hướng đang yếu đi.",
+          "expression": "alpha = minus(ts_rank(df['RSI_14'], 14), ts_rank(df['MACD'] - df['MACD_Signal'], 10))",
+          "ic": 0.011753,
+          "ic_5d": 0.023777,
+          "sharpe": -0.6292,
+          "turnover": 0.6868,
+          "status": "OK",
+          "score": 0.007052,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi HDB có xu hướng giảm trong khi chỉ báo MACD cho thấy sự phân kỳ với tín hiệu, có nghĩa là áp lực bán đang yếu đi. Điều này có thể xuất hiện như một tín hiệu mua trong một xu hướng giảm tiềm năng.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['close'], 5), 0), ts_zscore_scale(minus(df['MACD'], df['MACD_Signal']), 20))",
+          "ic": 0.00066,
+          "ic_5d": 0.007846,
+          "sharpe": -1.0732,
+          "turnover": 0.4475,
+          "status": "OK",
+          "score": 0.000396,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.031417,
+          "ic_5d": 0.009599,
+          "sharpe": 0.6663,
+          "turnover": 0.6363,
+          "status": "OK",
+          "score": 0.072151,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+          "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+          "ic": 0.045677,
+          "ic_5d": 0.010428,
+          "sharpe": 0.2235,
+          "turnover": 0.9378,
+          "status": "OK",
+          "score": 0.045283,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

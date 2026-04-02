@@ -1,0 +1,200 @@
+{
+  "ticker": "FPT",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi độ biến động tăng cao nhưng giá không thay đổi nhiều, điều này cho thấy sự không chắc chắn trong thị trường. Kết hợp với chỉ báo momentum để xác định xu hướng giảm.",
+      "expression": "alpha = ts_std(df['close'], 10) - ts_std(df['Momentum_10'], 10)",
+      "ic": 0.015069,
+      "ic_5d": 0.111735,
+      "sharpe": 0.8435,
+      "turnover": 0.3454,
+      "status": "OK",
+      "score": 0.076519,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, đây là một dấu hiệu của sự phân phối, cho thấy áp lực bán có thể gia tăng. Kết hợp với chỉ số momentum cho thấy xu hướng giảm sắp xảy ra.",
+      "expression": "alpha = minus(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+      "ic": 0.022377,
+      "ic_5d": 0.065749,
+      "sharpe": -0.2433,
+      "turnover": 1.1678,
+      "status": "OK",
+      "score": 0.013426,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Sự phân kỳ giữa momentum 3 và momentum 10 có thể chỉ ra sự đảo chiều. Nếu momentum 3 tăng trong khi momentum 10 giảm, kỳ vọng giảm giá.",
+      "expression": "alpha = minus(ts_delta(df['Momentum_3'], 5), ts_delta(df['Momentum_10'], 10))",
+      "ic": 0.005754,
+      "ic_5d": 0.055819,
+      "sharpe": -0.1193,
+      "turnover": 0.5471,
+      "status": "OK",
+      "score": 0.003452,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Sự phân kỳ giữa chỉ báo MACD và giá có thể là dấu hiệu của sự đảo chiều giá sắp xảy ra. Nếu MACD đang giảm nhưng giá không theo kịp (tăng nhẹ hoặc ổn định), điều này cho thấy áp lực bán có thể tăng lên. Kết hợp với chỉ báo OBV để xác định sức mạnh của xu hướng.",
+      "expression": "alpha = add(ts_zscore_scale(df['MACD'] - df['MACD_Signal'], 15), ts_zscore_scale(df['OBV'], 20))",
+      "ic": 0.021001,
+      "ic_5d": 0.051231,
+      "sharpe": 0.2206,
+      "turnover": 0.4713,
+      "status": "OK",
+      "score": 0.030249,
+      "flipped": true
+    },
+    {
+      "id": 5,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.027286,
+      "ic_5d": 0.080651,
+      "sharpe": -0.2371,
+      "turnover": 0.6338,
+      "status": "OK",
+      "score": 0.016372,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi độ biến động tăng cao nhưng giá không thay đổi nhiều, điều này cho thấy sự không chắc chắn trong thị trường. Kết hợp với chỉ báo momentum để xác định xu hướng giảm.",
+          "expression": "alpha = ts_std(df['close'], 10) - ts_std(df['Momentum_10'], 10)",
+          "ic": 0.015069,
+          "ic_5d": 0.111735,
+          "sharpe": 0.8435,
+          "turnover": 0.3454,
+          "status": "OK",
+          "score": 0.076519,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, đây là một dấu hiệu của sự phân phối, cho thấy áp lực bán có thể gia tăng. Kết hợp với chỉ số momentum cho thấy xu hướng giảm sắp xảy ra.",
+          "expression": "alpha = minus(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+          "ic": 0.022377,
+          "ic_5d": 0.065749,
+          "sharpe": -0.2433,
+          "turnover": 1.1678,
+          "status": "OK",
+          "score": 0.013426,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự phân kỳ giữa momentum 3 và momentum 10 có thể chỉ ra sự đảo chiều. Nếu momentum 3 tăng trong khi momentum 10 giảm, kỳ vọng giảm giá.",
+          "expression": "alpha = minus(ts_delta(df['Momentum_3'], 5), ts_delta(df['Momentum_10'], 10))",
+          "ic": 0.005754,
+          "ic_5d": 0.055819,
+          "sharpe": -0.1193,
+          "turnover": 0.5471,
+          "status": "OK",
+          "score": 0.003452,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa chỉ báo MACD và giá có thể là dấu hiệu của sự đảo chiều giá sắp xảy ra. Nếu MACD đang giảm nhưng giá không theo kịp (tăng nhẹ hoặc ổn định), điều này cho thấy áp lực bán có thể tăng lên. Kết hợp với chỉ báo OBV để xác định sức mạnh của xu hướng.",
+          "expression": "alpha = add(ts_zscore_scale(df['MACD'] - df['MACD_Signal'], 15), ts_zscore_scale(df['OBV'], 20))",
+          "ic": 0.021001,
+          "ic_5d": 0.051231,
+          "sharpe": 0.2206,
+          "turnover": 0.4713,
+          "status": "OK",
+          "score": 0.030249,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.027286,
+          "ic_5d": 0.080651,
+          "sharpe": -0.2371,
+          "turnover": 0.6338,
+          "status": "OK",
+          "score": 0.016372,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi độ biến động tăng cao nhưng giá không thay đổi nhiều, điều này cho thấy sự không chắc chắn trong thị trường. Kết hợp với chỉ báo momentum để xác định xu hướng giảm.",
+          "expression": "alpha = ts_std(df['close'], 10) - ts_std(df['Momentum_10'], 10)",
+          "ic": 0.015069,
+          "ic_5d": 0.111735,
+          "sharpe": 0.8435,
+          "turnover": 0.3454,
+          "status": "OK",
+          "score": 0.076519,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, đây là một dấu hiệu của sự phân phối, cho thấy áp lực bán có thể gia tăng. Kết hợp với chỉ số momentum cho thấy xu hướng giảm sắp xảy ra.",
+          "expression": "alpha = minus(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+          "ic": 0.022377,
+          "ic_5d": 0.065749,
+          "sharpe": -0.2433,
+          "turnover": 1.1678,
+          "status": "OK",
+          "score": 0.013426,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự phân kỳ giữa momentum 3 và momentum 10 có thể chỉ ra sự đảo chiều. Nếu momentum 3 tăng trong khi momentum 10 giảm, kỳ vọng giảm giá.",
+          "expression": "alpha = minus(ts_delta(df['Momentum_3'], 5), ts_delta(df['Momentum_10'], 10))",
+          "ic": 0.005754,
+          "ic_5d": 0.055819,
+          "sharpe": -0.1193,
+          "turnover": 0.5471,
+          "status": "OK",
+          "score": 0.003452,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa chỉ báo MACD và giá có thể là dấu hiệu của sự đảo chiều giá sắp xảy ra. Nếu MACD đang giảm nhưng giá không theo kịp (tăng nhẹ hoặc ổn định), điều này cho thấy áp lực bán có thể tăng lên. Kết hợp với chỉ báo OBV để xác định sức mạnh của xu hướng.",
+          "expression": "alpha = add(ts_zscore_scale(df['MACD'] - df['MACD_Signal'], 15), ts_zscore_scale(df['OBV'], 20))",
+          "ic": 0.021001,
+          "ic_5d": 0.051231,
+          "sharpe": 0.2206,
+          "turnover": 0.4713,
+          "status": "OK",
+          "score": 0.030249,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.027286,
+          "ic_5d": 0.080651,
+          "sharpe": -0.2371,
+          "turnover": 0.6338,
+          "status": "OK",
+          "score": 0.016372,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

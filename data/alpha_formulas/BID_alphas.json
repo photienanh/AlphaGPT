@@ -1,0 +1,200 @@
+{
+  "ticker": "BID",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, điều này cho thấy có sự phân tán trong tâm lý thị trường. Khi kết hợp với chỉ báo MACD, có thể xác định xu hướng giảm giá sắp tới.",
+      "expression": "alpha = minus(ts_delta(df['volume'], 5), ts_delta(df['close'], 5)) + minus(ts_rank(df['MACD'], 10), ts_rank(df['MACD_Signal'], 10))",
+      "ic": 0.079954,
+      "ic_5d": 0.006373,
+      "sharpe": 0.5687,
+      "turnover": 1.2849,
+      "status": "OK",
+      "score": 0.093465,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi MACD cắt xuống dưới MACD_Signal trong bối cảnh khối lượng giao dịch giảm, điều này cho thấy thị trường có thể sắp giảm.",
+      "expression": "alpha = less(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)) * minus(ts_rank(df['volume'], 10), 50)",
+      "ic": 0.038188,
+      "ic_5d": 0.117262,
+      "sharpe": 0.2606,
+      "turnover": 0.2836,
+      "status": "OK",
+      "score": 0.043758,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi chỉ báo RSI_14 nằm dưới mức 30, chỉ ra rằng giá có thể đang ở vùng quá bán. Nếu đồng thời khối lượng giao dịch (volume) tăng lên, điều này cho thấy sự quay trở lại của các nhà đầu tư có thể đang diễn ra, dẫn đến kỳ vọng tăng giá trong tương lai.",
+      "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['RSI_14'], 14), -1), ts_mean(df['volume'], 10))",
+      "ic": 0.029482,
+      "ic_5d": 0.067076,
+      "sharpe": 0.5753,
+      "turnover": 0.3254,
+      "status": "OK",
+      "score": 0.063714,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Một tín hiệu điều chỉnh có thể xảy ra khi giá hiện tại đóng cửa dưới BB_Lower và Momentum_3 đang quay trở lại từ vùng âm. Điều này có thể cho thấy một sự hồi phục trong ngắn hạn sắp xảy ra.",
+      "expression": "alpha = add(greater(df['close'], df['BB_Lower']), ts_ema(df['Momentum_3'], 10))",
+      "ic": 0.018047,
+      "ic_5d": 0.005708,
+      "sharpe": -0.4045,
+      "turnover": 0.358,
+      "status": "OK",
+      "score": 0.010828,
+      "flipped": true
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá chạm gần mức BB_Lower và tâm lý thị trường ngành ngân hàng (sentiment) đang tích cực, điều này có thể cho thấy khả năng hồi phục giá trong tương lai. Nếu chỉ báo Momentum_3 cũng cho thấy dấu hiệu hồi phục, thì đây là tín hiệu mạnh mẽ cho xu hướng tăng. Sự kết hợp này phản ánh sự quay trở lại của các nhà đầu tư khi giá ở mức thấp, có thể dẫn đến đợt tăng giá trong thời gian tới.",
+      "expression": "alpha = cwise_mul(greater(ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20), 0), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5)))) + cwise_mul(ts_zscore_scale(ts_delta(df['Momentum_3'], 5), 5), 0.5)",
+      "ic": 0.007669,
+      "ic_5d": 0.006126,
+      "sharpe": 0.4235,
+      "turnover": 0.8076,
+      "status": "OK",
+      "score": 0.038485,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, điều này cho thấy có sự phân tán trong tâm lý thị trường. Khi kết hợp với chỉ báo MACD, có thể xác định xu hướng giảm giá sắp tới.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 5), ts_delta(df['close'], 5)) + minus(ts_rank(df['MACD'], 10), ts_rank(df['MACD_Signal'], 10))",
+          "ic": 0.079954,
+          "ic_5d": 0.006373,
+          "sharpe": 0.5687,
+          "turnover": 1.2849,
+          "status": "OK",
+          "score": 0.093465,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi MACD cắt xuống dưới MACD_Signal trong bối cảnh khối lượng giao dịch giảm, điều này cho thấy thị trường có thể sắp giảm.",
+          "expression": "alpha = less(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)) * minus(ts_rank(df['volume'], 10), 50)",
+          "ic": 0.038188,
+          "ic_5d": 0.117262,
+          "sharpe": 0.2606,
+          "turnover": 0.2836,
+          "status": "OK",
+          "score": 0.043758,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi chỉ báo RSI_14 nằm dưới mức 30, chỉ ra rằng giá có thể đang ở vùng quá bán. Nếu đồng thời khối lượng giao dịch (volume) tăng lên, điều này cho thấy sự quay trở lại của các nhà đầu tư có thể đang diễn ra, dẫn đến kỳ vọng tăng giá trong tương lai.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['RSI_14'], 14), -1), ts_mean(df['volume'], 10))",
+          "ic": 0.029482,
+          "ic_5d": 0.067076,
+          "sharpe": 0.5753,
+          "turnover": 0.3254,
+          "status": "OK",
+          "score": 0.063714,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Một tín hiệu điều chỉnh có thể xảy ra khi giá hiện tại đóng cửa dưới BB_Lower và Momentum_3 đang quay trở lại từ vùng âm. Điều này có thể cho thấy một sự hồi phục trong ngắn hạn sắp xảy ra.",
+          "expression": "alpha = add(greater(df['close'], df['BB_Lower']), ts_ema(df['Momentum_3'], 10))",
+          "ic": 0.018047,
+          "ic_5d": 0.005708,
+          "sharpe": -0.4045,
+          "turnover": 0.358,
+          "status": "OK",
+          "score": 0.010828,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá gần chạm BB_Lower và momentum cho thấy sự hồi phục ngắn hạn, điều này cho thấy khả năng xuất hiện xu hướng tăng. Khi song song với tâm lý tích cực từ sentiment của ngành bất động sản (df['VIC_S']), có thể tăng cường biên độ kỳ vọng tăng.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20), add(1.0, cwise_mul(0.3, ts_ema(df['VIC_S'], 5))))",
+          "ic": 0.04851,
+          "ic_5d": 0.039965,
+          "sharpe": -0.2136,
+          "turnover": 0.5023,
+          "status": "OK",
+          "score": 0.029106,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, điều này cho thấy có sự phân tán trong tâm lý thị trường. Khi kết hợp với chỉ báo MACD, có thể xác định xu hướng giảm giá sắp tới.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 5), ts_delta(df['close'], 5)) + minus(ts_rank(df['MACD'], 10), ts_rank(df['MACD_Signal'], 10))",
+          "ic": 0.079954,
+          "ic_5d": 0.006373,
+          "sharpe": 0.5687,
+          "turnover": 1.2849,
+          "status": "OK",
+          "score": 0.093465,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi MACD cắt xuống dưới MACD_Signal trong bối cảnh khối lượng giao dịch giảm, điều này cho thấy thị trường có thể sắp giảm.",
+          "expression": "alpha = less(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)) * minus(ts_rank(df['volume'], 10), 50)",
+          "ic": 0.038188,
+          "ic_5d": 0.117262,
+          "sharpe": 0.2606,
+          "turnover": 0.2836,
+          "status": "OK",
+          "score": 0.043758,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi chỉ báo RSI_14 nằm dưới mức 30, chỉ ra rằng giá có thể đang ở vùng quá bán. Nếu đồng thời khối lượng giao dịch (volume) tăng lên, điều này cho thấy sự quay trở lại của các nhà đầu tư có thể đang diễn ra, dẫn đến kỳ vọng tăng giá trong tương lai.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['RSI_14'], 14), -1), ts_mean(df['volume'], 10))",
+          "ic": 0.029482,
+          "ic_5d": 0.067076,
+          "sharpe": 0.5753,
+          "turnover": 0.3254,
+          "status": "OK",
+          "score": 0.063714,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Một tín hiệu điều chỉnh có thể xảy ra khi giá hiện tại đóng cửa dưới BB_Lower và Momentum_3 đang quay trở lại từ vùng âm. Điều này có thể cho thấy một sự hồi phục trong ngắn hạn sắp xảy ra.",
+          "expression": "alpha = add(greater(df['close'], df['BB_Lower']), ts_ema(df['Momentum_3'], 10))",
+          "ic": 0.018047,
+          "ic_5d": 0.005708,
+          "sharpe": -0.4045,
+          "turnover": 0.358,
+          "status": "OK",
+          "score": 0.010828,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá chạm gần mức BB_Lower và tâm lý thị trường ngành ngân hàng (sentiment) đang tích cực, điều này có thể cho thấy khả năng hồi phục giá trong tương lai. Nếu chỉ báo Momentum_3 cũng cho thấy dấu hiệu hồi phục, thì đây là tín hiệu mạnh mẽ cho xu hướng tăng. Sự kết hợp này phản ánh sự quay trở lại của các nhà đầu tư khi giá ở mức thấp, có thể dẫn đến đợt tăng giá trong thời gian tới.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20), 0), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5)))) + cwise_mul(ts_zscore_scale(ts_delta(df['Momentum_3'], 5), 5), 0.5)",
+          "ic": 0.007669,
+          "ic_5d": 0.006126,
+          "sharpe": 0.4235,
+          "turnover": 0.8076,
+          "status": "OK",
+          "score": 0.038485,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

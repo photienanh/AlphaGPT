@@ -1,0 +1,200 @@
+{
+  "ticker": "VPB",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi giá VPB di chuyển lên trong khi chỉ số MACD đang giảm, cho thấy áp lực bán có thể gia tăng. Việc kết hợp với sentiment từ nhóm ngân hàng có thể cung cấp cái nhìn sâu sắc hơn về xu hướng.",
+      "expression": "alpha = minus(ts_delta(df['MACD'], 5), ts_delta(df['close'], 5)) * ts_zscore_scale(df['TCB_S'], 5)",
+      "ic": 0.082927,
+      "ic_5d": 0.016653,
+      "sharpe": 0.6838,
+      "turnover": 1.4562,
+      "status": "OK",
+      "score": 0.104464,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi giá VPB nằm dưới SMA 20 ngày, có khả năng cao rằng thị trường đang trong một xu hướng giảm. Kết hợp với sự gia tăng của MACD âm cho thấy áp lực bán có thể gia tăng.",
+      "expression": "alpha = less(df['close'], df['SMA_20']) * minus(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5))",
+      "ic": 0.03375,
+      "ic_5d": 0.079744,
+      "sharpe": 0.5486,
+      "turnover": 0.4917,
+      "status": "OK",
+      "score": 0.064142,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi RSI ở mức cao và giá VPB tăng vọt, điều này có thể cho thấy sự điều chỉnh sắp xảy ra. Sự kết hợp với sentiment ngành cho thấy nếu sentiment tiêu cực gia tăng, áp lực bán sẽ mạnh hơn.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['RSI_14'], 14), ts_ema(df['MBB_S'], 5))",
+      "ic": 0.042743,
+      "ic_5d": 0.055014,
+      "sharpe": 0.2804,
+      "turnover": 0.8203,
+      "status": "OK",
+      "score": 0.048075,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Khi momentum của VPB tăng nhưng giá không theo kịp, có thể thấy rằng giá sẽ điều chỉnh theo chiều hướng giảm. Việc kết hợp với sentiment của ngành ngân hàng giúp xác nhận khả năng điều chỉnh này.",
+      "expression": "alpha = minus(ts_delta(df['Momentum_10'], 5), ts_zscore_scale(df['TCB_S'], 5))",
+      "ic": 0.026412,
+      "ic_5d": 0.09583,
+      "sharpe": 0.3818,
+      "turnover": 0.634,
+      "status": "OK",
+      "score": 0.046394,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá VPB vượt qua BB_Middle nhưng lại không có sự hỗ trợ từ volume, điều này có thể cho thấy một sự điều chỉnh sắp xảy ra. Sự kết hợp với sentiment của HDB có thể tăng cường độ tin cậy của tín hiệu.",
+      "expression": "alpha = greater(df['close'], df['BB_Middle']) * minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['HDB_S'], 10))",
+      "ic": 0.008973,
+      "ic_5d": 0.007859,
+      "sharpe": -0.3186,
+      "turnover": 1.2553,
+      "status": "OK",
+      "score": 0.005384,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá VPB di chuyển lên trong khi chỉ số MACD đang giảm, cho thấy áp lực bán có thể gia tăng. Việc kết hợp với sentiment từ nhóm ngân hàng có thể cung cấp cái nhìn sâu sắc hơn về xu hướng.",
+          "expression": "alpha = minus(ts_delta(df['MACD'], 5), ts_delta(df['close'], 5)) * ts_zscore_scale(df['TCB_S'], 5)",
+          "ic": 0.082927,
+          "ic_5d": 0.016653,
+          "sharpe": 0.6838,
+          "turnover": 1.4562,
+          "status": "OK",
+          "score": 0.104464,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá VPB nằm dưới SMA 20 ngày, có khả năng cao rằng thị trường đang trong một xu hướng giảm. Kết hợp với sự gia tăng của MACD âm cho thấy áp lực bán có thể gia tăng.",
+          "expression": "alpha = less(df['close'], df['SMA_20']) * minus(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5))",
+          "ic": 0.03375,
+          "ic_5d": 0.079744,
+          "sharpe": 0.5486,
+          "turnover": 0.4917,
+          "status": "OK",
+          "score": 0.064142,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi RSI ở mức cao và giá VPB tăng vọt, điều này có thể cho thấy sự điều chỉnh sắp xảy ra. Sự kết hợp với sentiment ngành cho thấy nếu sentiment tiêu cực gia tăng, áp lực bán sẽ mạnh hơn.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['RSI_14'], 14), ts_ema(df['MBB_S'], 5))",
+          "ic": 0.042743,
+          "ic_5d": 0.055014,
+          "sharpe": 0.2804,
+          "turnover": 0.8203,
+          "status": "OK",
+          "score": 0.048075,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi momentum của VPB tăng nhưng giá không theo kịp, có thể thấy rằng giá sẽ điều chỉnh theo chiều hướng giảm. Việc kết hợp với sentiment của ngành ngân hàng giúp xác nhận khả năng điều chỉnh này.",
+          "expression": "alpha = minus(ts_delta(df['Momentum_10'], 5), ts_zscore_scale(df['TCB_S'], 5))",
+          "ic": 0.026412,
+          "ic_5d": 0.09583,
+          "sharpe": 0.3818,
+          "turnover": 0.634,
+          "status": "OK",
+          "score": 0.046394,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá VPB vượt qua BB_Middle nhưng lại không có sự hỗ trợ từ volume, điều này có thể cho thấy một sự điều chỉnh sắp xảy ra. Sự kết hợp với sentiment của HDB có thể tăng cường độ tin cậy của tín hiệu.",
+          "expression": "alpha = greater(df['close'], df['BB_Middle']) * minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['HDB_S'], 10))",
+          "ic": 0.008973,
+          "ic_5d": 0.007859,
+          "sharpe": -0.3186,
+          "turnover": 1.2553,
+          "status": "OK",
+          "score": 0.005384,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá VPB di chuyển lên trong khi chỉ số MACD đang giảm, cho thấy áp lực bán có thể gia tăng. Việc kết hợp với sentiment từ nhóm ngân hàng có thể cung cấp cái nhìn sâu sắc hơn về xu hướng.",
+          "expression": "alpha = minus(ts_delta(df['MACD'], 5), ts_delta(df['close'], 5)) * ts_zscore_scale(df['TCB_S'], 5)",
+          "ic": 0.082927,
+          "ic_5d": 0.016653,
+          "sharpe": 0.6838,
+          "turnover": 1.4562,
+          "status": "OK",
+          "score": 0.104464,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá VPB nằm dưới SMA 20 ngày, có khả năng cao rằng thị trường đang trong một xu hướng giảm. Kết hợp với sự gia tăng của MACD âm cho thấy áp lực bán có thể gia tăng.",
+          "expression": "alpha = less(df['close'], df['SMA_20']) * minus(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5))",
+          "ic": 0.03375,
+          "ic_5d": 0.079744,
+          "sharpe": 0.5486,
+          "turnover": 0.4917,
+          "status": "OK",
+          "score": 0.064142,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi RSI ở mức cao và giá VPB tăng vọt, điều này có thể cho thấy sự điều chỉnh sắp xảy ra. Sự kết hợp với sentiment ngành cho thấy nếu sentiment tiêu cực gia tăng, áp lực bán sẽ mạnh hơn.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['RSI_14'], 14), ts_ema(df['MBB_S'], 5))",
+          "ic": 0.042743,
+          "ic_5d": 0.055014,
+          "sharpe": 0.2804,
+          "turnover": 0.8203,
+          "status": "OK",
+          "score": 0.048075,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi momentum của VPB tăng nhưng giá không theo kịp, có thể thấy rằng giá sẽ điều chỉnh theo chiều hướng giảm. Việc kết hợp với sentiment của ngành ngân hàng giúp xác nhận khả năng điều chỉnh này.",
+          "expression": "alpha = minus(ts_delta(df['Momentum_10'], 5), ts_zscore_scale(df['TCB_S'], 5))",
+          "ic": 0.026412,
+          "ic_5d": 0.09583,
+          "sharpe": 0.3818,
+          "turnover": 0.634,
+          "status": "OK",
+          "score": 0.046394,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá VPB vượt qua BB_Middle nhưng lại không có sự hỗ trợ từ volume, điều này có thể cho thấy một sự điều chỉnh sắp xảy ra. Sự kết hợp với sentiment của HDB có thể tăng cường độ tin cậy của tín hiệu.",
+          "expression": "alpha = greater(df['close'], df['BB_Middle']) * minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['HDB_S'], 10))",
+          "ic": 0.008973,
+          "ic_5d": 0.007859,
+          "sharpe": -0.3186,
+          "turnover": 1.2553,
+          "status": "OK",
+          "score": 0.005384,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

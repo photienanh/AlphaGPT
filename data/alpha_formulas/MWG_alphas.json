@@ -1,0 +1,134 @@
+{
+  "ticker": "MWG",
+  "n_rows": 727,
+  "n_rounds": 1,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi cả hai chỉ số sentiment của ngành ngân hàng (TCB_S và MBB_S) đồng thời có xu hướng tiêu cực, điều này có thể cho thấy áp lực bán chung trong ngành, ảnh hưởng tiêu cực đến giá MWG.",
+      "expression": "alpha = cwise_mul(ts_ema(df['TCB_S'], 5), ts_ema(df['MBB_S'], 5))",
+      "ic": 0.041959,
+      "ic_5d": 0.019324,
+      "sharpe": 0.8893,
+      "turnover": 0.7334,
+      "status": "OK",
+      "score": 0.096317,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi sự phân kỳ giữa giá và momentum xảy ra, tức là giá tăng nhưng momentum lại giảm, điều này có thể cho thấy áp lực bán trong tương lai.",
+      "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), neg(ts_delta(df['Momentum_10'], 10)))",
+      "ic": 0.061981,
+      "ic_5d": 0.002585,
+      "sharpe": 0.3713,
+      "turnover": 0.7697,
+      "status": "OK",
+      "score": 0.066894,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi MACD cắt lên trên tín hiệu trong khi giá không tăng tương ứng, điều này cho thấy sự phân kỳ và có thể dẫn đến một sự điều chỉnh giảm trong ngắn hạn.",
+      "expression": "alpha = minus(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5))",
+      "ic": 0.026743,
+      "ic_5d": 0.116729,
+      "sharpe": 0.333,
+      "turnover": 0.4044,
+      "status": "OK",
+      "score": 0.042684,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Khi giá MWG ở vùng quá mua và cả hai chỉ số sentiment của TCB và MBB đều tiêu cực, điều này có thể dẫn đến áp lực bán mạnh hơn, làm giảm giá trong tương lai.",
+      "expression": "alpha = cwise_mul(ts_rank(df['RSI_14'], 14), ts_ema(df['TCB_S'], 5))",
+      "ic": 0.004147,
+      "ic_5d": 0.002742,
+      "sharpe": 0.3045,
+      "turnover": 0.6726,
+      "status": "OK",
+      "score": 0.026849,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.057527,
+      "ic_5d": 0.052257,
+      "sharpe": 0.5563,
+      "turnover": 0.6089,
+      "status": "OK",
+      "score": 0.079016,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi cả hai chỉ số sentiment của ngành ngân hàng (TCB_S và MBB_S) đồng thời có xu hướng tiêu cực, điều này có thể cho thấy áp lực bán chung trong ngành, ảnh hưởng tiêu cực đến giá MWG.",
+          "expression": "alpha = cwise_mul(ts_ema(df['TCB_S'], 5), ts_ema(df['MBB_S'], 5))",
+          "ic": 0.041959,
+          "ic_5d": 0.019324,
+          "sharpe": 0.8893,
+          "turnover": 0.7334,
+          "status": "OK",
+          "score": 0.096317,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi sự phân kỳ giữa giá và momentum xảy ra, tức là giá tăng nhưng momentum lại giảm, điều này có thể cho thấy áp lực bán trong tương lai.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), neg(ts_delta(df['Momentum_10'], 10)))",
+          "ic": 0.061981,
+          "ic_5d": 0.002585,
+          "sharpe": 0.3713,
+          "turnover": 0.7697,
+          "status": "OK",
+          "score": 0.066894,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi MACD cắt lên trên tín hiệu trong khi giá không tăng tương ứng, điều này cho thấy sự phân kỳ và có thể dẫn đến một sự điều chỉnh giảm trong ngắn hạn.",
+          "expression": "alpha = minus(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5))",
+          "ic": 0.026743,
+          "ic_5d": 0.116729,
+          "sharpe": 0.333,
+          "turnover": 0.4044,
+          "status": "OK",
+          "score": 0.042684,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá MWG ở vùng quá mua và cả hai chỉ số sentiment của TCB và MBB đều tiêu cực, điều này có thể dẫn đến áp lực bán mạnh hơn, làm giảm giá trong tương lai.",
+          "expression": "alpha = cwise_mul(ts_rank(df['RSI_14'], 14), ts_ema(df['TCB_S'], 5))",
+          "ic": 0.004147,
+          "ic_5d": 0.002742,
+          "sharpe": 0.3045,
+          "turnover": 0.6726,
+          "status": "OK",
+          "score": 0.026849,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.057527,
+          "ic_5d": 0.052257,
+          "sharpe": 0.5563,
+          "turnover": 0.6089,
+          "status": "OK",
+          "score": 0.079016,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

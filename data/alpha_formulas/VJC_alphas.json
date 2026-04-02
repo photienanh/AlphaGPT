@@ -1,0 +1,200 @@
+{
+  "ticker": "VJC",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi có sự tương quan lớn giữa giá cổ phiếu và khối lượng giao dịch trong 10 ngày qua, đặc biệt khi khối lượng vượt ngưỡng trung bình, điều này cho thấy một động lực tăng giá mạnh mẽ.",
+      "expression": "alpha = ts_corr(df['close'], df['volume'], 10)",
+      "ic": 0.03143,
+      "ic_5d": 0.056522,
+      "sharpe": 0.9669,
+      "turnover": 0.4496,
+      "status": "OK",
+      "score": 0.096208,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi giá cổ phiếu VJC giảm nhưng chỉ số MACD tăng lên, đây có thể là dấu hiệu cho thấy một sự đảo chiều sắp tới, đặc biệt khi có sự đồng thuận từ sentiment tích cực trong ngành hàng không.",
+      "expression": "alpha = cwise_mul(less(ts_delta(df['close'], 5), 0), greater(ts_delta(df['MACD'], 5), 0)) + cwise_mul(0.3, ts_ema(df['HDB_S'], 5))",
+      "ic": 0.046758,
+      "ic_5d": 0.043011,
+      "sharpe": -0.0563,
+      "turnover": 0.725,
+      "status": "OK",
+      "score": 0.028055,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi giá cổ phiếu VJC nằm dưới SMA 5 ngày và có sentiment tiêu cực cao từ các ngân hàng trong ngành, điều này có thể cho thấy áp lực bán mạnh hơn nữa, dự báo giá sẽ giảm.",
+      "expression": "alpha = cwise_mul(less(df['close'], df['SMA_5']), ts_zscore_scale(df['TCB_S'], 20))",
+      "ic": 0.034323,
+      "ic_5d": 0.035478,
+      "sharpe": -0.1612,
+      "turnover": 1.4026,
+      "status": "OK",
+      "score": 0.020594,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Khi có sự phân kỳ giữa chỉ số Momentum 10 ngày và giá cổ phiếu (tức là giá tăng trong khi momentum giảm), điều này có thể cho thấy rằng giá cổ phiếu đang được định giá quá cao và có khả năng giảm trong tương lai.",
+      "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 5))",
+      "ic": 0.005382,
+      "ic_5d": 0.000645,
+      "sharpe": -0.0321,
+      "turnover": 0.5815,
+      "status": "OK",
+      "score": 0.003229,
+      "flipped": true
+    },
+    {
+      "id": 5,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.038913,
+      "ic_5d": 0.072546,
+      "sharpe": 0.1464,
+      "turnover": 0.6363,
+      "status": "OK",
+      "score": 0.035063,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự tương quan lớn giữa giá cổ phiếu và khối lượng giao dịch trong 10 ngày qua, đặc biệt khi khối lượng vượt ngưỡng trung bình, điều này cho thấy một động lực tăng giá mạnh mẽ.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 10)",
+          "ic": 0.03143,
+          "ic_5d": 0.056522,
+          "sharpe": 0.9669,
+          "turnover": 0.4496,
+          "status": "OK",
+          "score": 0.096208,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá cổ phiếu VJC giảm nhưng chỉ số MACD tăng lên, đây có thể là dấu hiệu cho thấy một sự đảo chiều sắp tới, đặc biệt khi có sự đồng thuận từ sentiment tích cực trong ngành hàng không.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['close'], 5), 0), greater(ts_delta(df['MACD'], 5), 0)) + cwise_mul(0.3, ts_ema(df['HDB_S'], 5))",
+          "ic": 0.046758,
+          "ic_5d": 0.043011,
+          "sharpe": -0.0563,
+          "turnover": 0.725,
+          "status": "OK",
+          "score": 0.028055,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá cổ phiếu VJC nằm dưới SMA 5 ngày và có sentiment tiêu cực cao từ các ngân hàng trong ngành, điều này có thể cho thấy áp lực bán mạnh hơn nữa, dự báo giá sẽ giảm.",
+          "expression": "alpha = cwise_mul(less(df['close'], df['SMA_5']), ts_zscore_scale(df['TCB_S'], 20))",
+          "ic": 0.034323,
+          "ic_5d": 0.035478,
+          "sharpe": -0.1612,
+          "turnover": 1.4026,
+          "status": "OK",
+          "score": 0.020594,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi có sự phân kỳ giữa chỉ số Momentum 10 ngày và giá cổ phiếu (tức là giá tăng trong khi momentum giảm), điều này có thể cho thấy rằng giá cổ phiếu đang được định giá quá cao và có khả năng giảm trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 5))",
+          "ic": 0.005382,
+          "ic_5d": 0.000645,
+          "sharpe": -0.0321,
+          "turnover": 0.5815,
+          "status": "OK",
+          "score": 0.003229,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.038913,
+          "ic_5d": 0.072546,
+          "sharpe": 0.1464,
+          "turnover": 0.6363,
+          "status": "OK",
+          "score": 0.035063,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự tương quan lớn giữa giá cổ phiếu và khối lượng giao dịch trong 10 ngày qua, đặc biệt khi khối lượng vượt ngưỡng trung bình, điều này cho thấy một động lực tăng giá mạnh mẽ.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 10)",
+          "ic": 0.03143,
+          "ic_5d": 0.056522,
+          "sharpe": 0.9669,
+          "turnover": 0.4496,
+          "status": "OK",
+          "score": 0.096208,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá cổ phiếu VJC giảm nhưng chỉ số MACD tăng lên, đây có thể là dấu hiệu cho thấy một sự đảo chiều sắp tới, đặc biệt khi có sự đồng thuận từ sentiment tích cực trong ngành hàng không.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['close'], 5), 0), greater(ts_delta(df['MACD'], 5), 0)) + cwise_mul(0.3, ts_ema(df['HDB_S'], 5))",
+          "ic": 0.046758,
+          "ic_5d": 0.043011,
+          "sharpe": -0.0563,
+          "turnover": 0.725,
+          "status": "OK",
+          "score": 0.028055,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá cổ phiếu VJC nằm dưới SMA 5 ngày và có sentiment tiêu cực cao từ các ngân hàng trong ngành, điều này có thể cho thấy áp lực bán mạnh hơn nữa, dự báo giá sẽ giảm.",
+          "expression": "alpha = cwise_mul(less(df['close'], df['SMA_5']), ts_zscore_scale(df['TCB_S'], 20))",
+          "ic": 0.034323,
+          "ic_5d": 0.035478,
+          "sharpe": -0.1612,
+          "turnover": 1.4026,
+          "status": "OK",
+          "score": 0.020594,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi có sự phân kỳ giữa chỉ số Momentum 10 ngày và giá cổ phiếu (tức là giá tăng trong khi momentum giảm), điều này có thể cho thấy rằng giá cổ phiếu đang được định giá quá cao và có khả năng giảm trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 5))",
+          "ic": 0.005382,
+          "ic_5d": 0.000645,
+          "sharpe": -0.0321,
+          "turnover": 0.5815,
+          "status": "OK",
+          "score": 0.003229,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.038913,
+          "ic_5d": 0.072546,
+          "sharpe": 0.1464,
+          "turnover": 0.6363,
+          "status": "OK",
+          "score": 0.035063,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

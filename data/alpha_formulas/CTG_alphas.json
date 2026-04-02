@@ -1,0 +1,134 @@
+{
+  "ticker": "CTG",
+  "n_rows": 727,
+  "n_rounds": 1,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi MACD cắt lên trên MACD Signal trong khi Momentum 3 đang tăng, điều này cho thấy sự gia tăng động lực và có thể dẫn đến một xu hướng tăng mạnh.",
+      "expression": "alpha = cwise_mul(greater(df['MACD'], df['MACD_Signal']), ts_zscore_scale(df['Momentum_3'], 10))",
+      "ic": 0.028249,
+      "ic_5d": 0.015811,
+      "sharpe": 0.1516,
+      "turnover": 0.8572,
+      "status": "OK",
+      "score": 0.029076,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Sự tương quan giữa volume và price change có thể cho thấy sự xác nhận xu hướng. Khi volume tăng nhưng giá không tăng, điều này có thể chỉ ra rằng giá có thể giảm.",
+      "expression": "alpha = ts_corr(df['volume'], ts_delta(df['close'], 5), 10)",
+      "ic": 0.017051,
+      "ic_5d": 0.02024,
+      "sharpe": -0.0464,
+      "turnover": 0.3814,
+      "status": "OK",
+      "score": 0.010231,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi khối lượng giao dịch lớn và momentum đang trong xu hướng giảm, điều này cho thấy có thể có sự phân phối mạnh mẽ, dẫn đến khả năng giảm giá. Theo đó, khi có sự gia tăng không tương ứng của volume trong khi momentum giảm, đây là tín hiệu giảm giá.",
+      "expression": "alpha = cwise_mul(df['volume'], neg(ts_zscore_scale(df['Momentum_10'], 10)))",
+      "ic": 0.019798,
+      "ic_5d": 0.015707,
+      "sharpe": 0.2254,
+      "turnover": 0.7853,
+      "status": "OK",
+      "score": 0.02991,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi giá nằm dưới đường BB Lower trong khi chỉ số RSI đang ở vùng quá bán, điều này cho thấy khả năng đảo chiều tăng giá sắp xảy ra. Đặc biệt, nếu sentiment từ ngành bất động sản (df['VIC_S']) ở mức tích cực, điều đó càng củng cố thêm tín hiệu tăng giá.",
+      "expression": "alpha = add(ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20), cwise_mul(ts_ema(df['VIC_S'], 5), 0.2))",
+      "ic": 0.04766,
+      "ic_5d": 0.117612,
+      "sharpe": 0.5423,
+      "turnover": 0.4265,
+      "status": "OK",
+      "score": 0.071979,
+      "flipped": true
+    },
+    {
+      "id": 5,
+      "idea": "Khi có sự tăng trưởng mạnh của giá nhưng không đi kèm với sự tăng trưởng tương ứng của volume, điều này có thể phản ánh sự không chắc chắn trong xu hướng tăng giá. Ngoài ra, khi sentiment từ ngành ngân hàng (df['MBB_S']) đang ở mức tiêu cực, điều này càng củng cố cho khả năng điều chỉnh giảm. Alpha này sử dụng cả giá và volume để phát hiện tín hiệu giảm giá tiềm năng khi có sự phân kỳ giữa giá và volume.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(ts_delta(df['close'], 5), 10), neg(ts_zscore_scale(df['volume'], 10))) + cwise_mul(ts_ema(df['MBB_S'], 5), 0.2)",
+      "ic": 0.015764,
+      "ic_5d": 0.000594,
+      "sharpe": 0.6397,
+      "turnover": 1.275,
+      "status": "OK",
+      "score": 0.060631,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi MACD cắt lên trên MACD Signal trong khi Momentum 3 đang tăng, điều này cho thấy sự gia tăng động lực và có thể dẫn đến một xu hướng tăng mạnh.",
+          "expression": "alpha = cwise_mul(greater(df['MACD'], df['MACD_Signal']), ts_zscore_scale(df['Momentum_3'], 10))",
+          "ic": 0.028249,
+          "ic_5d": 0.015811,
+          "sharpe": 0.1516,
+          "turnover": 0.8572,
+          "status": "OK",
+          "score": 0.029076,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa volume và price change có thể cho thấy sự xác nhận xu hướng. Khi volume tăng nhưng giá không tăng, điều này có thể chỉ ra rằng giá có thể giảm.",
+          "expression": "alpha = ts_corr(df['volume'], ts_delta(df['close'], 5), 10)",
+          "ic": 0.017051,
+          "ic_5d": 0.02024,
+          "sharpe": -0.0464,
+          "turnover": 0.3814,
+          "status": "OK",
+          "score": 0.010231,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi khối lượng giao dịch lớn và momentum đang trong xu hướng giảm, điều này cho thấy có thể có sự phân phối mạnh mẽ, dẫn đến khả năng giảm giá. Theo đó, khi có sự gia tăng không tương ứng của volume trong khi momentum giảm, đây là tín hiệu giảm giá.",
+          "expression": "alpha = cwise_mul(df['volume'], neg(ts_zscore_scale(df['Momentum_10'], 10)))",
+          "ic": 0.019798,
+          "ic_5d": 0.015707,
+          "sharpe": 0.2254,
+          "turnover": 0.7853,
+          "status": "OK",
+          "score": 0.02991,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá nằm dưới đường BB Lower trong khi chỉ số RSI đang ở vùng quá bán, điều này cho thấy khả năng đảo chiều tăng giá sắp xảy ra. Đặc biệt, nếu sentiment từ ngành bất động sản (df['VIC_S']) ở mức tích cực, điều đó càng củng cố thêm tín hiệu tăng giá.",
+          "expression": "alpha = add(ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20), cwise_mul(ts_ema(df['VIC_S'], 5), 0.2))",
+          "ic": 0.04766,
+          "ic_5d": 0.117612,
+          "sharpe": 0.5423,
+          "turnover": 0.4265,
+          "status": "OK",
+          "score": 0.071979,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi có sự tăng trưởng mạnh của giá nhưng không đi kèm với sự tăng trưởng tương ứng của volume, điều này có thể phản ánh sự không chắc chắn trong xu hướng tăng giá. Ngoài ra, khi sentiment từ ngành ngân hàng (df['MBB_S']) đang ở mức tiêu cực, điều này càng củng cố cho khả năng điều chỉnh giảm. Alpha này sử dụng cả giá và volume để phát hiện tín hiệu giảm giá tiềm năng khi có sự phân kỳ giữa giá và volume.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(ts_delta(df['close'], 5), 10), neg(ts_zscore_scale(df['volume'], 10))) + cwise_mul(ts_ema(df['MBB_S'], 5), 0.2)",
+          "ic": 0.015764,
+          "ic_5d": 0.000594,
+          "sharpe": 0.6397,
+          "turnover": 1.275,
+          "status": "OK",
+          "score": 0.060631,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

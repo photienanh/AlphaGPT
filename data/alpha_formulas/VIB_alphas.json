@@ -1,0 +1,332 @@
+{
+  "ticker": "VIB",
+  "n_rows": 727,
+  "n_rounds": 4,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi giá VIB có xu hướng đi lên nhưng đã chạm vào mức kháng cự gần đây (SMA_20) và đang giảm đi kèm với khối lượng giao dịch thấp, điều này có thể cho thấy sự thất bại trong xu hướng tăng, dẫn đến khả năng giảm giá. Sentiment tiêu cực từ các cổ phiếu cùng ngành có thể củng cố khả năng giảm giá của VIB.",
+      "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(ts_ema(df['TCB_S'], 5), -0.3)",
+      "ic": 0.088245,
+      "ic_5d": 0.17245,
+      "sharpe": 1.4025,
+      "turnover": 0.6315,
+      "status": "OK",
+      "score": 0.165145,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Sự tương quan giữa giá và volume có thể cho thấy xu hướng hiện tại. Nếu giá tăng nhưng volume không tương ứng, điều này có thể cho thấy sự yếu kém trong xu hướng, dẫn đến khả năng giảm giá.",
+      "expression": "alpha = ts_corr(df['close'], df['volume'], 20) * ts_delta(df['close'], 5)",
+      "ic": 0.063076,
+      "ic_5d": 0.09375,
+      "sharpe": 0.5899,
+      "turnover": 0.6651,
+      "status": "OK",
+      "score": 0.085034,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi sentiment ngành ngân hàng đồng loạt tiêu cực, điều này có thể làm tăng áp lực giảm giá đối với VIB, đặc biệt khi momentum đang giảm.",
+      "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), ts_ema(df['HDB_S'], 5))",
+      "ic": 0.040212,
+      "ic_5d": 0.021087,
+      "sharpe": 0.546,
+      "turnover": 0.8324,
+      "status": "OK",
+      "score": 0.067805,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi giá VIB đang có xu hướng giảm nhưng có sự tăng cường về khối lượng giao dịch (volume), điều này có thể cho thấy sự tích cực từ các nhà đầu tư, dẫn đến khả năng đảo chiều tăng giá trong tương lai. Đồng thời, nếu sentiment từ các cổ phiếu cùng ngành cho thấy sự tích cực, điều này càng củng cố khả năng phục hồi giá.",
+      "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_ema(df['TCB_S'], 5), 0.3)",
+      "ic": 0.038425,
+      "ic_5d": 0.015316,
+      "sharpe": 0.158,
+      "turnover": 1.2004,
+      "status": "OK",
+      "score": 0.035696,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá của VIB dường như nằm trong vùng quá bán (oversold) so với trung bình động 20 ngày và động lực giá đang giảm, điều này cho thấy khả năng phục hồi trong ngắn hạn. Khi kết hợp với sentiment từ các cổ phiếu ngân hàng khác, nếu sentiment tích cực, điều này càng củng cố khả năng phục hồi giá của VIB.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['close'], df['SMA_20']), 20), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+      "ic": 0.024309,
+      "ic_5d": 0.005481,
+      "sharpe": 0.2229,
+      "turnover": 0.4611,
+      "status": "OK",
+      "score": 0.03242,
+      "flipped": true
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi VIB có mức giá nằm giữa BB_Middle và BB_Lower, điều này có thể cho thấy có xu hướng phục hồi. Kết hợp với sentiment từ các cổ phiếu cùng ngành để xác nhận.",
+          "expression": "alpha = greater(df['close'], df['BB_Lower']) * ts_ema(df['TCB_S'], 5)",
+          "ic": 0.075408,
+          "ic_5d": 0.04722,
+          "sharpe": 1.0679,
+          "turnover": 0.6849,
+          "status": "OK",
+          "score": 0.130674,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa giá và volume có thể cho thấy xu hướng hiện tại. Nếu giá tăng nhưng volume không tương ứng, điều này có thể cho thấy sự yếu kém trong xu hướng, dẫn đến khả năng giảm giá.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20) * ts_delta(df['close'], 5)",
+          "ic": 0.063076,
+          "ic_5d": 0.09375,
+          "sharpe": 0.5899,
+          "turnover": 0.6651,
+          "status": "OK",
+          "score": 0.085034,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment ngành ngân hàng đồng loạt tiêu cực, điều này có thể làm tăng áp lực giảm giá đối với VIB, đặc biệt khi momentum đang giảm.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), ts_ema(df['HDB_S'], 5))",
+          "ic": 0.040212,
+          "ic_5d": 0.021087,
+          "sharpe": 0.546,
+          "turnover": 0.8324,
+          "status": "OK",
+          "score": 0.067805,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá VIB đang có xu hướng giảm nhưng có sự tăng cường về khối lượng giao dịch (volume), điều này có thể cho thấy sự tích cực từ các nhà đầu tư, dẫn đến khả năng đảo chiều tăng giá trong tương lai. Đồng thời, nếu sentiment từ các cổ phiếu cùng ngành cho thấy sự tích cực, điều này càng củng cố khả năng phục hồi giá.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_ema(df['TCB_S'], 5), 0.3)",
+          "ic": 0.038425,
+          "ic_5d": 0.015316,
+          "sharpe": 0.158,
+          "turnover": 1.2004,
+          "status": "OK",
+          "score": 0.035696,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá của VIB dường như nằm trong vùng quá bán (oversold) so với trung bình động 20 ngày và động lực giá đang giảm, điều này cho thấy khả năng phục hồi trong ngắn hạn. Khi kết hợp với sentiment từ các cổ phiếu ngân hàng khác, nếu sentiment tích cực, điều này càng củng cố khả năng phục hồi giá của VIB.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['close'], df['SMA_20']), 20), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.024309,
+          "ic_5d": 0.005481,
+          "sharpe": 0.2229,
+          "turnover": 0.4611,
+          "status": "OK",
+          "score": 0.03242,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi VIB có mức giá nằm giữa BB_Middle và BB_Lower, điều này có thể cho thấy có xu hướng phục hồi. Kết hợp với sentiment từ các cổ phiếu cùng ngành để xác nhận.",
+          "expression": "alpha = greater(df['close'], df['BB_Lower']) * ts_ema(df['TCB_S'], 5)",
+          "ic": 0.075408,
+          "ic_5d": 0.04722,
+          "sharpe": 1.0679,
+          "turnover": 0.6849,
+          "status": "OK",
+          "score": 0.130674,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa giá và volume có thể cho thấy xu hướng hiện tại. Nếu giá tăng nhưng volume không tương ứng, điều này có thể cho thấy sự yếu kém trong xu hướng, dẫn đến khả năng giảm giá.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20) * ts_delta(df['close'], 5)",
+          "ic": 0.063076,
+          "ic_5d": 0.09375,
+          "sharpe": 0.5899,
+          "turnover": 0.6651,
+          "status": "OK",
+          "score": 0.085034,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment ngành ngân hàng đồng loạt tiêu cực, điều này có thể làm tăng áp lực giảm giá đối với VIB, đặc biệt khi momentum đang giảm.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), ts_ema(df['HDB_S'], 5))",
+          "ic": 0.040212,
+          "ic_5d": 0.021087,
+          "sharpe": 0.546,
+          "turnover": 0.8324,
+          "status": "OK",
+          "score": 0.067805,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá VIB đang có xu hướng giảm nhưng có sự tăng cường về khối lượng giao dịch (volume), điều này có thể cho thấy sự tích cực từ các nhà đầu tư, dẫn đến khả năng đảo chiều tăng giá trong tương lai. Đồng thời, nếu sentiment từ các cổ phiếu cùng ngành cho thấy sự tích cực, điều này càng củng cố khả năng phục hồi giá.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_ema(df['TCB_S'], 5), 0.3)",
+          "ic": 0.038425,
+          "ic_5d": 0.015316,
+          "sharpe": 0.158,
+          "turnover": 1.2004,
+          "status": "OK",
+          "score": 0.035696,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá của VIB dường như nằm trong vùng quá bán (oversold) so với trung bình động 20 ngày và động lực giá đang giảm, điều này cho thấy khả năng phục hồi trong ngắn hạn. Khi kết hợp với sentiment từ các cổ phiếu ngân hàng khác, nếu sentiment tích cực, điều này càng củng cố khả năng phục hồi giá của VIB.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['close'], df['SMA_20']), 20), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.024309,
+          "ic_5d": 0.005481,
+          "sharpe": 0.2229,
+          "turnover": 0.4611,
+          "status": "OK",
+          "score": 0.03242,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi VIB có mức giá nằm giữa BB_Middle và BB_Lower, điều này có thể cho thấy có xu hướng phục hồi. Kết hợp với sentiment từ các cổ phiếu cùng ngành để xác nhận.",
+          "expression": "alpha = greater(df['close'], df['BB_Lower']) * ts_ema(df['TCB_S'], 5)",
+          "ic": 0.075408,
+          "ic_5d": 0.04722,
+          "sharpe": 1.0679,
+          "turnover": 0.6849,
+          "status": "OK",
+          "score": 0.130674,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa giá và volume có thể cho thấy xu hướng hiện tại. Nếu giá tăng nhưng volume không tương ứng, điều này có thể cho thấy sự yếu kém trong xu hướng, dẫn đến khả năng giảm giá.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20) * ts_delta(df['close'], 5)",
+          "ic": 0.063076,
+          "ic_5d": 0.09375,
+          "sharpe": 0.5899,
+          "turnover": 0.6651,
+          "status": "OK",
+          "score": 0.085034,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment ngành ngân hàng đồng loạt tiêu cực, điều này có thể làm tăng áp lực giảm giá đối với VIB, đặc biệt khi momentum đang giảm.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), ts_ema(df['HDB_S'], 5))",
+          "ic": 0.040212,
+          "ic_5d": 0.021087,
+          "sharpe": 0.546,
+          "turnover": 0.8324,
+          "status": "OK",
+          "score": 0.067805,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá VIB đang có xu hướng giảm nhưng có sự tăng cường về khối lượng giao dịch (volume), điều này có thể cho thấy sự tích cực từ các nhà đầu tư, dẫn đến khả năng đảo chiều tăng giá trong tương lai. Đồng thời, nếu sentiment từ các cổ phiếu cùng ngành cho thấy sự tích cực, điều này càng củng cố khả năng phục hồi giá.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_ema(df['TCB_S'], 5), 0.3)",
+          "ic": 0.038425,
+          "ic_5d": 0.015316,
+          "sharpe": 0.158,
+          "turnover": 1.2004,
+          "status": "OK",
+          "score": 0.035696,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá của VIB dường như nằm trong vùng quá bán (oversold) so với trung bình động 20 ngày và động lực giá đang giảm, điều này cho thấy khả năng phục hồi trong ngắn hạn. Khi kết hợp với sentiment từ các cổ phiếu ngân hàng khác, nếu sentiment tích cực, điều này càng củng cố khả năng phục hồi giá của VIB.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['close'], df['SMA_20']), 20), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.024309,
+          "ic_5d": 0.005481,
+          "sharpe": 0.2229,
+          "turnover": 0.4611,
+          "status": "OK",
+          "score": 0.03242,
+          "flipped": true
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá VIB có xu hướng đi lên nhưng đã chạm vào mức kháng cự gần đây (SMA_20) và đang giảm đi kèm với khối lượng giao dịch thấp, điều này có thể cho thấy sự thất bại trong xu hướng tăng, dẫn đến khả năng giảm giá. Sentiment tiêu cực từ các cổ phiếu cùng ngành có thể củng cố khả năng giảm giá của VIB.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(ts_ema(df['TCB_S'], 5), -0.3)",
+          "ic": 0.088245,
+          "ic_5d": 0.17245,
+          "sharpe": 1.4025,
+          "turnover": 0.6315,
+          "status": "OK",
+          "score": 0.165145,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa giá và volume có thể cho thấy xu hướng hiện tại. Nếu giá tăng nhưng volume không tương ứng, điều này có thể cho thấy sự yếu kém trong xu hướng, dẫn đến khả năng giảm giá.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20) * ts_delta(df['close'], 5)",
+          "ic": 0.063076,
+          "ic_5d": 0.09375,
+          "sharpe": 0.5899,
+          "turnover": 0.6651,
+          "status": "OK",
+          "score": 0.085034,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi sentiment ngành ngân hàng đồng loạt tiêu cực, điều này có thể làm tăng áp lực giảm giá đối với VIB, đặc biệt khi momentum đang giảm.",
+          "expression": "alpha = cwise_mul(ts_delta(df['Momentum_10'], 5), ts_ema(df['HDB_S'], 5))",
+          "ic": 0.040212,
+          "ic_5d": 0.021087,
+          "sharpe": 0.546,
+          "turnover": 0.8324,
+          "status": "OK",
+          "score": 0.067805,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá VIB đang có xu hướng giảm nhưng có sự tăng cường về khối lượng giao dịch (volume), điều này có thể cho thấy sự tích cực từ các nhà đầu tư, dẫn đến khả năng đảo chiều tăng giá trong tương lai. Đồng thời, nếu sentiment từ các cổ phiếu cùng ngành cho thấy sự tích cực, điều này càng củng cố khả năng phục hồi giá.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_ema(df['TCB_S'], 5), 0.3)",
+          "ic": 0.038425,
+          "ic_5d": 0.015316,
+          "sharpe": 0.158,
+          "turnover": 1.2004,
+          "status": "OK",
+          "score": 0.035696,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá của VIB dường như nằm trong vùng quá bán (oversold) so với trung bình động 20 ngày và động lực giá đang giảm, điều này cho thấy khả năng phục hồi trong ngắn hạn. Khi kết hợp với sentiment từ các cổ phiếu ngân hàng khác, nếu sentiment tích cực, điều này càng củng cố khả năng phục hồi giá của VIB.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(minus(df['close'], df['SMA_20']), 20), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.024309,
+          "ic_5d": 0.005481,
+          "sharpe": 0.2229,
+          "turnover": 0.4611,
+          "status": "OK",
+          "score": 0.03242,
+          "flipped": true
+        }
+      ]
+    }
+  ]
+}

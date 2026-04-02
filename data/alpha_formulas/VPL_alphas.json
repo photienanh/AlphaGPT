@@ -1,0 +1,332 @@
+{
+  "ticker": "VPL",
+  "n_rows": 202,
+  "n_rounds": 4,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi giá hiện tại cao hơn SMA_5 và có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), giá có khả năng tiếp tục tăng.",
+      "expression": "alpha = cwise_mul(greater(df['close'], df['SMA_5']), ts_ema(df['VIC_S'], 5))",
+      "ic": 0.144491,
+      "ic_5d": 0.055273,
+      "sharpe": 2.0257,
+      "turnover": 0.6564,
+      "status": "OK",
+      "score": 0.248752,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi giá có sự điều chỉnh mạnh nhưng volume lại giảm, điều này có thể chỉ ra rằng áp lực bán không mạnh. Kết hợp với sentiment ngành bất động sản (df['VIC_S']) có thể cho thấy khả năng phục hồi của giá.",
+      "expression": "alpha = minus(ts_delta_ratio(df['close'], 10), ts_delta_ratio(df['volume'], 10)) * ts_zscore_scale(ts_ema(df['VIC_S'], 5), 10)",
+      "ic": 0.067349,
+      "ic_5d": 0.015311,
+      "sharpe": 0.3518,
+      "turnover": 0.9066,
+      "status": "OK",
+      "score": 0.068557,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi có sự gia tăng trong volume nhưng giá không tăng (không đồng thuận), điều này có thể cho thấy áp lực bán và khả năng giảm giá trong tương lai.",
+      "expression": "alpha = minus(ts_delta(df['volume'], 10), ts_delta(df['close'], 10))",
+      "ic": 0.009736,
+      "ic_5d": 0.015699,
+      "sharpe": -0.3306,
+      "turnover": 0.8649,
+      "status": "OK",
+      "score": 0.005842,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi RSI thấp cho thấy thị trường có thể đang ở trạng thái quá bán, kết hợp với MACD cắt lên trên MACD_Signal, điều này có thể báo hiệu sự đảo chiều tăng giá. Khi có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), khả năng tăng trưởng giá càng cao hơn.",
+      "expression": "alpha = cwise_mul(greater(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)), ts_ema(df['VIC_S'], 5))",
+      "ic": 0.057894,
+      "ic_5d": 0.014205,
+      "sharpe": 0.3182,
+      "turnover": 0.5585,
+      "status": "OK",
+      "score": 0.060189,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá đang giao dịch dưới BB_Lower và có sự gia tăng trong khối lượng giao dịch, điều này có thể cho thấy rằng áp lực bán đã đạt đến mức cực đoan, và có khả năng xảy ra sự đảo chiều. Kết hợp với sentiment ngành bất động sản (df['VIC_S']), nếu sentiment tích cực, có thể củng cố khả năng phục hồi giá trong tương lai.",
+      "expression": "alpha = cwise_mul(less(df['close'], df['BB_Lower']), ts_delta(df['volume'], 5)) + ts_ema(df['VIC_S'], 5)",
+      "ic": 0.034343,
+      "ic_5d": 0.017312,
+      "sharpe": 1.744,
+      "turnover": 1.0547,
+      "status": "OK",
+      "score": 0.160127,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá hiện tại cao hơn SMA_5 và có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), giá có khả năng tiếp tục tăng.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['SMA_5']), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.144491,
+          "ic_5d": 0.055273,
+          "sharpe": 2.0257,
+          "turnover": 0.6564,
+          "status": "OK",
+          "score": 0.248752,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi volume giao dịch tăng mạnh nhưng giá không tăng tương ứng (divergence), điều này có thể cho thấy áp lực bán. Sử dụng MA_5 và MA_20 để xác định xu hướng giảm.",
+          "expression": "alpha = minus(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+          "ic": 0.042392,
+          "ic_5d": 0.038103,
+          "sharpe": -0.3035,
+          "turnover": 0.6855,
+          "status": "OK",
+          "score": 0.025435,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi có sự gia tăng trong volume nhưng giá không tăng (không đồng thuận), điều này có thể cho thấy áp lực bán và khả năng giảm giá trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 10), ts_delta(df['close'], 10))",
+          "ic": 0.009736,
+          "ic_5d": 0.015699,
+          "sharpe": -0.3306,
+          "turnover": 0.8649,
+          "status": "OK",
+          "score": 0.005842,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi RSI thấp cho thấy thị trường có thể đang ở trạng thái quá bán, kết hợp với MACD cắt lên trên MACD_Signal, điều này có thể báo hiệu sự đảo chiều tăng giá. Khi có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), khả năng tăng trưởng giá càng cao hơn.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.057894,
+          "ic_5d": 0.014205,
+          "sharpe": 0.3182,
+          "turnover": 0.5585,
+          "status": "OK",
+          "score": 0.060189,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Sự gia tăng trong chi phí rủi ro (được đo bằng độ biến động) trong khi giá vẫn duy trì trên BB_Lower cho thấy có thể có sự đảo chiều tăng giá trong tương lai. Bằng cách kết hợp với sentiment ngành bất động sản (df['VIC_S']), chúng ta có thể xác định được sự bền vững của xu hướng này.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['BB_Lower']), ts_std(df['close'], 20)) + ts_ema(df['VIC_S'], 5)",
+          "ic": 0.006498,
+          "ic_5d": 0.108202,
+          "sharpe": -0.5199,
+          "turnover": 0.2136,
+          "status": "OK",
+          "score": 0.003899,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá hiện tại cao hơn SMA_5 và có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), giá có khả năng tiếp tục tăng.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['SMA_5']), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.144491,
+          "ic_5d": 0.055273,
+          "sharpe": 2.0257,
+          "turnover": 0.6564,
+          "status": "OK",
+          "score": 0.248752,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá có sự điều chỉnh mạnh nhưng volume lại giảm, điều này có thể chỉ ra rằng áp lực bán không mạnh. Kết hợp với sentiment ngành bất động sản (df['VIC_S']) có thể cho thấy khả năng phục hồi của giá.",
+          "expression": "alpha = minus(ts_delta_ratio(df['close'], 10), ts_delta_ratio(df['volume'], 10)) * ts_zscore_scale(ts_ema(df['VIC_S'], 5), 10)",
+          "ic": 0.067349,
+          "ic_5d": 0.015311,
+          "sharpe": 0.3518,
+          "turnover": 0.9066,
+          "status": "OK",
+          "score": 0.068557,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi có sự gia tăng trong volume nhưng giá không tăng (không đồng thuận), điều này có thể cho thấy áp lực bán và khả năng giảm giá trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 10), ts_delta(df['close'], 10))",
+          "ic": 0.009736,
+          "ic_5d": 0.015699,
+          "sharpe": -0.3306,
+          "turnover": 0.8649,
+          "status": "OK",
+          "score": 0.005842,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi RSI thấp cho thấy thị trường có thể đang ở trạng thái quá bán, kết hợp với MACD cắt lên trên MACD_Signal, điều này có thể báo hiệu sự đảo chiều tăng giá. Khi có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), khả năng tăng trưởng giá càng cao hơn.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.057894,
+          "ic_5d": 0.014205,
+          "sharpe": 0.3182,
+          "turnover": 0.5585,
+          "status": "OK",
+          "score": 0.060189,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Sự gia tăng trong chi phí rủi ro (được đo bằng độ biến động) trong khi giá vẫn duy trì trên BB_Lower cho thấy có thể có sự đảo chiều tăng giá trong tương lai. Bằng cách kết hợp với sentiment ngành bất động sản (df['VIC_S']), chúng ta có thể xác định được sự bền vững của xu hướng này.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['BB_Lower']), ts_std(df['close'], 20)) + ts_ema(df['VIC_S'], 5)",
+          "ic": 0.006498,
+          "ic_5d": 0.108202,
+          "sharpe": -0.5199,
+          "turnover": 0.2136,
+          "status": "OK",
+          "score": 0.003899,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá hiện tại cao hơn SMA_5 và có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), giá có khả năng tiếp tục tăng.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['SMA_5']), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.144491,
+          "ic_5d": 0.055273,
+          "sharpe": 2.0257,
+          "turnover": 0.6564,
+          "status": "OK",
+          "score": 0.248752,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá có sự điều chỉnh mạnh nhưng volume lại giảm, điều này có thể chỉ ra rằng áp lực bán không mạnh. Kết hợp với sentiment ngành bất động sản (df['VIC_S']) có thể cho thấy khả năng phục hồi của giá.",
+          "expression": "alpha = minus(ts_delta_ratio(df['close'], 10), ts_delta_ratio(df['volume'], 10)) * ts_zscore_scale(ts_ema(df['VIC_S'], 5), 10)",
+          "ic": 0.067349,
+          "ic_5d": 0.015311,
+          "sharpe": 0.3518,
+          "turnover": 0.9066,
+          "status": "OK",
+          "score": 0.068557,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi có sự gia tăng trong volume nhưng giá không tăng (không đồng thuận), điều này có thể cho thấy áp lực bán và khả năng giảm giá trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 10), ts_delta(df['close'], 10))",
+          "ic": 0.009736,
+          "ic_5d": 0.015699,
+          "sharpe": -0.3306,
+          "turnover": 0.8649,
+          "status": "OK",
+          "score": 0.005842,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi RSI thấp cho thấy thị trường có thể đang ở trạng thái quá bán, kết hợp với MACD cắt lên trên MACD_Signal, điều này có thể báo hiệu sự đảo chiều tăng giá. Khi có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), khả năng tăng trưởng giá càng cao hơn.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.057894,
+          "ic_5d": 0.014205,
+          "sharpe": 0.3182,
+          "turnover": 0.5585,
+          "status": "OK",
+          "score": 0.060189,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá đang giao dịch dưới BB_Lower và có sự gia tăng trong khối lượng giao dịch, điều này có thể cho thấy rằng áp lực bán đã đạt đến mức cực đoan, và có khả năng xảy ra sự đảo chiều. Kết hợp với sentiment ngành bất động sản (df['VIC_S']), nếu sentiment tích cực, có thể củng cố khả năng phục hồi giá trong tương lai.",
+          "expression": "alpha = cwise_mul(less(df['close'], df['BB_Lower']), ts_delta(df['volume'], 5)) + ts_ema(df['VIC_S'], 5)",
+          "ic": 0.034343,
+          "ic_5d": 0.017312,
+          "sharpe": 1.744,
+          "turnover": 1.0547,
+          "status": "OK",
+          "score": 0.160127,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá hiện tại cao hơn SMA_5 và có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), giá có khả năng tiếp tục tăng.",
+          "expression": "alpha = cwise_mul(greater(df['close'], df['SMA_5']), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.144491,
+          "ic_5d": 0.055273,
+          "sharpe": 2.0257,
+          "turnover": 0.6564,
+          "status": "OK",
+          "score": 0.248752,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá có sự điều chỉnh mạnh nhưng volume lại giảm, điều này có thể chỉ ra rằng áp lực bán không mạnh. Kết hợp với sentiment ngành bất động sản (df['VIC_S']) có thể cho thấy khả năng phục hồi của giá.",
+          "expression": "alpha = minus(ts_delta_ratio(df['close'], 10), ts_delta_ratio(df['volume'], 10)) * ts_zscore_scale(ts_ema(df['VIC_S'], 5), 10)",
+          "ic": 0.067349,
+          "ic_5d": 0.015311,
+          "sharpe": 0.3518,
+          "turnover": 0.9066,
+          "status": "OK",
+          "score": 0.068557,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi có sự gia tăng trong volume nhưng giá không tăng (không đồng thuận), điều này có thể cho thấy áp lực bán và khả năng giảm giá trong tương lai.",
+          "expression": "alpha = minus(ts_delta(df['volume'], 10), ts_delta(df['close'], 10))",
+          "ic": 0.009736,
+          "ic_5d": 0.015699,
+          "sharpe": -0.3306,
+          "turnover": 0.8649,
+          "status": "OK",
+          "score": 0.005842,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi RSI thấp cho thấy thị trường có thể đang ở trạng thái quá bán, kết hợp với MACD cắt lên trên MACD_Signal, điều này có thể báo hiệu sự đảo chiều tăng giá. Khi có sự đồng thuận từ sentiment ngành bất động sản (df['VIC_S']), khả năng tăng trưởng giá càng cao hơn.",
+          "expression": "alpha = cwise_mul(greater(ts_delta(df['MACD'], 5), ts_delta(df['MACD_Signal'], 5)), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.057894,
+          "ic_5d": 0.014205,
+          "sharpe": 0.3182,
+          "turnover": 0.5585,
+          "status": "OK",
+          "score": 0.060189,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá đang giao dịch dưới BB_Lower và có sự gia tăng trong khối lượng giao dịch, điều này có thể cho thấy rằng áp lực bán đã đạt đến mức cực đoan, và có khả năng xảy ra sự đảo chiều. Kết hợp với sentiment ngành bất động sản (df['VIC_S']), nếu sentiment tích cực, có thể củng cố khả năng phục hồi giá trong tương lai.",
+          "expression": "alpha = cwise_mul(less(df['close'], df['BB_Lower']), ts_delta(df['volume'], 5)) + ts_ema(df['VIC_S'], 5)",
+          "ic": 0.034343,
+          "ic_5d": 0.017312,
+          "sharpe": 1.744,
+          "turnover": 1.0547,
+          "status": "OK",
+          "score": 0.160127,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

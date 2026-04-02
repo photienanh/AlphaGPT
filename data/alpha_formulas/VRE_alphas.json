@@ -1,0 +1,398 @@
+{
+  "ticker": "VRE",
+  "n_rows": 727,
+  "n_rounds": 5,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi giá có xu hướng tăng nhưng khối lượng giao dịch cũng tăng mạnh, điều này có thể cho thấy rằng xu hướng tăng đang được củng cố bởi sự quan tâm của nhà đầu tư. Ngược lại, nếu giá tăng nhưng khối lượng lại giảm, điều này có thể chỉ ra rằng xu hướng tăng đang yếu đi. Kết hợp sentiment từ ngành Bất động sản sẽ giúp làm rõ hơn tâm lý của nhà đầu tư và cung cấp một cái nhìn toàn diện hơn về khả năng tiếp tục của xu hướng.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['volume'], 10)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+      "ic": 0.039601,
+      "ic_5d": 0.102298,
+      "sharpe": 0.4705,
+      "turnover": 1.2781,
+      "status": "OK",
+      "score": 0.061402,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi thị trường giao dịch với khối lượng thấp hơn mức bình quân động, điều này có thể cho thấy sự thiếu hụt trong sức mạnh của xu hướng. Nếu sentiment ngành Bất động sản tích cực trong khi khối lượng giao dịch thấp, điều này có thể cho thấy rằng giá có thể phục hồi trong tương lai gần.",
+      "expression": "alpha = minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+      "ic": 0.005174,
+      "ic_5d": 0.051045,
+      "sharpe": 0.6513,
+      "turnover": 0.6094,
+      "status": "OK",
+      "score": 0.055209,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Sự suy giảm trong khối lượng giao dịch có thể chỉ ra rằng thị trường đang thiếu sức mạnh. Nếu khối lượng hiện tại thấp hơn mức trung bình và giá vẫn duy trì trên mức nhất định, có thể đây là dấu hiệu cho thấy giá có thể gặp khó khăn trong việc tiếp tục tăng. Kết hợp sentiment từ ngành sẽ cho biết thêm về tâm lý của nhà đầu tư.",
+      "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['volume'], 10), 0), ts_zscore_scale(df['close'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+      "ic": 0.016797,
+      "ic_5d": 0.075679,
+      "sharpe": 0.4099,
+      "turnover": 1.0354,
+      "status": "OK",
+      "score": 0.042869,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Sự phân kỳ giữa momentum và khối lượng có thể chỉ ra sự thay đổi trong sức mạnh của xu hướng. Nếu momentum đang giảm trong khi khối lượng đang tăng, có thể cho thấy sự điều chỉnh sắp diễn ra. Kết hợp sentiment giúp tăng cường độ tin cậy của tín hiệu này.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), ts_ema(df['VIC_S'], 5))",
+      "ic": 0.014036,
+      "ic_5d": 0.037056,
+      "sharpe": 0.4516,
+      "turnover": 0.922,
+      "status": "OK",
+      "score": 0.044553,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.006108,
+      "ic_5d": 0.08739,
+      "sharpe": 0.4932,
+      "turnover": 0.6556,
+      "status": "OK",
+      "score": 0.043125,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự phân kỳ giữa momentum và giá có thể cho thấy sự yếu kém trong xu hướng hiện tại. Nếu momentum giảm trong khi giá vẫn tăng, có thể đây là dấu hiệu của sự điều chỉnh.",
+          "expression": "alpha = minus(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['Momentum_3'], 10))",
+          "ic": 0.006035,
+          "ic_5d": 0.05848,
+          "sharpe": 0.4074,
+          "turnover": 0.4785,
+          "status": "OK",
+          "score": 0.036213,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi thị trường giao dịch với khối lượng thấp hơn mức bình quân động, điều này có thể cho thấy sự thiếu hụt trong sức mạnh của xu hướng. Nếu sentiment ngành Bất động sản tích cực trong khi khối lượng giao dịch thấp, điều này có thể cho thấy rằng giá có thể phục hồi trong tương lai gần.",
+          "expression": "alpha = minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.005174,
+          "ic_5d": 0.051045,
+          "sharpe": 0.6513,
+          "turnover": 0.6094,
+          "status": "OK",
+          "score": 0.055209,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự biến động giá gần đây có thể cho thấy sự không ổn định trong xu hướng hiện tại. Nếu giá có sự điều chỉnh đáng kể trong khi khối lượng tăng mạnh, điều này có thể chỉ ra rằng thị trường đang chuẩn bị cho một sự đảo chiều. Kết hợp sentiment ngành Bất động sản có thể cung cấp thêm thông tin về tâm lý thị trường trong bối cảnh này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['close'], 20), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.01247,
+          "ic_5d": 0.015148,
+          "sharpe": 0.2665,
+          "turnover": 0.6123,
+          "status": "OK",
+          "score": 0.028802,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa momentum và khối lượng có thể chỉ ra sự thay đổi trong sức mạnh của xu hướng. Nếu momentum đang giảm trong khi khối lượng đang tăng, có thể cho thấy sự điều chỉnh sắp diễn ra. Kết hợp sentiment giúp tăng cường độ tin cậy của tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.014036,
+          "ic_5d": 0.037056,
+          "sharpe": 0.4516,
+          "turnover": 0.922,
+          "status": "OK",
+          "score": 0.044553,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.006108,
+          "ic_5d": 0.08739,
+          "sharpe": 0.4932,
+          "turnover": 0.6556,
+          "status": "OK",
+          "score": 0.043125,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự phân kỳ giữa momentum và giá có thể cho thấy sự yếu kém trong xu hướng hiện tại. Nếu momentum giảm trong khi giá vẫn tăng, có thể đây là dấu hiệu của sự điều chỉnh.",
+          "expression": "alpha = minus(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['Momentum_3'], 10))",
+          "ic": 0.006035,
+          "ic_5d": 0.05848,
+          "sharpe": 0.4074,
+          "turnover": 0.4785,
+          "status": "OK",
+          "score": 0.036213,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi thị trường giao dịch với khối lượng thấp hơn mức bình quân động, điều này có thể cho thấy sự thiếu hụt trong sức mạnh của xu hướng. Nếu sentiment ngành Bất động sản tích cực trong khi khối lượng giao dịch thấp, điều này có thể cho thấy rằng giá có thể phục hồi trong tương lai gần.",
+          "expression": "alpha = minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.005174,
+          "ic_5d": 0.051045,
+          "sharpe": 0.6513,
+          "turnover": 0.6094,
+          "status": "OK",
+          "score": 0.055209,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự suy giảm trong khối lượng giao dịch có thể chỉ ra rằng thị trường đang thiếu sức mạnh. Nếu khối lượng hiện tại thấp hơn mức trung bình và giá vẫn duy trì trên mức nhất định, có thể đây là dấu hiệu cho thấy giá có thể gặp khó khăn trong việc tiếp tục tăng. Kết hợp sentiment từ ngành sẽ cho biết thêm về tâm lý của nhà đầu tư.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['volume'], 10), 0), ts_zscore_scale(df['close'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.016797,
+          "ic_5d": 0.075679,
+          "sharpe": 0.4099,
+          "turnover": 1.0354,
+          "status": "OK",
+          "score": 0.042869,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa momentum và khối lượng có thể chỉ ra sự thay đổi trong sức mạnh của xu hướng. Nếu momentum đang giảm trong khi khối lượng đang tăng, có thể cho thấy sự điều chỉnh sắp diễn ra. Kết hợp sentiment giúp tăng cường độ tin cậy của tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.014036,
+          "ic_5d": 0.037056,
+          "sharpe": 0.4516,
+          "turnover": 0.922,
+          "status": "OK",
+          "score": 0.044553,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.006108,
+          "ic_5d": 0.08739,
+          "sharpe": 0.4932,
+          "turnover": 0.6556,
+          "status": "OK",
+          "score": 0.043125,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự phân kỳ giữa momentum và giá có thể cho thấy sự yếu kém trong xu hướng hiện tại. Nếu momentum giảm trong khi giá vẫn tăng, có thể đây là dấu hiệu của sự điều chỉnh.",
+          "expression": "alpha = minus(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['Momentum_3'], 10))",
+          "ic": 0.006035,
+          "ic_5d": 0.05848,
+          "sharpe": 0.4074,
+          "turnover": 0.4785,
+          "status": "OK",
+          "score": 0.036213,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi thị trường giao dịch với khối lượng thấp hơn mức bình quân động, điều này có thể cho thấy sự thiếu hụt trong sức mạnh của xu hướng. Nếu sentiment ngành Bất động sản tích cực trong khi khối lượng giao dịch thấp, điều này có thể cho thấy rằng giá có thể phục hồi trong tương lai gần.",
+          "expression": "alpha = minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.005174,
+          "ic_5d": 0.051045,
+          "sharpe": 0.6513,
+          "turnover": 0.6094,
+          "status": "OK",
+          "score": 0.055209,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự suy giảm trong khối lượng giao dịch có thể chỉ ra rằng thị trường đang thiếu sức mạnh. Nếu khối lượng hiện tại thấp hơn mức trung bình và giá vẫn duy trì trên mức nhất định, có thể đây là dấu hiệu cho thấy giá có thể gặp khó khăn trong việc tiếp tục tăng. Kết hợp sentiment từ ngành sẽ cho biết thêm về tâm lý của nhà đầu tư.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['volume'], 10), 0), ts_zscore_scale(df['close'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.016797,
+          "ic_5d": 0.075679,
+          "sharpe": 0.4099,
+          "turnover": 1.0354,
+          "status": "OK",
+          "score": 0.042869,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa momentum và khối lượng có thể chỉ ra sự thay đổi trong sức mạnh của xu hướng. Nếu momentum đang giảm trong khi khối lượng đang tăng, có thể cho thấy sự điều chỉnh sắp diễn ra. Kết hợp sentiment giúp tăng cường độ tin cậy của tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.014036,
+          "ic_5d": 0.037056,
+          "sharpe": 0.4516,
+          "turnover": 0.922,
+          "status": "OK",
+          "score": 0.044553,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.006108,
+          "ic_5d": 0.08739,
+          "sharpe": 0.4932,
+          "turnover": 0.6556,
+          "status": "OK",
+          "score": 0.043125,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự phân kỳ giữa momentum và giá có thể cho thấy sự yếu kém trong xu hướng hiện tại. Nếu momentum giảm trong khi giá vẫn tăng, có thể đây là dấu hiệu của sự điều chỉnh.",
+          "expression": "alpha = minus(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['Momentum_3'], 10))",
+          "ic": 0.006035,
+          "ic_5d": 0.05848,
+          "sharpe": 0.4074,
+          "turnover": 0.4785,
+          "status": "OK",
+          "score": 0.036213,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi thị trường giao dịch với khối lượng thấp hơn mức bình quân động, điều này có thể cho thấy sự thiếu hụt trong sức mạnh của xu hướng. Nếu sentiment ngành Bất động sản tích cực trong khi khối lượng giao dịch thấp, điều này có thể cho thấy rằng giá có thể phục hồi trong tương lai gần.",
+          "expression": "alpha = minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.005174,
+          "ic_5d": 0.051045,
+          "sharpe": 0.6513,
+          "turnover": 0.6094,
+          "status": "OK",
+          "score": 0.055209,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự suy giảm trong khối lượng giao dịch có thể chỉ ra rằng thị trường đang thiếu sức mạnh. Nếu khối lượng hiện tại thấp hơn mức trung bình và giá vẫn duy trì trên mức nhất định, có thể đây là dấu hiệu cho thấy giá có thể gặp khó khăn trong việc tiếp tục tăng. Kết hợp sentiment từ ngành sẽ cho biết thêm về tâm lý của nhà đầu tư.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['volume'], 10), 0), ts_zscore_scale(df['close'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.016797,
+          "ic_5d": 0.075679,
+          "sharpe": 0.4099,
+          "turnover": 1.0354,
+          "status": "OK",
+          "score": 0.042869,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa momentum và khối lượng có thể chỉ ra sự thay đổi trong sức mạnh của xu hướng. Nếu momentum đang giảm trong khi khối lượng đang tăng, có thể cho thấy sự điều chỉnh sắp diễn ra. Kết hợp sentiment giúp tăng cường độ tin cậy của tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.014036,
+          "ic_5d": 0.037056,
+          "sharpe": 0.4516,
+          "turnover": 0.922,
+          "status": "OK",
+          "score": 0.044553,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.006108,
+          "ic_5d": 0.08739,
+          "sharpe": 0.4932,
+          "turnover": 0.6556,
+          "status": "OK",
+          "score": 0.043125,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá có xu hướng tăng nhưng khối lượng giao dịch cũng tăng mạnh, điều này có thể cho thấy rằng xu hướng tăng đang được củng cố bởi sự quan tâm của nhà đầu tư. Ngược lại, nếu giá tăng nhưng khối lượng lại giảm, điều này có thể chỉ ra rằng xu hướng tăng đang yếu đi. Kết hợp sentiment từ ngành Bất động sản sẽ giúp làm rõ hơn tâm lý của nhà đầu tư và cung cấp một cái nhìn toàn diện hơn về khả năng tiếp tục của xu hướng.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['volume'], 10)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.039601,
+          "ic_5d": 0.102298,
+          "sharpe": 0.4705,
+          "turnover": 1.2781,
+          "status": "OK",
+          "score": 0.061402,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi thị trường giao dịch với khối lượng thấp hơn mức bình quân động, điều này có thể cho thấy sự thiếu hụt trong sức mạnh của xu hướng. Nếu sentiment ngành Bất động sản tích cực trong khi khối lượng giao dịch thấp, điều này có thể cho thấy rằng giá có thể phục hồi trong tương lai gần.",
+          "expression": "alpha = minus(ts_zscore_scale(df['volume'], 10), ts_zscore_scale(df['SMA_20'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.005174,
+          "ic_5d": 0.051045,
+          "sharpe": 0.6513,
+          "turnover": 0.6094,
+          "status": "OK",
+          "score": 0.055209,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự suy giảm trong khối lượng giao dịch có thể chỉ ra rằng thị trường đang thiếu sức mạnh. Nếu khối lượng hiện tại thấp hơn mức trung bình và giá vẫn duy trì trên mức nhất định, có thể đây là dấu hiệu cho thấy giá có thể gặp khó khăn trong việc tiếp tục tăng. Kết hợp sentiment từ ngành sẽ cho biết thêm về tâm lý của nhà đầu tư.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['volume'], 10), 0), ts_zscore_scale(df['close'], 20)) + cwise_mul(0.5, ts_ema(df['VIC_S'], 5))",
+          "ic": 0.016797,
+          "ic_5d": 0.075679,
+          "sharpe": 0.4099,
+          "turnover": 1.0354,
+          "status": "OK",
+          "score": 0.042869,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa momentum và khối lượng có thể chỉ ra sự thay đổi trong sức mạnh của xu hướng. Nếu momentum đang giảm trong khi khối lượng đang tăng, có thể cho thấy sự điều chỉnh sắp diễn ra. Kết hợp sentiment giúp tăng cường độ tin cậy của tín hiệu này.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 10), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.014036,
+          "ic_5d": 0.037056,
+          "sharpe": 0.4516,
+          "turnover": 0.922,
+          "status": "OK",
+          "score": 0.044553,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.006108,
+          "ic_5d": 0.08739,
+          "sharpe": 0.4932,
+          "turnover": 0.6556,
+          "status": "OK",
+          "score": 0.043125,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

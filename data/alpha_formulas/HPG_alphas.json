@@ -1,0 +1,200 @@
+{
+  "ticker": "HPG",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Sự phân kỳ giữa giá và khối lượng giao dịch có thể chỉ ra cơ hội mua vào. Khi giá tăng nhưng khối lượng giao dịch giảm, điều này có thể cho thấy sự thiếu hụt trong lực mua, dẫn đến khả năng điều chỉnh. Chúng ta có thể sử dụng động lượng 3 ngày để xác nhận xu hướng giá và khối lượng giao dịch để phát hiện sự phân kỳ.",
+      "expression": "alpha = cwise_mul(greater(ts_delta_ratio(df['close'], 20), 0), minus(ts_zscore_scale(df['volume'], 20), ts_zscore_scale(df['Momentum_3'], 10)))",
+      "ic": 0.074913,
+      "ic_5d": 0.104607,
+      "sharpe": 0.5154,
+      "turnover": 1.1348,
+      "status": "OK",
+      "score": 0.086178,
+      "flipped": true
+    },
+    {
+      "id": 2,
+      "idea": "Khi giá gần chạm mức BB_Upper nhưng động lượng 10 ngày lại cho thấy áp lực bán, điều này có thể dự báo sự điều chỉnh giảm trong giá. Công thức này kết hợp giữa động lượng 10 ngày và tỷ lệ giá so với Bollinger Bands để nhận diện áp lực bán.",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_10'], 10), ts_zscore_scale(df['BB_Upper'], 20))",
+      "ic": 0.036486,
+      "ic_5d": 0.103641,
+      "sharpe": 0.4533,
+      "turnover": 0.4331,
+      "status": "OK",
+      "score": 0.058157,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi giá đóng cửa gần mức BB_Lower và có xu hướng phục hồi từ vùng oversold, chúng ta có thể kỳ vọng giá sẽ tăng. Động lượng trong quá khứ (3 ngày) tích cực sẽ củng cố thêm niềm tin vào xu hướng tăng này.",
+      "expression": "alpha = cwise_mul(ts_mean(df['close'], 5), ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20))",
+      "ic": 0.04887,
+      "ic_5d": 0.04017,
+      "sharpe": 0.4107,
+      "turnover": 0.4254,
+      "status": "OK",
+      "score": 0.062176,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Sự phân kỳ giữa khối lượng giao dịch và giá có thể chỉ ra sự yếu kém trong xu hướng hiện tại. Khi volume tăng nhưng giá không tăng tương ứng, điều này có thể dẫn đến việc giá giảm. Chúng ta sử dụng phân tích động lượng 10 ngày để đo lường phản ứng của giá đối với khối lượng giao dịch.",
+      "expression": "alpha = minus(ts_delta_ratio(df['volume'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.043066,
+      "ic_5d": 0.077746,
+      "sharpe": 0.467,
+      "turnover": 0.8609,
+      "status": "OK",
+      "score": 0.063198,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.065856,
+      "ic_5d": 0.113734,
+      "sharpe": 0.8473,
+      "turnover": 0.6311,
+      "status": "OK",
+      "score": 0.107301,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá đóng cửa trên mức trung bình động 20 ngày nhưng khối lượng giao dịch giảm mạnh, điều này có thể cho thấy sự giảm sút trong lực mua và dẫn đến điều chỉnh giá. Công thức này sử dụng sự kết hợp giữa động lượng 3 ngày và khối lượng giao dịch để phát hiện sự khác biệt trong lực mua.",
+          "expression": "alpha = cwise_mul(less(ts_delta_ratio(df['volume'], 20), 0), ts_zscore_scale(df['Momentum_3'], 20))",
+          "ic": 0.02496,
+          "ic_5d": 0.012432,
+          "sharpe": 0.3005,
+          "turnover": 1.3214,
+          "status": "OK",
+          "score": 0.039018,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá gần chạm mức BB_Upper nhưng động lượng 10 ngày lại cho thấy áp lực bán, điều này có thể dự báo sự điều chỉnh giảm trong giá. Công thức này kết hợp giữa động lượng 10 ngày và tỷ lệ giá so với Bollinger Bands để nhận diện áp lực bán.",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_10'], 10), ts_zscore_scale(df['BB_Upper'], 20))",
+          "ic": 0.036486,
+          "ic_5d": 0.103641,
+          "sharpe": 0.4533,
+          "turnover": 0.4331,
+          "status": "OK",
+          "score": 0.058157,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá đóng cửa gần mức BB_Lower và có xu hướng phục hồi từ vùng oversold, chúng ta có thể kỳ vọng giá sẽ tăng. Động lượng trong quá khứ (3 ngày) tích cực sẽ củng cố thêm niềm tin vào xu hướng tăng này.",
+          "expression": "alpha = cwise_mul(ts_mean(df['close'], 5), ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20))",
+          "ic": 0.04887,
+          "ic_5d": 0.04017,
+          "sharpe": 0.4107,
+          "turnover": 0.4254,
+          "status": "OK",
+          "score": 0.062176,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa khối lượng giao dịch và giá có thể chỉ ra sự yếu kém trong xu hướng hiện tại. Khi volume tăng nhưng giá không tăng tương ứng, điều này có thể dẫn đến việc giá giảm. Chúng ta sử dụng phân tích động lượng 10 ngày để đo lường phản ứng của giá đối với khối lượng giao dịch.",
+          "expression": "alpha = minus(ts_delta_ratio(df['volume'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.043066,
+          "ic_5d": 0.077746,
+          "sharpe": 0.467,
+          "turnover": 0.8609,
+          "status": "OK",
+          "score": 0.063198,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.065856,
+          "ic_5d": 0.113734,
+          "sharpe": 0.8473,
+          "turnover": 0.6311,
+          "status": "OK",
+          "score": 0.107301,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự phân kỳ giữa giá và khối lượng giao dịch có thể chỉ ra cơ hội mua vào. Khi giá tăng nhưng khối lượng giao dịch giảm, điều này có thể cho thấy sự thiếu hụt trong lực mua, dẫn đến khả năng điều chỉnh. Chúng ta có thể sử dụng động lượng 3 ngày để xác nhận xu hướng giá và khối lượng giao dịch để phát hiện sự phân kỳ.",
+          "expression": "alpha = cwise_mul(greater(ts_delta_ratio(df['close'], 20), 0), minus(ts_zscore_scale(df['volume'], 20), ts_zscore_scale(df['Momentum_3'], 10)))",
+          "ic": 0.074913,
+          "ic_5d": 0.104607,
+          "sharpe": 0.5154,
+          "turnover": 1.1348,
+          "status": "OK",
+          "score": 0.086178,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá gần chạm mức BB_Upper nhưng động lượng 10 ngày lại cho thấy áp lực bán, điều này có thể dự báo sự điều chỉnh giảm trong giá. Công thức này kết hợp giữa động lượng 10 ngày và tỷ lệ giá so với Bollinger Bands để nhận diện áp lực bán.",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_10'], 10), ts_zscore_scale(df['BB_Upper'], 20))",
+          "ic": 0.036486,
+          "ic_5d": 0.103641,
+          "sharpe": 0.4533,
+          "turnover": 0.4331,
+          "status": "OK",
+          "score": 0.058157,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá đóng cửa gần mức BB_Lower và có xu hướng phục hồi từ vùng oversold, chúng ta có thể kỳ vọng giá sẽ tăng. Động lượng trong quá khứ (3 ngày) tích cực sẽ củng cố thêm niềm tin vào xu hướng tăng này.",
+          "expression": "alpha = cwise_mul(ts_mean(df['close'], 5), ts_zscore_scale(minus(df['close'], df['BB_Lower']), 20))",
+          "ic": 0.04887,
+          "ic_5d": 0.04017,
+          "sharpe": 0.4107,
+          "turnover": 0.4254,
+          "status": "OK",
+          "score": 0.062176,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Sự phân kỳ giữa khối lượng giao dịch và giá có thể chỉ ra sự yếu kém trong xu hướng hiện tại. Khi volume tăng nhưng giá không tăng tương ứng, điều này có thể dẫn đến việc giá giảm. Chúng ta sử dụng phân tích động lượng 10 ngày để đo lường phản ứng của giá đối với khối lượng giao dịch.",
+          "expression": "alpha = minus(ts_delta_ratio(df['volume'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.043066,
+          "ic_5d": 0.077746,
+          "sharpe": 0.467,
+          "turnover": 0.8609,
+          "status": "OK",
+          "score": 0.063198,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.065856,
+          "ic_5d": 0.113734,
+          "sharpe": 0.8473,
+          "turnover": 0.6311,
+          "status": "OK",
+          "score": 0.107301,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

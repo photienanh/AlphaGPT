@@ -1,0 +1,200 @@
+{
+  "ticker": "TPB",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi có sự tương quan tích cực giữa khối lượng và giá, điều này cho thấy có thể có xu hướng tăng trong tương lai.",
+      "expression": "alpha = ts_corr(df['close'], df['volume'], 20)",
+      "ic": 0.039325,
+      "ic_5d": 0.066546,
+      "sharpe": 0.7587,
+      "turnover": 0.2745,
+      "status": "OK",
+      "score": 0.084292,
+      "flipped": true
+    },
+    {
+      "id": 2,
+      "idea": "Khi khối lượng giao dịch tăng đáng kể nhưng giá không tăng tương ứng, điều này cho thấy có sự phân phối cổ phiếu, do đó có khả năng giá sẽ giảm trong tương lai.",
+      "expression": "alpha = minus(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+      "ic": 0.009369,
+      "ic_5d": 0.044305,
+      "sharpe": 0.7502,
+      "turnover": 1.1208,
+      "status": "OK",
+      "score": 0.06564,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Khi có sự phân kỳ giữa giá và động lượng (momentum), điều này cho thấy có thể xảy ra sự điều chỉnh giá, đặc biệt khi giá đang ở mức cao.",
+      "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 10))",
+      "ic": 0.002897,
+      "ic_5d": 0.088656,
+      "sharpe": 0.5398,
+      "turnover": 0.6174,
+      "status": "OK",
+      "score": 0.044921,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Khi giá TPB tăng mạnh nhưng khối lượng giao dịch không tương theo, điều này có thể chỉ ra rằng có sự suy yếu trong áp lực mua. Nếu sentiment ngành ngân hàng đồng loạt tích cực mà khối lượng không tăng, điều này cho thấy rằng áp lực mua có thể sẽ sớm giảm, dẫn đến khả năng giảm giá. Đây là một tình huống phân kỳ cho thấy sự thiếu hụt động lực giá.",
+      "expression": "alpha = minus(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_zscore_scale(df['HDB_S'], 20), 1)",
+      "ic": 0.038388,
+      "ic_5d": 0.027102,
+      "sharpe": 0.8921,
+      "turnover": 1.1707,
+      "status": "OK",
+      "score": 0.094401,
+      "flipped": true
+    },
+    {
+      "id": 5,
+      "idea": "Khi sentiment ngành ngân hàng trở nên tiêu cực nhưng giá TPB vẫn duy trì ở mức cao, điều này cho thấy có sự phân kỳ và khả năng điều chỉnh giá sẽ xảy ra. Sự tiêu cực trong sentiment có thể làm giảm biên độ giá tăng.",
+      "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(minus(df['HDB_S'], df['TCB_S']), 20))",
+      "ic": 0.06035,
+      "ic_5d": 0.041866,
+      "sharpe": 0.7184,
+      "turnover": 1.5324,
+      "status": "OK",
+      "score": 0.093686,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự tương quan tích cực giữa khối lượng và giá, điều này cho thấy có thể có xu hướng tăng trong tương lai.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20)",
+          "ic": 0.039325,
+          "ic_5d": 0.066546,
+          "sharpe": 0.7587,
+          "turnover": 0.2745,
+          "status": "OK",
+          "score": 0.084292,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi khối lượng giao dịch tăng đáng kể nhưng giá không tăng tương ứng, điều này cho thấy có sự phân phối cổ phiếu, do đó có khả năng giá sẽ giảm trong tương lai.",
+          "expression": "alpha = minus(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+          "ic": 0.009369,
+          "ic_5d": 0.044305,
+          "sharpe": 0.7502,
+          "turnover": 1.1208,
+          "status": "OK",
+          "score": 0.06564,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi có sự phân kỳ giữa giá và động lượng (momentum), điều này cho thấy có thể xảy ra sự điều chỉnh giá, đặc biệt khi giá đang ở mức cao.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 10))",
+          "ic": 0.002897,
+          "ic_5d": 0.088656,
+          "sharpe": 0.5398,
+          "turnover": 0.6174,
+          "status": "OK",
+          "score": 0.044921,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi có sự phân kỳ giữa giá và khối lượng giao dịch, điều này có thể chỉ ra rằng giá đang bị đẩy lên mà không có sự hỗ trợ từ khối lượng. Nếu giá tăng nhưng khối lượng không tăng tương ứng, điều này cho thấy sự thiếu hụt của cầu thực sự và có khả năng xảy ra điều chỉnh giá. Hơn nữa, khi sentiment ngành ngân hàng tiêu cực, điều này có thể càng làm tăng khả năng điều chỉnh giá.",
+          "expression": "alpha = minus(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_zscore_scale(df['HDB_S'], 20), -1)",
+          "ic": 0.045145,
+          "ic_5d": 0.060117,
+          "sharpe": 0.8632,
+          "turnover": 1.0968,
+          "status": "OK",
+          "score": 0.096139,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi sentiment ngành ngân hàng trở nên tiêu cực nhưng giá TPB vẫn duy trì ở mức cao, điều này cho thấy có sự phân kỳ và khả năng điều chỉnh giá sẽ xảy ra. Sự tiêu cực trong sentiment có thể làm giảm biên độ giá tăng.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(minus(df['HDB_S'], df['TCB_S']), 20))",
+          "ic": 0.06035,
+          "ic_5d": 0.041866,
+          "sharpe": 0.7184,
+          "turnover": 1.5324,
+          "status": "OK",
+          "score": 0.093686,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi có sự tương quan tích cực giữa khối lượng và giá, điều này cho thấy có thể có xu hướng tăng trong tương lai.",
+          "expression": "alpha = ts_corr(df['close'], df['volume'], 20)",
+          "ic": 0.039325,
+          "ic_5d": 0.066546,
+          "sharpe": 0.7587,
+          "turnover": 0.2745,
+          "status": "OK",
+          "score": 0.084292,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi khối lượng giao dịch tăng đáng kể nhưng giá không tăng tương ứng, điều này cho thấy có sự phân phối cổ phiếu, do đó có khả năng giá sẽ giảm trong tương lai.",
+          "expression": "alpha = minus(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+          "ic": 0.009369,
+          "ic_5d": 0.044305,
+          "sharpe": 0.7502,
+          "turnover": 1.1208,
+          "status": "OK",
+          "score": 0.06564,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Khi có sự phân kỳ giữa giá và động lượng (momentum), điều này cho thấy có thể xảy ra sự điều chỉnh giá, đặc biệt khi giá đang ở mức cao.",
+          "expression": "alpha = minus(ts_delta(df['close'], 5), ts_delta(df['Momentum_10'], 10))",
+          "ic": 0.002897,
+          "ic_5d": 0.088656,
+          "sharpe": 0.5398,
+          "turnover": 0.6174,
+          "status": "OK",
+          "score": 0.044921,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá TPB tăng mạnh nhưng khối lượng giao dịch không tương theo, điều này có thể chỉ ra rằng có sự suy yếu trong áp lực mua. Nếu sentiment ngành ngân hàng đồng loạt tích cực mà khối lượng không tăng, điều này cho thấy rằng áp lực mua có thể sẽ sớm giảm, dẫn đến khả năng giảm giá. Đây là một tình huống phân kỳ cho thấy sự thiếu hụt động lực giá.",
+          "expression": "alpha = minus(ts_zscore_scale(df['close'], 20), ts_zscore_scale(df['volume'], 20)) + cwise_mul(ts_zscore_scale(df['HDB_S'], 20), 1)",
+          "ic": 0.038388,
+          "ic_5d": 0.027102,
+          "sharpe": 0.8921,
+          "turnover": 1.1707,
+          "status": "OK",
+          "score": 0.094401,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi sentiment ngành ngân hàng trở nên tiêu cực nhưng giá TPB vẫn duy trì ở mức cao, điều này cho thấy có sự phân kỳ và khả năng điều chỉnh giá sẽ xảy ra. Sự tiêu cực trong sentiment có thể làm giảm biên độ giá tăng.",
+          "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(minus(df['HDB_S'], df['TCB_S']), 20))",
+          "ic": 0.06035,
+          "ic_5d": 0.041866,
+          "sharpe": 0.7184,
+          "turnover": 1.5324,
+          "status": "OK",
+          "score": 0.093686,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

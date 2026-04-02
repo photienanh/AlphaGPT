@@ -1,0 +1,332 @@
+{
+  "ticker": "ACB",
+  "n_rows": 728,
+  "n_rounds": 4,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Sự gia tăng của chỉ số Momentum_10 cho thấy xu hướng tăng mạnh. Tuy nhiên, khi sentiment ngành ngân hàng (TCB_S) trở nên tiêu cực, xu hướng này có thể bị đảo chiều, tạo ra một tín hiệu bán.",
+      "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), minus(1, ts_ema(df['TCB_S'], 5)))",
+      "ic": 0.013105,
+      "ic_5d": 0.058265,
+      "sharpe": 0.6326,
+      "turnover": 0.5686,
+      "status": "OK",
+      "score": 0.058473,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Khi giá ACB đang ở mức gần đường BB_Lower nhưng sentiment ngành (VPB_S) lại tích cực, điều này cho thấy rằng có thể có sự hồi phục giá, vì vậy kỳ vọng tăng giá là hợp lý.",
+      "expression": "alpha = cwise_mul(greater(ts_rank(df['close'], 20), ts_rank(df['BB_Lower'], 20)), ts_ema(df['VPB_S'], 5))",
+      "ic": 0.046512,
+      "ic_5d": 0.096141,
+      "sharpe": -0.3781,
+      "turnover": 0.5286,
+      "status": "OK",
+      "score": 0.027907,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi giá ACB đang trong xu hướng giảm với chỉ số RSI_14 cho thấy tình trạng quá bán, có thể có khả năng đảo chiều nếu lực bán suy yếu. Sự tích cực của sentiment ngành ngân hàng (MBB_S) có thể củng cố cho khả năng hồi phục giá, chỉ ra rằng sự tích cực của thị trường có thể giúp ACB phục hồi. Điều này thể hiện qua việc so sánh giữa mức độ giảm giá và chỉ số RSI, khi sentiment ngành ngân hàng tích cực hơn, điều này có thể làm tăng biên độ phục hồi.",
+      "expression": "alpha = cwise_mul(minus(ts_rank(ts_delta(df['close'], 5), 10), ts_rank(df['RSI_14'], 10)), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5))))",
+      "ic": 0.056293,
+      "ic_5d": 0.053685,
+      "sharpe": 0.2287,
+      "turnover": 0.7477,
+      "status": "OK",
+      "score": 0.052072,
+      "flipped": false
+    },
+    {
+      "id": 4,
+      "idea": "Khi giá ACB đang trong xu hướng giảm nhưng chỉ số MACD cho thấy dấu hiệu phân kỳ tăng (giá giảm trong khi MACD tăng), điều này có thể chỉ ra rằng lực bán đang suy yếu. Nếu sentiment ngành ngân hàng (MBB_S) cũng tích cực, điều này củng cố cho khả năng phục hồi giá. Chúng ta có thể sử dụng sự khác biệt giữa sức mạnh của MACD và giá để tạo ra tín hiệu mua.",
+      "expression": "alpha = cwise_mul(less(ts_rank(df['close'], 20), ts_rank(ts_delta(df['MACD'], 5), 10)), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5))))",
+      "ic": 0.077685,
+      "ic_5d": 0.097156,
+      "sharpe": 0.8088,
+      "turnover": 0.3983,
+      "status": "OK",
+      "score": 0.111316,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá ACB giảm nhưng chỉ số RSI_14 lại giảm chậm hơn, đây có thể là dấu hiệu của việc lực bán đang suy yếu và có khả năng phục hồi giá. Nếu sentiment ngành ngân hàng (MBB_S) cũng tích cực, điều này càng củng cố tín hiệu tăng giá.",
+      "expression": "alpha = cwise_mul(ts_rank(ts_delta(df['close'], 5), 10), add(1.0, cwise_mul(0.2, ts_ema(df['MBB_S'], 5))))",
+      "ic": 0.045889,
+      "ic_5d": 0.001046,
+      "sharpe": 0.64,
+      "turnover": 0.6399,
+      "status": "OK",
+      "score": 0.078736,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự gia tăng của chỉ số Momentum_10 cho thấy xu hướng tăng mạnh. Tuy nhiên, khi sentiment ngành ngân hàng (TCB_S) trở nên tiêu cực, xu hướng này có thể bị đảo chiều, tạo ra một tín hiệu bán.",
+          "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), minus(1, ts_ema(df['TCB_S'], 5)))",
+          "ic": 0.013105,
+          "ic_5d": 0.058265,
+          "sharpe": 0.6326,
+          "turnover": 0.5686,
+          "status": "OK",
+          "score": 0.058473,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá ACB đang ở mức gần đường BB_Lower nhưng sentiment ngành (VPB_S) lại tích cực, điều này cho thấy rằng có thể có sự hồi phục giá, vì vậy kỳ vọng tăng giá là hợp lý.",
+          "expression": "alpha = cwise_mul(greater(ts_rank(df['close'], 20), ts_rank(df['BB_Lower'], 20)), ts_ema(df['VPB_S'], 5))",
+          "ic": 0.046512,
+          "ic_5d": 0.096141,
+          "sharpe": -0.3781,
+          "turnover": 0.5286,
+          "status": "OK",
+          "score": 0.027907,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá ACB đang trong xu hướng giảm (tính từ các mức thấp gần đây) nhưng sentiment ngành ngân hàng (MBB_S) trở nên tích cực, điều này có thể cho thấy rằng thị trường có thể phản ứng tích cực với ACB bất chấp xu hướng giảm hiện tại.",
+          "expression": "alpha = cwise_mul(minus(ts_rank(df['close'], 10), ts_rank(df['low'], 10)), ts_ema(df['MBB_S'], 5))",
+          "ic": 0.002795,
+          "ic_5d": 0.002688,
+          "sharpe": -0.4416,
+          "turnover": 1.5186,
+          "status": "OK",
+          "score": 0.001677,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi chỉ số MACD vượt lên trên MACD_Signal nhưng giá không tăng tương ứng (dựa trên EMA_10), điều này có thể là dấu hiệu của một sự đảo chiều giảm giá sắp tới. Sự phân kỳ giữa MACD và giá này sẽ dẫn đến tín hiệu bán.",
+          "expression": "alpha = cwise_mul(greater(df['MACD'], df['MACD_Signal']), minus(ts_mean(df['close'], 10), ts_mean(df['EMA_10'], 10)))",
+          "ic": 0.002121,
+          "ic_5d": 0.05965,
+          "sharpe": -0.9684,
+          "turnover": 0.2294,
+          "status": "OK",
+          "score": 0.001272,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá ACB giảm nhưng chỉ số RSI_14 lại giảm chậm hơn, đây có thể là dấu hiệu của việc lực bán đang suy yếu và có khả năng phục hồi giá. Nếu sentiment ngành ngân hàng (MBB_S) cũng tích cực, điều này càng củng cố tín hiệu tăng giá.",
+          "expression": "alpha = cwise_mul(ts_rank(ts_delta(df['close'], 5), 10), add(1.0, cwise_mul(0.2, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.045889,
+          "ic_5d": 0.001046,
+          "sharpe": 0.64,
+          "turnover": 0.6399,
+          "status": "OK",
+          "score": 0.078736,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 2,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự gia tăng của chỉ số Momentum_10 cho thấy xu hướng tăng mạnh. Tuy nhiên, khi sentiment ngành ngân hàng (TCB_S) trở nên tiêu cực, xu hướng này có thể bị đảo chiều, tạo ra một tín hiệu bán.",
+          "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), minus(1, ts_ema(df['TCB_S'], 5)))",
+          "ic": 0.013105,
+          "ic_5d": 0.058265,
+          "sharpe": 0.6326,
+          "turnover": 0.5686,
+          "status": "OK",
+          "score": 0.058473,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá ACB đang ở mức gần đường BB_Lower nhưng sentiment ngành (VPB_S) lại tích cực, điều này cho thấy rằng có thể có sự hồi phục giá, vì vậy kỳ vọng tăng giá là hợp lý.",
+          "expression": "alpha = cwise_mul(greater(ts_rank(df['close'], 20), ts_rank(df['BB_Lower'], 20)), ts_ema(df['VPB_S'], 5))",
+          "ic": 0.046512,
+          "ic_5d": 0.096141,
+          "sharpe": -0.3781,
+          "turnover": 0.5286,
+          "status": "OK",
+          "score": 0.027907,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá ACB đang trong xu hướng giảm với chỉ số RSI_14 cho thấy tình trạng quá bán, có thể có khả năng đảo chiều nếu lực bán suy yếu. Sự tích cực của sentiment ngành ngân hàng (MBB_S) có thể củng cố cho khả năng hồi phục giá, chỉ ra rằng sự tích cực của thị trường có thể giúp ACB phục hồi. Điều này thể hiện qua việc so sánh giữa mức độ giảm giá và chỉ số RSI, khi sentiment ngành ngân hàng tích cực hơn, điều này có thể làm tăng biên độ phục hồi.",
+          "expression": "alpha = cwise_mul(minus(ts_rank(ts_delta(df['close'], 5), 10), ts_rank(df['RSI_14'], 10)), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.056293,
+          "ic_5d": 0.053685,
+          "sharpe": 0.2287,
+          "turnover": 0.7477,
+          "status": "OK",
+          "score": 0.052072,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi chỉ số MACD đang trong xu hướng giảm nhưng giá ACB lại gần đường BB_Lower, điều này có thể cho thấy rằng giá có khả năng đảo chiều tăng. Nếu sentiment ngành (VPB_S) cũng tích cực, điều này càng củng cố khả năng giá sẽ hồi phục. Sự phân kỳ giữa MACD và giá cùng với việc giá gần BB_Lower sẽ tạo ra một tín hiệu mua mạnh mẽ.",
+          "expression": "alpha = cwise_mul(less(ts_rank(df['close'], 20), ts_rank(df['BB_Lower'], 20)), add(1.0, cwise_mul(0.3, ts_ema(df['VPB_S'], 5))))",
+          "ic": 0.049856,
+          "ic_5d": 0.046246,
+          "sharpe": -0.9172,
+          "turnover": 0.2341,
+          "status": "OK",
+          "score": 0.029913,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá ACB giảm nhưng chỉ số RSI_14 lại giảm chậm hơn, đây có thể là dấu hiệu của việc lực bán đang suy yếu và có khả năng phục hồi giá. Nếu sentiment ngành ngân hàng (MBB_S) cũng tích cực, điều này càng củng cố tín hiệu tăng giá.",
+          "expression": "alpha = cwise_mul(ts_rank(ts_delta(df['close'], 5), 10), add(1.0, cwise_mul(0.2, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.045889,
+          "ic_5d": 0.001046,
+          "sharpe": 0.64,
+          "turnover": 0.6399,
+          "status": "OK",
+          "score": 0.078736,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự gia tăng của chỉ số Momentum_10 cho thấy xu hướng tăng mạnh. Tuy nhiên, khi sentiment ngành ngân hàng (TCB_S) trở nên tiêu cực, xu hướng này có thể bị đảo chiều, tạo ra một tín hiệu bán.",
+          "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), minus(1, ts_ema(df['TCB_S'], 5)))",
+          "ic": 0.013105,
+          "ic_5d": 0.058265,
+          "sharpe": 0.6326,
+          "turnover": 0.5686,
+          "status": "OK",
+          "score": 0.058473,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá ACB đang ở mức gần đường BB_Lower nhưng sentiment ngành (VPB_S) lại tích cực, điều này cho thấy rằng có thể có sự hồi phục giá, vì vậy kỳ vọng tăng giá là hợp lý.",
+          "expression": "alpha = cwise_mul(greater(ts_rank(df['close'], 20), ts_rank(df['BB_Lower'], 20)), ts_ema(df['VPB_S'], 5))",
+          "ic": 0.046512,
+          "ic_5d": 0.096141,
+          "sharpe": -0.3781,
+          "turnover": 0.5286,
+          "status": "OK",
+          "score": 0.027907,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá ACB đang trong xu hướng giảm với chỉ số RSI_14 cho thấy tình trạng quá bán, có thể có khả năng đảo chiều nếu lực bán suy yếu. Sự tích cực của sentiment ngành ngân hàng (MBB_S) có thể củng cố cho khả năng hồi phục giá, chỉ ra rằng sự tích cực của thị trường có thể giúp ACB phục hồi. Điều này thể hiện qua việc so sánh giữa mức độ giảm giá và chỉ số RSI, khi sentiment ngành ngân hàng tích cực hơn, điều này có thể làm tăng biên độ phục hồi.",
+          "expression": "alpha = cwise_mul(minus(ts_rank(ts_delta(df['close'], 5), 10), ts_rank(df['RSI_14'], 10)), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.056293,
+          "ic_5d": 0.053685,
+          "sharpe": 0.2287,
+          "turnover": 0.7477,
+          "status": "OK",
+          "score": 0.052072,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi chỉ số MACD đang trong xu hướng giảm nhưng giá ACB lại gần đường BB_Lower, điều này có thể cho thấy rằng giá có khả năng đảo chiều tăng. Nếu sentiment ngành (VPB_S) cũng tích cực, điều này càng củng cố khả năng giá sẽ hồi phục. Sự phân kỳ giữa MACD và giá cùng với việc giá gần BB_Lower sẽ tạo ra một tín hiệu mua mạnh mẽ.",
+          "expression": "alpha = cwise_mul(less(ts_rank(df['close'], 20), ts_rank(df['BB_Lower'], 20)), add(1.0, cwise_mul(0.3, ts_ema(df['VPB_S'], 5))))",
+          "ic": 0.049856,
+          "ic_5d": 0.046246,
+          "sharpe": -0.9172,
+          "turnover": 0.2341,
+          "status": "OK",
+          "score": 0.029913,
+          "flipped": true
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá ACB giảm nhưng chỉ số RSI_14 lại giảm chậm hơn, đây có thể là dấu hiệu của việc lực bán đang suy yếu và có khả năng phục hồi giá. Nếu sentiment ngành ngân hàng (MBB_S) cũng tích cực, điều này càng củng cố tín hiệu tăng giá.",
+          "expression": "alpha = cwise_mul(ts_rank(ts_delta(df['close'], 5), 10), add(1.0, cwise_mul(0.2, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.045889,
+          "ic_5d": 0.001046,
+          "sharpe": 0.64,
+          "turnover": 0.6399,
+          "status": "OK",
+          "score": 0.078736,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Sự gia tăng của chỉ số Momentum_10 cho thấy xu hướng tăng mạnh. Tuy nhiên, khi sentiment ngành ngân hàng (TCB_S) trở nên tiêu cực, xu hướng này có thể bị đảo chiều, tạo ra một tín hiệu bán.",
+          "expression": "alpha = cwise_mul(ts_rank(df['Momentum_10'], 10), minus(1, ts_ema(df['TCB_S'], 5)))",
+          "ic": 0.013105,
+          "ic_5d": 0.058265,
+          "sharpe": 0.6326,
+          "turnover": 0.5686,
+          "status": "OK",
+          "score": 0.058473,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi giá ACB đang ở mức gần đường BB_Lower nhưng sentiment ngành (VPB_S) lại tích cực, điều này cho thấy rằng có thể có sự hồi phục giá, vì vậy kỳ vọng tăng giá là hợp lý.",
+          "expression": "alpha = cwise_mul(greater(ts_rank(df['close'], 20), ts_rank(df['BB_Lower'], 20)), ts_ema(df['VPB_S'], 5))",
+          "ic": 0.046512,
+          "ic_5d": 0.096141,
+          "sharpe": -0.3781,
+          "turnover": 0.5286,
+          "status": "OK",
+          "score": 0.027907,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi giá ACB đang trong xu hướng giảm với chỉ số RSI_14 cho thấy tình trạng quá bán, có thể có khả năng đảo chiều nếu lực bán suy yếu. Sự tích cực của sentiment ngành ngân hàng (MBB_S) có thể củng cố cho khả năng hồi phục giá, chỉ ra rằng sự tích cực của thị trường có thể giúp ACB phục hồi. Điều này thể hiện qua việc so sánh giữa mức độ giảm giá và chỉ số RSI, khi sentiment ngành ngân hàng tích cực hơn, điều này có thể làm tăng biên độ phục hồi.",
+          "expression": "alpha = cwise_mul(minus(ts_rank(ts_delta(df['close'], 5), 10), ts_rank(df['RSI_14'], 10)), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.056293,
+          "ic_5d": 0.053685,
+          "sharpe": 0.2287,
+          "turnover": 0.7477,
+          "status": "OK",
+          "score": 0.052072,
+          "flipped": false
+        },
+        {
+          "id": 4,
+          "idea": "Khi giá ACB đang trong xu hướng giảm nhưng chỉ số MACD cho thấy dấu hiệu phân kỳ tăng (giá giảm trong khi MACD tăng), điều này có thể chỉ ra rằng lực bán đang suy yếu. Nếu sentiment ngành ngân hàng (MBB_S) cũng tích cực, điều này củng cố cho khả năng phục hồi giá. Chúng ta có thể sử dụng sự khác biệt giữa sức mạnh của MACD và giá để tạo ra tín hiệu mua.",
+          "expression": "alpha = cwise_mul(less(ts_rank(df['close'], 20), ts_rank(ts_delta(df['MACD'], 5), 10)), add(1.0, cwise_mul(0.3, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.077685,
+          "ic_5d": 0.097156,
+          "sharpe": 0.8088,
+          "turnover": 0.3983,
+          "status": "OK",
+          "score": 0.111316,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá ACB giảm nhưng chỉ số RSI_14 lại giảm chậm hơn, đây có thể là dấu hiệu của việc lực bán đang suy yếu và có khả năng phục hồi giá. Nếu sentiment ngành ngân hàng (MBB_S) cũng tích cực, điều này càng củng cố tín hiệu tăng giá.",
+          "expression": "alpha = cwise_mul(ts_rank(ts_delta(df['close'], 5), 10), add(1.0, cwise_mul(0.2, ts_ema(df['MBB_S'], 5))))",
+          "ic": 0.045889,
+          "ic_5d": 0.001046,
+          "sharpe": 0.64,
+          "turnover": 0.6399,
+          "status": "OK",
+          "score": 0.078736,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

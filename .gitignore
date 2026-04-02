@@ -1,0 +1,8 @@
+.env
+*__pycache__/
+data/daily_scores/
+data/features/
+data/price/
+data/raw_news/
+data/sentiment_output/
+data/signals/

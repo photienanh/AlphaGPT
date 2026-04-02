@@ -1,0 +1,200 @@
+{
+  "ticker": "MSN",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi giá của MSN đang ở gần mức hỗ trợ (SMA_20) và sentiment ngành (TCB_S) tích cực, điều này có thể dẫn đến một xu hướng tăng. Sự kết hợp này cho thấy có thể có một sự phục hồi từ mức hỗ trợ.",
+      "expression": "alpha = cwise_mul(greater(ts_ema(df['TCB_S'], 5), 0), minus(df['SMA_20'], df['close']))",
+      "ic": 0.059871,
+      "ic_5d": 0.103531,
+      "sharpe": 0.0674,
+      "turnover": 0.4699,
+      "status": "OK",
+      "score": 0.041311,
+      "flipped": false
+    },
+    {
+      "id": 2,
+      "idea": "Sự tương quan giữa volume và giá có thể tạo ra tín hiệu mạnh mẽ khi giá đang tiếp cận vùng quá bán (RSI < 30). Khi volume tăng mạnh trong khi giá tiếp tục giảm, điều này có thể chỉ ra một xu hướng phục hồi sắp xảy ra. Kết hợp với sentiment ngành ngân hàng (TCB_S) tích cực có thể củng cố thêm cho tín hiệu mua này.",
+      "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['RSI_14'], 14), -1), ts_rank(df['volume'], 5)) + cwise_mul(ts_ema(df['TCB_S'], 5), 0.3)",
+      "ic": 0.047062,
+      "ic_5d": 0.014715,
+      "sharpe": 0.5341,
+      "turnover": 0.9352,
+      "status": "OK",
+      "score": 0.070963,
+      "flipped": false
+    },
+    {
+      "id": 3,
+      "idea": "Sự giao nhau giữa SMA_5 và SMA_20 trong khi sentiment ngành liên quan (VIC_S) tích cực có thể báo hiệu xu hướng tăng. Điều này cho thấy sự đồng thuận từ cả phân tích kỹ thuật và tâm lý thị trường.",
+      "expression": "alpha = cwise_mul(greater(df['SMA_5'], df['SMA_20']), ts_ema(df['VIC_S'], 5))",
+      "ic": 0.035013,
+      "ic_5d": 0.007801,
+      "sharpe": -0.3449,
+      "turnover": 0.4202,
+      "status": "OK",
+      "score": 0.021008,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+      "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+      "ic": 0.010904,
+      "ic_5d": 0.017137,
+      "sharpe": 0.3135,
+      "turnover": 0.6085,
+      "status": "OK",
+      "score": 0.031624,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+      "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+      "ic": 0.024584,
+      "ic_5d": 0.034331,
+      "sharpe": 0.2789,
+      "turnover": 0.9601,
+      "status": "OK",
+      "score": 0.03706,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá của MSN đang ở gần mức hỗ trợ (SMA_20) và sentiment ngành (TCB_S) tích cực, điều này có thể dẫn đến một xu hướng tăng. Sự kết hợp này cho thấy có thể có một sự phục hồi từ mức hỗ trợ.",
+          "expression": "alpha = cwise_mul(greater(ts_ema(df['TCB_S'], 5), 0), minus(df['SMA_20'], df['close']))",
+          "ic": 0.059871,
+          "ic_5d": 0.103531,
+          "sharpe": 0.0674,
+          "turnover": 0.4699,
+          "status": "OK",
+          "score": 0.041311,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Khi MACD cắt lên trên đường tín hiệu trong khi volume tăng, điều này cho thấy tín hiệu mua mạnh mẽ. Sự tương tác giữa MACD và volume cho thấy sự xác nhận của xu hướng tăng.",
+          "expression": "alpha = cwise_mul(greater(df['MACD'], df['MACD_Signal']), ts_rank(df['volume'], 5))",
+          "ic": 0.012298,
+          "ic_5d": 0.044572,
+          "sharpe": 0.2334,
+          "turnover": 0.5947,
+          "status": "OK",
+          "score": 0.026047,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự giao nhau giữa SMA_5 và SMA_20 trong khi sentiment ngành liên quan (VIC_S) tích cực có thể báo hiệu xu hướng tăng. Điều này cho thấy sự đồng thuận từ cả phân tích kỹ thuật và tâm lý thị trường.",
+          "expression": "alpha = cwise_mul(greater(df['SMA_5'], df['SMA_20']), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.035013,
+          "ic_5d": 0.007801,
+          "sharpe": -0.3449,
+          "turnover": 0.4202,
+          "status": "OK",
+          "score": 0.021008,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.010904,
+          "ic_5d": 0.017137,
+          "sharpe": 0.3135,
+          "turnover": 0.6085,
+          "status": "OK",
+          "score": 0.031624,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+          "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+          "ic": 0.024584,
+          "ic_5d": 0.034331,
+          "sharpe": 0.2789,
+          "turnover": 0.9601,
+          "status": "OK",
+          "score": 0.03706,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi giá của MSN đang ở gần mức hỗ trợ (SMA_20) và sentiment ngành (TCB_S) tích cực, điều này có thể dẫn đến một xu hướng tăng. Sự kết hợp này cho thấy có thể có một sự phục hồi từ mức hỗ trợ.",
+          "expression": "alpha = cwise_mul(greater(ts_ema(df['TCB_S'], 5), 0), minus(df['SMA_20'], df['close']))",
+          "ic": 0.059871,
+          "ic_5d": 0.103531,
+          "sharpe": 0.0674,
+          "turnover": 0.4699,
+          "status": "OK",
+          "score": 0.041311,
+          "flipped": false
+        },
+        {
+          "id": 2,
+          "idea": "Sự tương quan giữa volume và giá có thể tạo ra tín hiệu mạnh mẽ khi giá đang tiếp cận vùng quá bán (RSI < 30). Khi volume tăng mạnh trong khi giá tiếp tục giảm, điều này có thể chỉ ra một xu hướng phục hồi sắp xảy ra. Kết hợp với sentiment ngành ngân hàng (TCB_S) tích cực có thể củng cố thêm cho tín hiệu mua này.",
+          "expression": "alpha = cwise_mul(greater(ts_zscore_scale(df['RSI_14'], 14), -1), ts_rank(df['volume'], 5)) + cwise_mul(ts_ema(df['TCB_S'], 5), 0.3)",
+          "ic": 0.047062,
+          "ic_5d": 0.014715,
+          "sharpe": 0.5341,
+          "turnover": 0.9352,
+          "status": "OK",
+          "score": 0.070963,
+          "flipped": false
+        },
+        {
+          "id": 3,
+          "idea": "Sự giao nhau giữa SMA_5 và SMA_20 trong khi sentiment ngành liên quan (VIC_S) tích cực có thể báo hiệu xu hướng tăng. Điều này cho thấy sự đồng thuận từ cả phân tích kỹ thuật và tâm lý thị trường.",
+          "expression": "alpha = cwise_mul(greater(df['SMA_5'], df['SMA_20']), ts_ema(df['VIC_S'], 5))",
+          "ic": 0.035013,
+          "ic_5d": 0.007801,
+          "sharpe": -0.3449,
+          "turnover": 0.4202,
+          "status": "OK",
+          "score": 0.021008,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Momentum multi-timeframe: so sánh momentum ngắn hạn vs dài hạn",
+          "expression": "alpha = minus(ts_zscore_scale(df['Momentum_3'], 10), ts_zscore_scale(df['Momentum_10'], 20))",
+          "ic": 0.010904,
+          "ic_5d": 0.017137,
+          "sharpe": 0.3135,
+          "turnover": 0.6085,
+          "status": "OK",
+          "score": 0.031624,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Volume-price divergence: volume tăng relative nhưng return giảm",
+          "expression": "alpha = minus(ts_rank(df['volume'], 20), ts_rank(ts_delta(df['close'], 5), 20))",
+          "ic": 0.024584,
+          "ic_5d": 0.034331,
+          "sharpe": 0.2789,
+          "turnover": 0.9601,
+          "status": "OK",
+          "score": 0.03706,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}

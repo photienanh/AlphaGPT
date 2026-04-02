@@ -1,0 +1,200 @@
+{
+  "ticker": "VNM",
+  "n_rows": 727,
+  "n_rounds": 2,
+  "alphas": [
+    {
+      "id": 1,
+      "idea": "Khi đường MACD cắt xuống dưới đường tín hiệu trong bối cảnh khối lượng giao dịch thấp hơn trung bình, đây là dấu hiệu cho thấy giá có thể giảm. Chúng tôi kết hợp MACD và OBV để tối ưu hóa dự đoán.",
+      "expression": "alpha = cwise_mul(less(ts_delta(df['MACD'], 1), ts_delta(df['MACD_Signal'], 1)), ts_zscore_scale(df['OBV'], 20))",
+      "ic": 0.048148,
+      "ic_5d": 0.005408,
+      "sharpe": 0.336,
+      "turnover": 0.7226,
+      "status": "OK",
+      "score": 0.055769,
+      "flipped": true
+    },
+    {
+      "id": 2,
+      "idea": "Khi sentiment của ngành ngân hàng (TCB_S) đang thấp trong khi Momentum đang tăng, có khả năng giá sẽ giảm mạnh. Chúng tôi kết hợp sentiment với Momentum để điều chỉnh tín hiệu.",
+      "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_10'], 10), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+      "ic": 0.074661,
+      "ic_5d": 0.049491,
+      "sharpe": -0.1814,
+      "turnover": 0.6517,
+      "status": "OK",
+      "score": 0.044796,
+      "flipped": true
+    },
+    {
+      "id": 3,
+      "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, điều này cho thấy có sự phân phối. Chúng tôi sử dụng tỷ lệ giữa khối lượng và giá để xác định kỳ vọng giảm.",
+      "expression": "alpha = less(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+      "ic": 0.014968,
+      "ic_5d": 0.023253,
+      "sharpe": -0.172,
+      "turnover": 0.7576,
+      "status": "OK",
+      "score": 0.008981,
+      "flipped": true
+    },
+    {
+      "id": 4,
+      "idea": "Khi khối lượng giao dịch giảm mạnh dưới mức trung bình trong khi giá đang có xu hướng tăng, điều này có thể cho thấy một xu hướng giảm sắp xảy ra. Chúng tôi dùng tỷ lệ giữa khối lượng hiện tại và trung bình động để tạo ra một tín hiệu bán.",
+      "expression": "alpha = cwise_mul(less(ts_delta_ratio(df['volume'], 20), 0.5), ts_zscore_scale(ts_delta(df['close'], 5), 5))",
+      "ic": 0.033511,
+      "ic_5d": 0.022063,
+      "sharpe": 0.1311,
+      "turnover": 1.0482,
+      "status": "OK",
+      "score": 0.030595,
+      "flipped": false
+    },
+    {
+      "id": 5,
+      "idea": "Khi giá nằm dưới đường SMA_20 nhưng có dấu hiệu tăng trưởng trong Momentum, điều này có thể cho thấy sự đảo chiều sắp xảy ra. Chúng tôi sử dụng sự kết hợp giữa SMA_20 và Momentum để tạo ra tín hiệu mua.",
+      "expression": "alpha = cwise_mul(greater(df['close'], ts_mean(df['SMA_20'], 20)), ts_zscore_scale(df['Momentum_3'], 10))",
+      "ic": 0.007615,
+      "ic_5d": 0.075126,
+      "sharpe": 0.4027,
+      "turnover": 0.902,
+      "status": "OK",
+      "score": 0.036787,
+      "flipped": false
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi đường MACD cắt xuống dưới đường tín hiệu trong bối cảnh khối lượng giao dịch thấp hơn trung bình, đây là dấu hiệu cho thấy giá có thể giảm. Chúng tôi kết hợp MACD và OBV để tối ưu hóa dự đoán.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['MACD'], 1), ts_delta(df['MACD_Signal'], 1)), ts_zscore_scale(df['OBV'], 20))",
+          "ic": 0.048148,
+          "ic_5d": 0.005408,
+          "sharpe": 0.336,
+          "turnover": 0.7226,
+          "status": "OK",
+          "score": 0.055769,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi sentiment của ngành ngân hàng (TCB_S) đang thấp trong khi Momentum đang tăng, có khả năng giá sẽ giảm mạnh. Chúng tôi kết hợp sentiment với Momentum để điều chỉnh tín hiệu.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_10'], 10), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.074661,
+          "ic_5d": 0.049491,
+          "sharpe": -0.1814,
+          "turnover": 0.6517,
+          "status": "OK",
+          "score": 0.044796,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, điều này cho thấy có sự phân phối. Chúng tôi sử dụng tỷ lệ giữa khối lượng và giá để xác định kỳ vọng giảm.",
+          "expression": "alpha = less(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+          "ic": 0.014968,
+          "ic_5d": 0.023253,
+          "sharpe": -0.172,
+          "turnover": 0.7576,
+          "status": "OK",
+          "score": 0.008981,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi khối lượng giao dịch giảm mạnh dưới mức trung bình trong khi giá đang có xu hướng tăng, điều này có thể cho thấy một xu hướng giảm sắp xảy ra. Chúng tôi dùng tỷ lệ giữa khối lượng hiện tại và trung bình động để tạo ra một tín hiệu bán.",
+          "expression": "alpha = cwise_mul(less(ts_delta_ratio(df['volume'], 20), 0.5), ts_zscore_scale(ts_delta(df['close'], 5), 5))",
+          "ic": 0.033511,
+          "ic_5d": 0.022063,
+          "sharpe": 0.1311,
+          "turnover": 1.0482,
+          "status": "OK",
+          "score": 0.030595,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá nằm dưới đường SMA_20 nhưng có dấu hiệu tăng trưởng trong Momentum, điều này có thể cho thấy sự đảo chiều sắp xảy ra. Chúng tôi sử dụng sự kết hợp giữa SMA_20 và Momentum để tạo ra tín hiệu mua.",
+          "expression": "alpha = cwise_mul(greater(df['close'], ts_mean(df['SMA_20'], 20)), ts_zscore_scale(df['Momentum_3'], 10))",
+          "ic": 0.007615,
+          "ic_5d": 0.075126,
+          "sharpe": 0.4027,
+          "turnover": 0.902,
+          "status": "OK",
+          "score": 0.036787,
+          "flipped": false
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "replaced": 0,
+      "alphas": [
+        {
+          "id": 1,
+          "idea": "Khi đường MACD cắt xuống dưới đường tín hiệu trong bối cảnh khối lượng giao dịch thấp hơn trung bình, đây là dấu hiệu cho thấy giá có thể giảm. Chúng tôi kết hợp MACD và OBV để tối ưu hóa dự đoán.",
+          "expression": "alpha = cwise_mul(less(ts_delta(df['MACD'], 1), ts_delta(df['MACD_Signal'], 1)), ts_zscore_scale(df['OBV'], 20))",
+          "ic": 0.048148,
+          "ic_5d": 0.005408,
+          "sharpe": 0.336,
+          "turnover": 0.7226,
+          "status": "OK",
+          "score": 0.055769,
+          "flipped": true
+        },
+        {
+          "id": 2,
+          "idea": "Khi sentiment của ngành ngân hàng (TCB_S) đang thấp trong khi Momentum đang tăng, có khả năng giá sẽ giảm mạnh. Chúng tôi kết hợp sentiment với Momentum để điều chỉnh tín hiệu.",
+          "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_10'], 10), add(1.0, cwise_mul(0.3, ts_ema(df['TCB_S'], 5))))",
+          "ic": 0.074661,
+          "ic_5d": 0.049491,
+          "sharpe": -0.1814,
+          "turnover": 0.6517,
+          "status": "OK",
+          "score": 0.044796,
+          "flipped": true
+        },
+        {
+          "id": 3,
+          "idea": "Khi khối lượng giao dịch tăng mạnh nhưng giá không tăng tương ứng, điều này cho thấy có sự phân phối. Chúng tôi sử dụng tỷ lệ giữa khối lượng và giá để xác định kỳ vọng giảm.",
+          "expression": "alpha = less(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['close'], 5))",
+          "ic": 0.014968,
+          "ic_5d": 0.023253,
+          "sharpe": -0.172,
+          "turnover": 0.7576,
+          "status": "OK",
+          "score": 0.008981,
+          "flipped": true
+        },
+        {
+          "id": 4,
+          "idea": "Khi khối lượng giao dịch giảm mạnh dưới mức trung bình trong khi giá đang có xu hướng tăng, điều này có thể cho thấy một xu hướng giảm sắp xảy ra. Chúng tôi dùng tỷ lệ giữa khối lượng hiện tại và trung bình động để tạo ra một tín hiệu bán.",
+          "expression": "alpha = cwise_mul(less(ts_delta_ratio(df['volume'], 20), 0.5), ts_zscore_scale(ts_delta(df['close'], 5), 5))",
+          "ic": 0.033511,
+          "ic_5d": 0.022063,
+          "sharpe": 0.1311,
+          "turnover": 1.0482,
+          "status": "OK",
+          "score": 0.030595,
+          "flipped": false
+        },
+        {
+          "id": 5,
+          "idea": "Khi giá nằm dưới đường SMA_20 nhưng có dấu hiệu tăng trưởng trong Momentum, điều này có thể cho thấy sự đảo chiều sắp xảy ra. Chúng tôi sử dụng sự kết hợp giữa SMA_20 và Momentum để tạo ra tín hiệu mua.",
+          "expression": "alpha = cwise_mul(greater(df['close'], ts_mean(df['SMA_20'], 20)), ts_zscore_scale(df['Momentum_3'], 10))",
+          "ic": 0.007615,
+          "ic_5d": 0.075126,
+          "sharpe": 0.4027,
+          "turnover": 0.902,
+          "status": "OK",
+          "score": 0.036787,
+          "flipped": false
+        }
+      ]
+    }
+  ]
+}
