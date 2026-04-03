@@ -1,0 +1,210 @@
+[
+  {
+    "ticker": "FPT",
+    "idea": "Mô hình nến tăng sau chuỗi giảm có thể báo hiệu sự đảo chiều.",
+    "expression": "alpha = ts_rank(cwise_mul(ts_rank(ts_delta_ratio(df['close'], 7), 12), sign(ts_delta(df['close'], 15))), 15)",
+    "ic_oos": 0.140349,
+    "ic_is": 0.010415,
+    "sharpe_oos": 3.0504,
+    "sharpe": 1.2018,
+    "score": 0.328241,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "FPT",
+    "idea": "Tương quan giữa giá và khối lượng có thể chỉ ra xu hướng tăng.",
+    "expression": "alpha = tanh(ts_rank(ts_corr(df['close'], df['volume'], 15) * ts_delta(df['close'], 3), 10))",
+    "ic_oos": 0.105295,
+    "ic_is": 0.022165,
+    "sharpe_oos": 2.5422,
+    "sharpe": 0.5631,
+    "score": 0.266554,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "FPT",
+    "idea": "Khối lượng tăng mạnh mà giá không thay đổi có thể dẫn đến xu hướng tăng.",
+    "expression": "alpha = ts_delta_ratio(df['volume'], 3) * ts_delta(df['close'], 3)",
+    "ic_oos": 0.082329,
+    "ic_is": 0.014045,
+    "sharpe_oos": 1.7714,
+    "sharpe": 0.5762,
+    "score": 0.191106,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "FPT",
+    "idea": "Xu hướng giá tăng với khối lượng giảm cho thấy sự tiếp diễn của xu hướng.",
+    "expression": "alpha = tanh(ts_maxmin_scale(cwise_mul(ts_delta(df['close'], 5), neg(ts_delta(df['volume'], 7))), 15))",
+    "ic_oos": 0.11548,
+    "ic_is": 0.008598,
+    "sharpe_oos": 1.5204,
+    "sharpe": 0.1805,
+    "score": 0.190922,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "FPT",
+    "idea": "Tâm lý tích cực trong ngành công nghệ có thể thúc đẩy giá cổ phiếu tăng.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta(df['close'], 7), add(1.0, cwise_mul(0.2, ts_ema(df['FPT_S'], 3)))), 10))",
+    "ic_oos": 0.103212,
+    "ic_is": 0.026993,
+    "sharpe_oos": 1.4961,
+    "sharpe": 0.4155,
+    "score": 0.181614,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "FPT_S"
+        ]
+      },
+      "n_components": 6,
+      "uses_sentiment": true
+    }
+  }
+]

@@ -1,0 +1,205 @@
+[
+  {
+    "ticker": "VIC",
+    "idea": "Phục hồi giá khi giá dưới BB thấp và khối lượng tăng.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(neg(ts_delta(df['close'], 12)), ts_maxmin_scale(df['volume'], 15)), 15))",
+    "ic_oos": 0.247118,
+    "ic_is": 0.010716,
+    "sharpe_oos": 4.1784,
+    "sharpe": 1.7721,
+    "score": 0.482541,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Động lượng dương có thể dẫn đến xu hướng tăng tiếp theo.",
+    "expression": "alpha = cwise_mul(ts_maxmin_scale(df['Momentum_3'], 7), sign(ts_delta(df['close'], 1)))",
+    "ic_oos": 0.152309,
+    "ic_is": 0.059135,
+    "sharpe_oos": 2.4475,
+    "sharpe": 1.5757,
+    "score": 0.287184,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Độ biến động cao có thể chỉ ra khả năng điều chỉnh giá.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_std(df['close'], 25), 15))",
+    "ic_oos": 0.086893,
+    "ic_is": 0.095941,
+    "sharpe_oos": 2.152,
+    "sharpe": 1.3324,
+    "score": 0.224292,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Sự phục hồi từ mức thấp so với SMA có thể dẫn đến tăng trưởng giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_delta_ratio(df['Momentum_3'], 3) * neg(ts_delta_ratio(df['close'], 20)), 12))",
+    "ic_oos": 0.126524,
+    "ic_is": 0.038006,
+    "sharpe_oos": 1.8074,
+    "sharpe": 0.582,
+    "score": 0.220506,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Giá trên BB cao với khối lượng thấp có thể dẫn đến giảm giá.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(neg(ts_delta(df['close'], 10)), ts_zscore_scale(df['BB_Upper'], 20)), 20)",
+    "ic_oos": 0.107852,
+    "ic_is": 0.010791,
+    "sharpe_oos": 1.6255,
+    "sharpe": 0.5764,
+    "score": 0.194754,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "BB_Upper"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  }
+]

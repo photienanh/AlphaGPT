@@ -1,0 +1,121 @@
+[
+  {
+    "ticker": "SSB",
+    "idea": "Dự đoán phục hồi giá sau đợt giảm.",
+    "expression": "alpha = cwise_mul(neg(ts_delta_ratio(df['close'], 7)), ts_delta(df['close'], 1))",
+    "ic_oos": 0.141947,
+    "ic_is": 0.139811,
+    "sharpe_oos": 2.8712,
+    "sharpe": 1.4469,
+    "score": 0.314865,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSB",
+    "idea": "Phát hiện đợt tăng giá tiềm năng khi giá tăng nhưng khối lượng thấp.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['close'], 7), ts_decayed_linear(df['volume'], 20)), 12))",
+    "ic_oos": 0.127655,
+    "ic_is": 0.024577,
+    "sharpe_oos": 1.6677,
+    "sharpe": 0.3383,
+    "score": 0.210011,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_decayed_linear",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSB",
+    "idea": "Dự đoán thay đổi giá dựa trên sự thay đổi tương quan giữa giá và khối lượng.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_corr(df['close'], df['volume'], 10), 20))",
+    "ic_oos": -0.035341,
+    "ic_is": 0.046046,
+    "sharpe_oos": 1.5481,
+    "sharpe": 1.2822,
+    "score": 0.145053,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

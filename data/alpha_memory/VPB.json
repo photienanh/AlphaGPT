@@ -1,0 +1,179 @@
+[
+  {
+    "ticker": "VPB",
+    "idea": "Sự tích lũy trong OBV có thể dẫn đến tăng giá.",
+    "expression": "alpha = cwise_mul(ts_delta(df['OBV'], 12), ts_delta_ratio(df['close'], 5))",
+    "ic_oos": 0.197958,
+    "ic_is": 0.005034,
+    "sharpe_oos": 2.7391,
+    "sharpe": 0.5462,
+    "score": 0.337901,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Mô hình nến tăng mạnh có thể dẫn đến tăng giá.",
+    "expression": "alpha = ts_zscore_scale(ts_delta_ratio(df['close'], 1) - ts_delta(df['open'], 1), 25)",
+    "ic_oos": 0.101511,
+    "ic_is": 0.02242,
+    "sharpe_oos": 2.7924,
+    "sharpe": 1.4017,
+    "score": 0.284296,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "open",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Sự thay đổi tương quan giữa giá và khối lượng có thể chỉ ra xu hướng mới.",
+    "expression": "alpha = ts_cov(df['close'], df['volume'], 5)",
+    "ic_oos": 0.109941,
+    "ic_is": 0.022135,
+    "sharpe_oos": 2.2388,
+    "sharpe": 0.9767,
+    "score": 0.245069,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_cov",
+          "role": "covariance_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Khối lượng giao dịch tăng mà không có sự tăng giá có thể chỉ ra sự tích lũy.",
+    "expression": "alpha = cwise_mul(ts_delta(df['volume'], 10), ts_rank(df['close'], 25))",
+    "ic_oos": 0.115455,
+    "ic_is": 0.01049,
+    "sharpe_oos": 1.9447,
+    "sharpe": 1.2176,
+    "score": 0.224853,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Cảm xúc tích cực trong khi giá giảm có thể dẫn đến sự phục hồi.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['VPB_S'], 12), neg(ts_delta(df['close'], 5)))",
+    "ic_oos": 0.065043,
+    "ic_is": 0.019869,
+    "sharpe_oos": 1.3441,
+    "sharpe": 0.504,
+    "score": 0.146552,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "VPB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  }
+]

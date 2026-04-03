@@ -1,0 +1,199 @@
+[
+  {
+    "ticker": "STB",
+    "idea": "Tăng giá liên tục với khối lượng cao cho thấy khả năng tiếp tục xu hướng.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_delta_ratio(df['close'], 3), greater(df['volume'], ts_ema(df['volume'], 7))), 25)",
+    "ic_oos": 0.156222,
+    "ic_is": 0.047808,
+    "sharpe_oos": 2.2931,
+    "sharpe": 0.9955,
+    "score": 0.277184,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Giá vượt dải trên cùng với khối lượng thấp chỉ ra khả năng điều chỉnh.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(neg(ts_delta(df['close'], 12)), less(df['volume'], ts_ema(df['volume'], 20))), 20))",
+    "ic_oos": 0.128078,
+    "ic_is": 0.046824,
+    "sharpe_oos": 2.3887,
+    "sharpe": 1.6497,
+    "score": 0.267946,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Tương quan tích cực giữa volume và price chỉ ra xu hướng tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_corr(df['volume'], df['close'], 7), 15)",
+    "ic_oos": 0.178847,
+    "ic_is": 0.040926,
+    "sharpe_oos": 1.9483,
+    "sharpe": 0.8591,
+    "score": 0.263175,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Đồng thuận cảm xúc tích cực từ ngành ngân hàng có thể thúc đẩy giá cổ phiếu STB.",
+    "expression": "alpha = cwise_mul(ts_delta(df['close'], 7), add(1.0, cwise_mul(0.2, ts_ema(df['STB_S'], 5))))",
+    "ic_oos": 0.143058,
+    "ic_is": 0.068619,
+    "sharpe_oos": 1.6036,
+    "sharpe": 0.6456,
+    "score": 0.214127,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "STB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Tăng trưởng giá khi momentum tích cực và khối lượng tăng.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['volume'], 10), ts_delta(df['Momentum_10'], 12))",
+    "ic_oos": 0.087898,
+    "ic_is": 0.035704,
+    "sharpe_oos": 1.5573,
+    "sharpe": 1.0464,
+    "score": 0.177322,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "Momentum_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

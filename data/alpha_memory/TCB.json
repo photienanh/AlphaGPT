@@ -1,0 +1,204 @@
+[
+  {
+    "ticker": "TCB",
+    "idea": "Dự đoán phục hồi giá khi khối lượng tăng mạnh trong khi giá giảm.",
+    "expression": "alpha = ts_maxmin_scale(cwise_mul(ts_delta_ratio(df['volume'], 5), neg(ts_delta(df['close'], 7))), 15)",
+    "ic_oos": 0.119587,
+    "ic_is": 0.043731,
+    "sharpe_oos": 2.2835,
+    "sharpe": 0.8251,
+    "score": 0.254431,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TCB",
+    "idea": "Dự đoán giá giảm khi có mẫu nến tăng theo sau là mẫu nến giảm.",
+    "expression": "alpha = tanh(ts_rank(neg(ts_delta(df['close'], 10)) * sign(ts_delta(df['close'], 1)), 12))",
+    "ic_oos": 0.074545,
+    "ic_is": 0.039062,
+    "sharpe_oos": 1.6959,
+    "sharpe": 0.5355,
+    "score": 0.180395,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TCB",
+    "idea": "Dự đoán phục hồi khi khối lượng và giá có sự khác biệt lớn.",
+    "expression": "alpha = ts_corr(df['volume'], df['close'], 10) * ts_delta_ratio(df['close'], 3)",
+    "ic_oos": 0.089531,
+    "ic_is": 0.024144,
+    "sharpe_oos": 0.9601,
+    "sharpe": 0.283,
+    "score": 0.130523,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TCB",
+    "idea": "Dự đoán phục hồi giá khi OBV tăng trong bối cảnh giá giảm.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['OBV'], 10), neg(ts_delta(df['close'], 10)) ), 15))",
+    "ic_oos": 0.048587,
+    "ic_is": 0.004724,
+    "sharpe_oos": 1.1397,
+    "sharpe": 0.0732,
+    "score": 0.120327,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TCB",
+    "idea": "Dự đoán giá tăng khi biến động thấp.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_std(df['close'], 20), 12))",
+    "ic_oos": 0.011222,
+    "ic_is": 0.007292,
+    "sharpe_oos": 1.2649,
+    "sharpe": 0.6277,
+    "score": 0.107924,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

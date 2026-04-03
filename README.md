@@ -1,132 +1,88 @@
-# Alpha-GPT · VN30 Quant System
-
-Hệ thống sinh alpha tự động kết hợp Human-AI interaction theo paper Alpha-GPT (2308.00016v2),
-áp dụng cho thị trường VN30 Việt Nam.
-
-## Kiến trúc
+# Alpha-GPT VN30 — Project Structure & Guide
 
 ```
 alpha_gpt/
+│
+├── app.py                          # Flask REST API + Dashboard server
+│
+├── core/                           # Core modules (stateless utilities)
+│   ├── alpha_memory.py             # ★ NEW: RAG Knowledge Library
+│   ├── alpha_operators.py          # All formulaic operators for alpha expressions
+│   ├── backtester.py               # ★ UPDATED: Walk-forward OOS evaluation
+│   ├── daily_runner.py             # Daily pipeline: refresh → recompute → signal
+│   ├── genetic_search.py           # ★ NEW: GP enhancement (paper Section 4.2)
+│   ├── paths.py                    # Filesystem paths
+│   └── universe.py                 # VN30 symbols + industry mapping
+│
 ├── pipelines/
-│   ├── stock_data.py         ← Crawl OHLCV từ vnstock
-│   ├── indicators.py         ← Tính technical indicators
-│   ├── sentiment.py          ← Crawl tin tức + sentiment (GPT-4o-mini)
-│   └── gen_alpha.py          ← Sinh công thức alpha (LLM + refinement loop)
-├── app.py                    ← Flask REST API backend
-├── core/
-│   ├── alpha_operators.py    ← Toán tử alpha (ts_*, cross-sectional, element-wise)
-│   ├── backtester.py         ← IC, Sharpe, Turnover, decay detection
-│   ├── daily_runner.py       ← Pipeline hàng ngày: load alpha → compute → signal
-│   ├── universe.py           ← VN30 symbols + industry map (shared constants)
-│   └── paths.py              ← Shared filesystem paths
+│   ├── gen_alpha.py                # ★ UPDATED: Full Alpha-GPT pipeline (v3)
+│   ├── indicators.py               # Technical indicator computation
+│   ├── sentiment.py                # News crawl + sentiment scoring
+│   └── stock_data.py               # OHLCV data download via vnstock
+│
 ├── templates/
-│   └── dashboard.html        ← Frontend SPA (vanilla JS + Chart.js)
-└── data/
-	├── alpha_formulas/       ← {TICKER}_alphas.json (công thức + metrics)
-	├── alphas/               ← {TICKER}_alpha_values.csv (series values)
-	├── daily_scores/         ← daily sentiment per symbol
-	├── features/             ← {TICKER}.csv (OHLCV + technical indicators)
-	├── price/                ← OHLCV raw prices
-	├── raw_news/             ← crawled news titles by symbol
-	├── sentiment_output/     ← {TICKER}_Full_Sentiment.csv
-	└── signals/              ← signals_{YYYYMMDD}.csv (daily output)
+│   └── dashboard.html              # ★ UPDATED: Web dashboard (OOS metrics, GP tag)
+│
+└── data/                           # Auto-created by pipelines
+    ├── price/                      # Raw OHLCV CSVs (SSI.csv, HPG.csv, ...)
+    ├── features/                   # OHLCV + Technical indicators
+    ├── raw_news/                   # Crawled news titles
+    ├── daily_scores/               # Per-ticker daily sentiment scores
+    ├── sentiment_output/           # Merged sentiment features
+    ├── alpha_formulas/             # Alpha definitions + metrics (JSON)
+    ├── alphas/                     # Alpha value time-series (CSV)
+    ├── alpha_memory/               # ★ NEW: RAG memory store (JSON)
+    └── signals/                    # Daily signal outputs (CSV)
 ```
 
-## Quy trình đầy đủ
+## Quick Start
 
-### Bước 1 — Thu thập dữ liệu (chạy 1 lần + update hàng ngày)
-
+### 1. Install dependencies
 ```bash
-# Crawl giá cổ phiếu (3 năm)
-python pipelines/stock_data.py
-
-# Tính technical indicators
-python pipelines/indicators.py
-
-# Crawl tin tức + tính sentiment (cần OPENAI_API_KEY)
-python pipelines/sentiment.py
+pip install flask flask-cors openai vnstock pandas numpy python-dotenv beautifulsoup4 requests
 ```
 
-### Bước 2 — Sinh alpha formulas (chạy 1 lần, refinement định kỳ)
-
+### 2. Set API key
 ```bash
-# Sinh alpha cho 1 mã
-python pipelines/gen_alpha.py --ticker STB
+echo "OPENAI_API_KEY=sk-..." > .env
+```
 
-# Sinh alpha cho tất cả 30 mã VN30
+### 3. Download data (one-time)
+```bash
+python pipelines/stock_data.py        # OHLCV for VN30
+python pipelines/indicators.py        # Compute technical indicators
+python pipelines/sentiment.py         # Crawl news + score sentiment (slow ~1hr)
+```
+
+### 4. Generate alphas
+```bash
+# Single ticker (recommended to start)
+python pipelines/gen_alpha.py --ticker HPG
+
+# Faster (skip GP enhancement)
+python pipelines/gen_alpha.py --ticker HPG --no-gp
+
+# All VN30 (long, ~30 min)
 python pipelines/gen_alpha.py --all
 
-# Force re-generate (bỏ qua cache)
-python pipelines/gen_alpha.py --ticker STB --force
-
-# Tăng số vòng refinement
-python pipelines/gen_alpha.py --ticker STB --rounds 5
+# Refine existing alphas (keep good, replace weak)
+python pipelines/gen_alpha.py --ticker HPG --refine-only
 ```
 
-### Bước 3 — Chạy dashboard
-
+### 5. Launch dashboard
 ```bash
-# Cài dependencies
-pip install -r requirements.txt
-
-# Khởi động API backend
 python app.py
-# → API tại http://localhost:5000/api
-
-# Mở dashboard trong browser
-open templates/dashboard.html
-# Hoặc serve qua Flask: http://localhost:5000
+# Open: http://localhost:5000
 ```
 
-### Bước 4 — Pipeline hàng ngày (cron job)
-
+### 6. Daily update
 ```bash
-# Thêm vào crontab - chạy lúc 8:45 sáng mỗi ngày giao dịch
-# 45 8 * * 1-5 cd /path/to/alpha_gpt && python -c "
-# from core.daily_runner import run_daily
-# import json
-# tickers = json.load(open('data/alpha_formulas/VN30_list.json'))
-# run_daily(tickers)
-# "
+python -c "
+from core.daily_runner import refresh_market_data, refresh_alpha_values, run_daily
+from core.universe import VN30_SYMBOLS
+refresh_market_data(VN30_SYMBOLS)
+refresh_alpha_values(VN30_SYMBOLS)
+signals = run_daily(VN30_SYMBOLS)
+print(signals[['ticker','signal','action','rank']].head(10))
+"
 ```
-
-## API Endpoints
-
-| Endpoint | Mô tả |
-|---|---|
-| `GET /api/overview` | Tóm tắt tất cả 30 mã (signal, action, IC, Sharpe) |
-| `GET /api/ticker/{TICKER}` | Chi tiết 1 mã: alphas, rolling IC, composite signal |
-| `GET /api/signals` | Ranked buy/sell signals hôm nay |
-| `GET /api/decay` | Các alpha đang bị decay |
-| `POST /api/gen/{TICKER}` | Trigger re-generate alpha (async) |
-| `GET /api/ticker/{TICKER}/history` | Lịch sử refinement rounds |
-
-## Cách đọc tín hiệu giao dịch
-
-```
-Composite Signal > +1σ  → BUY  (mua ATO lúc 9:00)
-Composite Signal < -1σ  → SELL (tránh / bán nếu đang giữ)
--1σ ≤ Signal ≤ +1σ     → HOLD
-```
-
-Composite signal = weighted average của 5 alpha, trọng số = composite score (IC × Sharpe).
-Signal được z-score normalize trên rolling 60 ngày để so sánh tương đối giữa các mã.
-
-## Alpha Decay Loop
-
-Mỗi tuần/tháng, dashboard → tab "Alpha Decay" kiểm tra IC rolling 20d.
-Nếu IC giảm > 30% so với lịch sử → alpha được đánh dấu cần refinement.
-Click "Refinement" → trigger `pipelines/gen_alpha.py --ticker X --force` để sinh alpha mới.
-
-## Môi trường
-
-```bash
-# .env
-OPENAI_API_KEY=sk-...
-```
-
-## Liên quan
-
-- Paper: Alpha-GPT: Human-AI Interactive Alpha Mining (arXiv 2308.00016)
-- Repo tham khảo: https://github.com/parthmodi152/alpha-gpt
-- Thực nghiệm: file `Thực_nghiệm_AlphaGPT.pdf`

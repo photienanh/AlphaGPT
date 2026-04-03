@@ -1,0 +1,138 @@
+[
+  {
+    "ticker": "SAB",
+    "idea": "Momentum dương với khối lượng cao dự đoán tăng trưởng giá tiếp tục.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['Momentum_3'], 5))",
+    "ic_oos": 0.234377,
+    "ic_is": 0.002115,
+    "sharpe_oos": 2.2298,
+    "sharpe": 0.7723,
+    "score": 0.319014,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SAB",
+    "idea": "Khối lượng tăng mạnh khi giá có dấu hiệu giảm có thể dẫn đến sự đảo chiều.",
+    "expression": "alpha = ts_rank(cwise_mul(ts_delta_ratio(df['volume'], 7), neg(ts_delta_ratio(df['close'], 3))), 25)",
+    "ic_oos": 0.179969,
+    "ic_is": 0.009738,
+    "sharpe_oos": 2.0683,
+    "sharpe": 1.0722,
+    "score": 0.273449,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SAB",
+    "idea": "Dự đoán khả năng tiếp tục tăng giá khi khối lượng giao dịch gia tăng trong bối cảnh giá đang tăng.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 7), ts_maxmin_scale(df['volume'], 20))",
+    "ic_oos": 0.168643,
+    "ic_is": 0.089293,
+    "sharpe_oos": 1.5552,
+    "sharpe": 1.2478,
+    "score": 0.2256,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SAB",
+    "idea": "Tương quan giữa khối lượng và giá cho thấy xu hướng tiếp theo.",
+    "expression": "alpha = ts_cov(df['close'], df['volume'], 7)",
+    "ic_oos": 0.163438,
+    "ic_is": 0.016192,
+    "sharpe_oos": 1.207,
+    "sharpe": 0.5628,
+    "score": 0.194626,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_cov",
+          "role": "covariance_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  }
+]

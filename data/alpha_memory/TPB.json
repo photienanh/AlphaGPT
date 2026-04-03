@@ -1,0 +1,185 @@
+[
+  {
+    "ticker": "TPB",
+    "idea": "Cảm xúc tích cực về TPB trong bối cảnh nhóm ngân hàng có thể dẫn đến giá tăng.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['TPB_S'], 10), ts_delta(df['close'], 7))",
+    "ic_oos": 0.292341,
+    "ic_is": 0.078608,
+    "sharpe_oos": 3.5332,
+    "sharpe": 1.821,
+    "score": 0.458064,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "TPB_S"
+        ]
+      },
+      "n_components": 3,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "OBV tăng trong điều kiện giá ổn định có thể dẫn đến một đợt tăng giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_delta(df['OBV'], 7), 10))",
+    "ic_oos": 0.216053,
+    "ic_is": 0.010206,
+    "sharpe_oos": 2.9164,
+    "sharpe": 1.1708,
+    "score": 0.362943,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "Momentum dương trong bối cảnh giảm giá có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta(df['Momentum_3'], 5), neg(ts_delta_ratio(df['close'], 5)))",
+    "ic_oos": 0.108543,
+    "ic_is": 0.040286,
+    "sharpe_oos": 2.2023,
+    "sharpe": 1.0236,
+    "score": 0.241312,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "Sự tương quan cao giữa giá và khối lượng có thể dẫn đến sự củng cố xu hướng tăng.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_cov(df['close'], df['volume'], 12), 15))",
+    "ic_oos": 0.042598,
+    "ic_is": 0.047295,
+    "sharpe_oos": 2.0628,
+    "sharpe": 1.3122,
+    "score": 0.19058,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_cov",
+          "role": "covariance_signal"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "RSI cao cho thấy khả năng điều chỉnh giá đáng kể.",
+    "expression": "alpha = ts_zscore_scale(neg(ts_rank(df['RSI_14'], 15)), 20)",
+    "ic_oos": 0.068735,
+    "ic_is": 0.03452,
+    "sharpe_oos": 1.5128,
+    "sharpe": 0.6189,
+    "score": 0.162262,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

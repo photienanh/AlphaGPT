@@ -1,0 +1,136 @@
+[
+  {
+    "ticker": "CTG",
+    "idea": "Mô hình nến tăng sau chuỗi giảm có thể báo hiệu xu hướng tăng.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_delta_ratio(df['close'], 3) * sign(ts_delta(df['close'], 12)), 10))",
+    "ic_oos": 0.163456,
+    "ic_is": 0.013473,
+    "sharpe_oos": 2.5116,
+    "sharpe": 1.3281,
+    "score": 0.299003,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "CTG",
+    "idea": "Thị trường ổn định với biến động thấp có thể dẫn đến tăng giá.",
+    "expression": "alpha = ts_ema(df['close'], 10) - ts_std(df['close'], 15)",
+    "ic_oos": 0.131844,
+    "ic_is": 0.056709,
+    "sharpe_oos": 2.6427,
+    "sharpe": 0.4032,
+    "score": 0.290521,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "CTG",
+    "idea": "OBV tăng trong khi giá giảm cho thấy sự tích lũy có thể dẫn đến tăng giá.",
+    "expression": "alpha = ts_delta(df['OBV'], 7) - ts_delta(df['close'], 5)",
+    "ic_oos": 0.096236,
+    "ic_is": 0.03771,
+    "sharpe_oos": 2.2976,
+    "sharpe": 1.385,
+    "score": 0.241548,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "CTG",
+    "idea": "Giá tăng và khối lượng giảm cho thấy sự điều chỉnh có thể xảy ra.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta(df['close'], 3) - ts_delta(df['volume'], 7), 12)",
+    "ic_oos": 0.087428,
+    "ic_is": 0.007913,
+    "sharpe_oos": 1.8481,
+    "sharpe": 0.3999,
+    "score": 0.200302,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]

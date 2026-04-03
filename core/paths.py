@@ -7,6 +7,7 @@ DATA_DIR = BASE_DIR / "data"
 
 ALPHA_FORMULA_DIR = str(DATA_DIR / "alpha_formulas")
 ALPHA_VALUES_DIR = str(DATA_DIR / "alphas")
+ALPHA_MEMORY_DIR = str(DATA_DIR / "alpha_memory")
 FEATURES_DIR = str(DATA_DIR / "features")
 PRICE_DIR = str(DATA_DIR / "price")
 RAW_NEWS_DIR = str(DATA_DIR / "raw_news")

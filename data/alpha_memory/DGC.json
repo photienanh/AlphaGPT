@@ -1,0 +1,177 @@
+[
+  {
+    "ticker": "DGC",
+    "idea": "Thị trường ổn định với biến động thấp có thể dẫn đến tăng giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_std(df['close'], 10), 12))",
+    "ic_oos": 0.158929,
+    "ic_is": 0.034113,
+    "sharpe_oos": 4.626,
+    "sharpe": 1.6935,
+    "score": 0.465439,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "DGC",
+    "idea": "Cảm xúc tích cực của ngành hóa chất kết hợp với động lực giá dự đoán xu hướng tăng.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_delta_ratio(df['close'], 5), ts_ema(df['DGC_S'], 7)), 20)",
+    "ic_oos": 0.135314,
+    "ic_is": 0.044364,
+    "sharpe_oos": 2.6537,
+    "sharpe": 0.6877,
+    "score": 0.293481,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "DGC_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "DGC",
+    "idea": "Tương quan giữa giá và khối lượng cho thấy động lực giá tích cực.",
+    "expression": "alpha = ts_corr(df['close'], df['volume'], 10)",
+    "ic_oos": 0.137786,
+    "ic_is": 0.035477,
+    "sharpe_oos": 1.8379,
+    "sharpe": 0.4563,
+    "score": 0.229707,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "DGC",
+    "idea": "Khối lượng cao mà không có biến động giá cho thấy tích lũy.",
+    "expression": "alpha = minus(ts_delta(df['volume'], 10), ts_delta(df['close'], 3))",
+    "ic_oos": 0.105377,
+    "ic_is": 0.023222,
+    "sharpe_oos": 1.95,
+    "sharpe": 0.7053,
+    "score": 0.219229,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "minus",
+          "role": "divergence"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "DGC",
+    "idea": "RSI quá bán sau đó phục hồi dự báo xu hướng tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['RSI_14'], 7), minus(1, div(df['RSI_14'], 100)))",
+    "ic_oos": 0.057836,
+    "ic_is": 0.031322,
+    "sharpe_oos": 1.5945,
+    "sharpe": 0.6675,
+    "score": 0.162265,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "div",
+          "role": "ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  }
+]

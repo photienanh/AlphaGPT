@@ -1,0 +1,185 @@
+[
+  {
+    "ticker": "VIB",
+    "idea": "Cảm xúc tích cực từ ngành ngân hàng thúc đẩy giá VIB.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_zscore_scale(df['HDB_S'], 7), ts_delta(df['close'], 3)), 10))",
+    "ic_oos": 0.105705,
+    "ic_is": 0.068129,
+    "sharpe_oos": 2.659,
+    "sharpe": 1.2721,
+    "score": 0.27614,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "HDB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "VIB",
+    "idea": "Khối lượng tăng trong khi giá giảm có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta(df['volume'], 5), neg(ts_delta_ratio(df['close'], 7)) )",
+    "ic_oos": 0.119388,
+    "ic_is": 0.027977,
+    "sharpe_oos": 2.2727,
+    "sharpe": 0.871,
+    "score": 0.253452,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIB",
+    "idea": "Thị trường ổn định dẫn đến xu hướng tăng.",
+    "expression": "alpha = ts_rank(ts_std(df['close'], 7), 15)",
+    "ic_oos": 0.114196,
+    "ic_is": 0.010098,
+    "sharpe_oos": 2.0128,
+    "sharpe": 0.704,
+    "score": 0.229541,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIB",
+    "idea": "Sự thay đổi tương quan giữa giá và khối lượng dự báo xu hướng giá.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_corr(df['close'], df['volume'], 7), 20))",
+    "ic_oos": -0.074784,
+    "ic_is": 0.013431,
+    "sharpe_oos": 1.2534,
+    "sharpe": 0.6128,
+    "score": 0.145142,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIB",
+    "idea": "Tăng giá gần đây dự báo sự tiếp tục của xu hướng tăng.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_delta(df['close'], 5), 7))",
+    "ic_oos": -0.015141,
+    "ic_is": 0.038647,
+    "sharpe_oos": 1.1121,
+    "sharpe": 0.3708,
+    "score": 0.098055,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

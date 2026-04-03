@@ -1,0 +1,181 @@
+[
+  {
+    "ticker": "GAS",
+    "idea": "Sự bán tháo tạo ra áp lực giảm giá nhưng với khối lượng tăng, có thể dẫn đến sự đảo chiều.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 3), ts_delta_ratio(df['volume'], 5))",
+    "ic_oos": 0.172857,
+    "ic_is": 0.000617,
+    "sharpe_oos": 2.859,
+    "sharpe": 0.9435,
+    "score": 0.332437,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "Động lực giá đảo chiều từ giảm sang tăng có thể báo hiệu sự phục hồi.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(ts_delta_ratio(df['close'], 10), 7), sign(ts_delta(df['Momentum_3'], 7)))",
+    "ic_oos": 0.192501,
+    "ic_is": 0.030625,
+    "sharpe_oos": 2.6715,
+    "sharpe": 1.3478,
+    "score": 0.329224,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "Tăng OBV có thể dẫn đến giá tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta(df['OBV'], 20) * sign(ts_delta(df['close'], 5)), 20)",
+    "ic_oos": 0.132346,
+    "ic_is": 0.009051,
+    "sharpe_oos": 2.4713,
+    "sharpe": 1.0586,
+    "score": 0.277114,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "Tăng cường mối tương quan giữa giá và khối lượng có thể dẫn đến sự xác nhận xu hướng.",
+    "expression": "alpha = ts_rank(ts_corr(df['close'], df['volume'], 15), 25)",
+    "ic_oos": 0.025169,
+    "ic_is": 0.060943,
+    "sharpe_oos": 1.6994,
+    "sharpe": 0.9607,
+    "score": 0.151053,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "RSI quá mua có thể dẫn đến sự điều chỉnh giá.",
+    "expression": "alpha = tanh(ts_rank(neg(ts_rank(df['RSI_14'], 15)), 15))",
+    "ic_oos": 0.072791,
+    "ic_is": 0.008019,
+    "sharpe_oos": 1.2247,
+    "sharpe": 0.595,
+    "score": 0.141654,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

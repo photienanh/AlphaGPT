@@ -1,0 +1,164 @@
+[
+  {
+    "ticker": "ACB",
+    "idea": "RSI thấp cho thấy cơ hội mua cổ phiếu ACB.",
+    "expression": "alpha = minus(ts_maxmin_scale(df['RSI_14'], 25), 1)",
+    "ic_oos": 0.026005,
+    "ic_is": 0.034232,
+    "sharpe_oos": 1.4269,
+    "sharpe": 0.8291,
+    "score": 0.129755,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Tín hiệu từ sự phục hồi giá khi giá giảm xuống dưới mức BB_lower.",
+    "expression": "alpha = ts_zscore_scale(minus(df['close'], df['BB_Lower']), 3)",
+    "ic_oos": 0.035231,
+    "ic_is": 0.004968,
+    "sharpe_oos": 0.8772,
+    "sharpe": 0.7882,
+    "score": 0.091314,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "BB_Lower"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Tín hiệu từ sự tăng trưởng của OBV cùng với giá ổn định.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['OBV'], 5), relu(ts_std(df['close'], 20)))",
+    "ic_oos": 0.034613,
+    "ic_is": 0.042135,
+    "sharpe_oos": 0.3967,
+    "sharpe": 0.1652,
+    "score": 0.052504,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "relu",
+          "role": "threshold"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Tín hiệu tăng trưởng OBV trái ngược với chuyển động giá.",
+    "expression": "alpha = ts_delta(df['OBV'], 10)",
+    "ic_oos": -0.072051,
+    "ic_is": 0.004225,
+    "sharpe_oos": -0.8037,
+    "sharpe": -0.0552,
+    "score": 0.043231,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Tín hiệu momentum kết hợp với sự gia tăng biến động giá.",
+    "expression": "alpha = cwise_mul(df['Momentum_3'], ts_std(df['close'], 5))",
+    "ic_oos": -0.040084,
+    "ic_is": 0.078859,
+    "sharpe_oos": -1.327,
+    "sharpe": -0.0638,
+    "score": 0.02405,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]

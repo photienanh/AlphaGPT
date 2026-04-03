@@ -1,0 +1,189 @@
+[
+  {
+    "ticker": "BID",
+    "idea": "Khối lượng tăng cùng với giá giảm cho thấy có sự bán tháo.",
+    "expression": "alpha = cwise_mul(ts_delta(df['volume'], 5), neg(ts_std(df['close'], 30)))",
+    "ic_oos": 0.132941,
+    "ic_is": 0.055183,
+    "sharpe_oos": 2.7575,
+    "sharpe": 1.0238,
+    "score": 0.300364,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Độ biến động thấp cho thấy thị trường ổn định.",
+    "expression": "alpha = relu(ts_mean(df['close'], 10) - ts_std(df['close'], 10))",
+    "ic_oos": 0.158895,
+    "ic_is": 0.062613,
+    "sharpe_oos": 2.2337,
+    "sharpe": 1.4355,
+    "score": 0.274031,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_mean",
+          "role": "smoothing"
+        },
+        {
+          "operator": "relu",
+          "role": "threshold"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Sự phân kỳ giữa giá và OBV cho thấy khả năng điều chỉnh.",
+    "expression": "alpha = ts_rank(neg(ts_corr(df['close'], df['OBV'], 15)), 20)",
+    "ic_oos": 0.14026,
+    "ic_is": 0.005864,
+    "sharpe_oos": 1.673,
+    "sharpe": 0.7654,
+    "score": 0.217998,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Giá vượt EMA_10 với điều kiện khối lượng tăng cho thấy sự tiếp diễn của xu hướng.",
+    "expression": "alpha = cwise_mul(greater(df['close'], df['EMA_10']), ts_zscore_scale(df['volume'], 25))",
+    "ic_oos": 0.101022,
+    "ic_is": 0.004523,
+    "sharpe_oos": 1.8759,
+    "sharpe": 0.505,
+    "score": 0.210683,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close",
+          "EMA_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Giá tăng mạnh trong ngắn hạn chỉ ra xu hướng tiếp diễn.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['close'], 7), ts_std(df['close'], 5)), 12))",
+    "ic_oos": 0.049727,
+    "ic_is": 0.106092,
+    "sharpe_oos": 1.1084,
+    "sharpe": 1.2406,
+    "score": 0.11851,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  }
+]

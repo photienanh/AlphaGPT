@@ -1,0 +1,209 @@
+[
+  {
+    "ticker": "LPB",
+    "idea": "Động lượng thấp có thể dẫn đến phục hồi trong môi trường ổn định.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(neg(ts_delta_ratio(df['Momentum_10'], 3)), ts_std(df['close'], 5)), 25)",
+    "ic_oos": 0.130511,
+    "ic_is": 0.0163,
+    "sharpe_oos": 2.5125,
+    "sharpe": 0.6862,
+    "score": 0.279308,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Phân kỳ giữa cảm xúc thị trường và giá có thể dẫn đến phục hồi giá.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_zscore_scale(df['LPB_S'], 7), neg(ts_delta(df['close'], 5))), 20)",
+    "ic_oos": 0.132073,
+    "ic_is": 0.056291,
+    "sharpe_oos": 2.3018,
+    "sharpe": 0.84,
+    "score": 0.263386,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "LPB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Giá quá mua với tín hiệu sentiment yếu có thể dẫn đến điều chỉnh.",
+    "expression": "alpha = tanh(ts_maxmin_scale(cwise_mul(ts_zscore_scale(df['BB_Upper'], 10), ts_zscore_scale(df['LPB_S'], 3)), 12))",
+    "ic_oos": 0.108874,
+    "ic_is": 0.053282,
+    "sharpe_oos": 2.0163,
+    "sharpe": 0.9061,
+    "score": 0.226632,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "BB_Upper"
+        ],
+        "sentiment": [
+          "LPB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Xu hướng tăng mạnh có thể tiếp tục khi giá vẫn dưới trung bình dài hạn.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 15), minus(df['SMA_20'], df['close']))",
+    "ic_oos": 0.13638,
+    "ic_is": 0.021134,
+    "sharpe_oos": 1.7792,
+    "sharpe": 0.728,
+    "score": 0.224163,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Giá thấp hơn mức hỗ trợ có thể dẫn đến phục hồi nhờ vào khối lượng tăng.",
+    "expression": "alpha = tanh(ts_maxmin_scale(cwise_mul(neg(ts_delta_ratio(df['close'], 3)), ts_delta_ratio(df['volume'], 10)), 12))",
+    "ic_oos": 0.086864,
+    "ic_is": 0.01356,
+    "sharpe_oos": 1.9208,
+    "sharpe": 0.833,
+    "score": 0.205782,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  }
+]

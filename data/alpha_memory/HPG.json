@@ -1,0 +1,160 @@
+[
+  {
+    "ticker": "HPG",
+    "idea": "Khối lượng tăng trong khi giá giảm cho thấy sự bán tháo có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['volume'], 7), neg(ts_delta(df['close'], 7)))",
+    "ic_oos": 0.195425,
+    "ic_is": 0.014633,
+    "sharpe_oos": 3.6433,
+    "sharpe": 1.1395,
+    "score": 0.408721,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "Phân kỳ giữa giá và khối lượng có thể dẫn đến phục hồi.",
+    "expression": "alpha = ts_cov(df['close'], df['volume'], 7)",
+    "ic_oos": 0.167647,
+    "ic_is": 0.070876,
+    "sharpe_oos": 2.8928,
+    "sharpe": 1.2593,
+    "score": 0.332012,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_cov",
+          "role": "covariance_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "Tích lũy trong OBV có thể dẫn đến đợt tăng giá.",
+    "expression": "alpha = ts_delta(df['OBV'], 12)",
+    "ic_oos": 0.114883,
+    "ic_is": 0.027958,
+    "sharpe_oos": 2.4931,
+    "sharpe": 0.6924,
+    "score": 0.268377,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "RSI thấp cho thấy cổ phiếu có thể đã bán quá mức.",
+    "expression": "alpha = neg(ts_maxmin_scale(df['RSI_14'], 14))",
+    "ic_oos": 0.085889,
+    "ic_is": 0.056826,
+    "sharpe_oos": 2.2922,
+    "sharpe": 0.8234,
+    "score": 0.234906,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "Tăng giá cùng với khối lượng tăng cho thấy đà tăng mạnh.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 10), ts_delta_ratio(df['volume'], 12))",
+    "ic_oos": 0.122758,
+    "ic_is": 0.052832,
+    "sharpe_oos": 1.5857,
+    "sharpe": 0.7039,
+    "score": 0.200507,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]

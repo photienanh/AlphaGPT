@@ -1,0 +1,190 @@
+[
+  {
+    "ticker": "HDB",
+    "idea": "Cảm xúc tiêu cực trong ngành ngân hàng có thể tạo áp lực giảm giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['HDB_S'], 3), neg(ts_delta_ratio(df['close'], 5))), 15))",
+    "ic_oos": 0.196134,
+    "ic_is": 0.055052,
+    "sharpe_oos": 2.4335,
+    "sharpe": 1.4151,
+    "score": 0.312362,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "HDB_S"
+        ]
+      },
+      "n_components": 5,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "HDB",
+    "idea": "Biến động cao có thể dẫn đến giảm giá trong ngắn hạn.",
+    "expression": "alpha = ts_maxmin_scale(neg(ts_std(df['close'], 15)), 10)",
+    "ic_oos": 0.12721,
+    "ic_is": 0.012981,
+    "sharpe_oos": 2.4741,
+    "sharpe": 0.9273,
+    "score": 0.274255,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HDB",
+    "idea": "Sự gia tăng khối lượng trong bối cảnh giá giảm có thể dẫn đến áp lực mua vào, tạo ra tín hiệu đảo chiều tích cực.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 3), ts_zscore_scale(ts_mean(df['volume'], 7), 7))",
+    "ic_oos": 0.073058,
+    "ic_is": 0.011013,
+    "sharpe_oos": 1.6819,
+    "sharpe": 1.1561,
+    "score": 0.178386,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_mean",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HDB",
+    "idea": "Giá tăng nhưng khối lượng giảm có thể dẫn đến điều chỉnh giá.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 5), neg(ts_delta_ratio(df['volume'], 5)))",
+    "ic_oos": 0.072699,
+    "ic_is": 0.020793,
+    "sharpe_oos": 1.4818,
+    "sharpe": 0.6769,
+    "score": 0.16216,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HDB",
+    "idea": "Giá vượt biên trên Bollinger Bands có thể dẫn đến điều chỉnh giá xuống.",
+    "expression": "alpha = ts_rank(minus(df['close'], df['BB_Upper']), 20)",
+    "ic_oos": 0.041503,
+    "ic_is": 0.006475,
+    "sharpe_oos": 0.9024,
+    "sharpe": 0.216,
+    "score": 0.097091,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "BB_Upper"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]

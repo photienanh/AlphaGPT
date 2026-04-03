@@ -1,0 +1,190 @@
+[
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán khả năng phục hồi khi có bán tháo với khối lượng cao.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['volume'], 10), neg(ts_delta_ratio(df['close'], 10))), 15))",
+    "ic_oos": 0.205868,
+    "ic_is": 0.000893,
+    "sharpe_oos": 3.3934,
+    "sharpe": 1.3044,
+    "score": 0.394995,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán sự tăng giá mạnh mẽ khi có cảm xúc tích cực.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 7), add(1.0, cwise_mul(0.2, ts_ema(df['MWG_S'], 5))))",
+    "ic_oos": 0.156467,
+    "ic_is": 0.023004,
+    "sharpe_oos": 2.762,
+    "sharpe": 0.7913,
+    "score": 0.314839,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "MWG_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán sự đảo chiều khi có đỉnh cao nhưng khối lượng không tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['high'], 10), neg(ts_delta_ratio(df['volume'], 3)))",
+    "ic_oos": 0.198793,
+    "ic_is": 0.03144,
+    "sharpe_oos": 2.2936,
+    "sharpe": 0.7067,
+    "score": 0.302766,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "high",
+          "volume"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Sự tiếp diễn của xu hướng tăng khi có sức mua gia tăng.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['Momentum_10'], 10), ts_delta_ratio(df['volume'], 5))",
+    "ic_oos": 0.088401,
+    "ic_is": 0.039384,
+    "sharpe_oos": 2.2946,
+    "sharpe": 1.0032,
+    "score": 0.236606,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "Momentum_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán sự tiếp diễn của xu hướng khi có khối lượng giao dịch tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta(df['volume'], 7), 3)",
+    "ic_oos": 0.106094,
+    "ic_is": 0.043461,
+    "sharpe_oos": 1.9665,
+    "sharpe": 0.8813,
+    "score": 0.220975,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]

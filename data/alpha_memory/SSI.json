@@ -1,0 +1,201 @@
+[
+  {
+    "ticker": "SSI",
+    "idea": "Mức RSI thấp cho thấy tình trạng quá bán, tạo cơ hội cho sự phục hồi giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(neg(ts_delta_ratio(df['close'], 5)), relu(ts_rank(minus(df['RSI_14'], 30), 10))), 20))",
+    "ic_oos": 0.11228,
+    "ic_is": 0.0313,
+    "sharpe_oos": 2.6776,
+    "sharpe": 0.7597,
+    "score": 0.281574,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "relu",
+          "role": "threshold"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 8,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Sự vượt lên của giá so với SMA có thể dẫn đến tiếp tục đà tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta_ratio(df['close'], 3), 10)",
+    "ic_oos": 0.149534,
+    "ic_is": 0.007861,
+    "sharpe_oos": 2.3345,
+    "sharpe": 1.5663,
+    "score": 0.276481,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Sự quá mua có thể dẫn đến điều chỉnh giá.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['RSI_14'], 20), ts_delta_ratio(df['volume'], 12))",
+    "ic_oos": 0.07313,
+    "ic_is": 0.023132,
+    "sharpe_oos": 2.3467,
+    "sharpe": 0.7776,
+    "score": 0.231618,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Tăng OBV trong bối cảnh giá giảm có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['OBV'], 7), neg(ts_delta_ratio(df['close'], 10)))",
+    "ic_oos": 0.141399,
+    "ic_is": 0.01786,
+    "sharpe_oos": 1.5363,
+    "sharpe": 0.2047,
+    "score": 0.207744,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Nhu cầu giảm có thể dẫn đến điều chỉnh giá.",
+    "expression": "alpha = ts_rank(cwise_mul(ts_delta_ratio(df['close'], 3), neg(ts_delta_ratio(df['volume'], 5))), 20)",
+    "ic_oos": 0.068079,
+    "ic_is": 0.02596,
+    "sharpe_oos": 2.0859,
+    "sharpe": 0.7614,
+    "score": 0.207718,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  }
+]

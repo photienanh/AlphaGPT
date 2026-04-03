@@ -1,0 +1,188 @@
+[
+  {
+    "ticker": "VRE",
+    "idea": "Thị trường ổn định có thể dẫn đến giá tăng khi biến động thấp.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_std(df['close'], 30), 10))",
+    "ic_oos": 0.267114,
+    "ic_is": 0.023528,
+    "sharpe_oos": 3.9428,
+    "sharpe": 2.2153,
+    "score": 0.475695,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Mô hình nến đảo chiều có thể báo hiệu sự tăng giá sắp tới.",
+    "expression": "alpha = ts_zscore_scale(ts_delta_ratio(df['close'], 3) * sign(ts_delta(df['close'], 3)), 30)",
+    "ic_oos": 0.126674,
+    "ic_is": 0.014119,
+    "sharpe_oos": 2.2199,
+    "sharpe": 0.6196,
+    "score": 0.253595,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Giá dưới BB thấp và RSI thấp có thể dẫn đến phục hồi giá.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(neg(ts_delta(df['close'], 5)), ts_zscore_scale(df['RSI_14'], 7)), 12))",
+    "ic_oos": 0.09058,
+    "ic_is": 0.017806,
+    "sharpe_oos": 2.1001,
+    "sharpe": 0.7174,
+    "score": 0.222353,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Sự kết hợp giữa momentum tích cực và khối lượng tăng mạnh có thể thúc đẩy giá tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['close'], 3), ts_maxmin_scale(df['volume'], 7))",
+    "ic_oos": 0.061301,
+    "ic_is": 0.001882,
+    "sharpe_oos": 1.636,
+    "sharpe": 0.8549,
+    "score": 0.167661,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Sự tương quan tích cực với chỉ số giá thị trường có thể dẫn đến giá tăng.",
+    "expression": "alpha = ts_corr(df['close'], df['OBV'], 15)",
+    "ic_oos": 0.117698,
+    "ic_is": 0.011088,
+    "sharpe_oos": 1.1507,
+    "sharpe": 0.6011,
+    "score": 0.162677,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  }
+]

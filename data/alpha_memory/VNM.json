@@ -1,0 +1,209 @@
+[
+  {
+    "ticker": "VNM",
+    "idea": "Giá vượt qua SMA_20 với khối lượng tăng cho thấy sự xác nhận của xu hướng tăng.",
+    "expression": "alpha = cwise_mul(ts_maxmin_scale(ts_delta_ratio(df['close'], 5), 20), ts_zscore_scale(df['SMA_20'], 20))",
+    "ic_oos": 0.116757,
+    "ic_is": 0.002944,
+    "sharpe_oos": 2.4133,
+    "sharpe": 0.1499,
+    "score": 0.263121,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Sức mạnh xu hướng tích cực hỗ trợ cho sự tiếp tục tăng giá.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 7), ts_rank(df['Momentum_10'], 15))",
+    "ic_oos": 0.155025,
+    "ic_is": 0.033519,
+    "sharpe_oos": 2.0884,
+    "sharpe": -0.0026,
+    "score": 0.260089,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Tích lũy khối lượng mà không có mức tăng giá có thể dẫn đến sự tăng giá trong tương lai.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['volume'], 5), ts_zscore_scale(neg(ts_delta(df['close'], 10)), 15)), 15))",
+    "ic_oos": 0.140606,
+    "ic_is": 0.043415,
+    "sharpe_oos": 1.6424,
+    "sharpe": 0.7252,
+    "score": 0.215755,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Giá vượt ngưỡng trên của Bollinger Bands có thể dẫn đến sự điều chỉnh giảm giá.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(neg(ts_delta(df['close'], 12)), ts_zscore_scale(div(df['close'], df['BB_Middle']), 25)), 15))",
+    "ic_oos": 0.095335,
+    "ic_is": 0.01377,
+    "sharpe_oos": 1.7212,
+    "sharpe": 0.724,
+    "score": 0.194896,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "div",
+          "role": "ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "BB_Middle",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 7,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Biến động thấp có thể tạo cơ hội cho sự tăng giá.",
+    "expression": "alpha = ts_maxmin_scale(ts_std(df['close'], 10), 12)",
+    "ic_oos": 0.075473,
+    "ic_is": 0.029175,
+    "sharpe_oos": 1.2027,
+    "sharpe": 0.2943,
+    "score": 0.141496,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]

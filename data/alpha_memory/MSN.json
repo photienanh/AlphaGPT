@@ -1,0 +1,182 @@
+[
+  {
+    "ticker": "MSN",
+    "idea": "Phân kỳ giữa giá giảm và tâm lý tích cực có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(neg(ts_delta(df['close'], 7)), add(1.0, cwise_mul(0.2, ts_ema(df['MSN_S'], 10))))",
+    "ic_oos": 0.203745,
+    "ic_is": 0.016879,
+    "sharpe_oos": 2.811,
+    "sharpe": 0.2374,
+    "score": 0.34713,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "MSN_S"
+        ]
+      },
+      "n_components": 5,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "MSN",
+    "idea": "Thay đổi tương quan giữa giá và khối lượng có thể chỉ ra điều chỉnh giá.",
+    "expression": "alpha = ts_corr(df['close'], df['volume'], 30)",
+    "ic_oos": 0.18818,
+    "ic_is": 0.068538,
+    "sharpe_oos": 2.694,
+    "sharpe": 0.8013,
+    "score": 0.328429,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MSN",
+    "idea": "Biến động cao hơn trung bình có thể dẫn đến điều chỉnh giá.",
+    "expression": "alpha = ts_zscore_scale(ts_std(df['close'], 10), 10)",
+    "ic_oos": 0.081664,
+    "ic_is": 0.038075,
+    "sharpe_oos": 1.3177,
+    "sharpe": 0.5211,
+    "score": 0.154418,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MSN",
+    "idea": "OBV tăng khi giá giảm có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['OBV'], 12), neg(ts_delta_ratio(df['close'], 10)))",
+    "ic_oos": 0.079291,
+    "ic_is": 0.014543,
+    "sharpe_oos": 0.5535,
+    "sharpe": 0.6854,
+    "score": 0.091852,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MSN",
+    "idea": "Giá tăng mạnh với khối lượng thấp có thể dẫn đến điều chỉnh giá.",
+    "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), neg(ts_delta_ratio(df['volume'], 3)))",
+    "ic_oos": 0.030052,
+    "ic_is": 0.006095,
+    "sharpe_oos": 0.8347,
+    "sharpe": 0.291,
+    "score": 0.084803,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  }
+]

@@ -1,0 +1,3786 @@
+[
+  {
+    "ticker": "VIC",
+    "idea": "Phục hồi giá khi giá dưới BB thấp và khối lượng tăng.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(neg(ts_delta(df['close'], 12)), ts_maxmin_scale(df['volume'], 15)), 15))",
+    "ic_oos": 0.247118,
+    "ic_is": 0.010716,
+    "sharpe_oos": 4.1784,
+    "sharpe": 1.7721,
+    "score": 0.482541,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Thị trường ổn định có thể dẫn đến giá tăng khi biến động thấp.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_std(df['close'], 30), 10))",
+    "ic_oos": 0.267114,
+    "ic_is": 0.023528,
+    "sharpe_oos": 3.9428,
+    "sharpe": 2.2153,
+    "score": 0.475695,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "Cảm xúc tích cực về TPB trong bối cảnh nhóm ngân hàng có thể dẫn đến giá tăng.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['TPB_S'], 10), ts_delta(df['close'], 7))",
+    "ic_oos": 0.292341,
+    "ic_is": 0.078608,
+    "sharpe_oos": 3.5332,
+    "sharpe": 1.821,
+    "score": 0.458064,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "TPB_S"
+        ]
+      },
+      "n_components": 3,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "RSI thấp trong bối cảnh giá giảm cho thấy khả năng phục hồi.",
+    "expression": "alpha = ts_zscore_scale(neg(ts_delta(df['close'], 5)) * ts_maxmin_scale(df['RSI_14'], 10), 20)",
+    "ic_oos": 0.191162,
+    "ic_is": 0.010935,
+    "sharpe_oos": 3.9734,
+    "sharpe": 1.3566,
+    "score": 0.432573,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "Khối lượng tăng trong khi giá giảm cho thấy sự bán tháo có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['volume'], 7), neg(ts_delta(df['close'], 7)))",
+    "ic_oos": 0.195425,
+    "ic_is": 0.014633,
+    "sharpe_oos": 3.6433,
+    "sharpe": 1.1395,
+    "score": 0.408721,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán khả năng phục hồi khi có bán tháo với khối lượng cao.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['volume'], 10), neg(ts_delta_ratio(df['close'], 10))), 15))",
+    "ic_oos": 0.205868,
+    "ic_is": 0.000893,
+    "sharpe_oos": 3.3934,
+    "sharpe": 1.3044,
+    "score": 0.394995,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "OBV tăng trong điều kiện giá ổn định có thể dẫn đến một đợt tăng giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_delta(df['OBV'], 7), 10))",
+    "ic_oos": 0.216053,
+    "ic_is": 0.010206,
+    "sharpe_oos": 2.9164,
+    "sharpe": 1.1708,
+    "score": 0.362943,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MSN",
+    "idea": "Phân kỳ giữa giá giảm và tâm lý tích cực có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(neg(ts_delta(df['close'], 7)), add(1.0, cwise_mul(0.2, ts_ema(df['MSN_S'], 10))))",
+    "ic_oos": 0.203745,
+    "ic_is": 0.016879,
+    "sharpe_oos": 2.811,
+    "sharpe": 0.2374,
+    "score": 0.34713,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "MSN_S"
+        ]
+      },
+      "n_components": 5,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán xu hướng giảm khi có mẫu nến đảo chiều.",
+    "expression": "alpha = ts_rank(cwise_mul(sign(df['high'] - df['open']), neg(ts_delta_ratio(df['close'], 5))), 20)",
+    "ic_oos": 0.123926,
+    "ic_is": 0.019833,
+    "sharpe_oos": 3.3364,
+    "sharpe": 1.1031,
+    "score": 0.341269,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "high",
+          "close",
+          "open"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Sự tích lũy trong OBV có thể dẫn đến tăng giá.",
+    "expression": "alpha = cwise_mul(ts_delta(df['OBV'], 12), ts_delta_ratio(df['close'], 5))",
+    "ic_oos": 0.197958,
+    "ic_is": 0.005034,
+    "sharpe_oos": 2.7391,
+    "sharpe": 0.5462,
+    "score": 0.337901,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "Giá giảm liên tục kèm theo OBV tăng cho thấy sự tích lũy, dẫn đến khả năng phục hồi giá.",
+    "expression": "alpha = ts_delta_ratio(df['OBV'], 7) + neg(ts_delta_ratio(df['close'], 5))",
+    "ic_oos": 0.170498,
+    "ic_is": 0.021954,
+    "sharpe_oos": 2.8777,
+    "sharpe": 1.0411,
+    "score": 0.332519,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "Sự bán tháo tạo ra áp lực giảm giá nhưng với khối lượng tăng, có thể dẫn đến sự đảo chiều.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 3), ts_delta_ratio(df['volume'], 5))",
+    "ic_oos": 0.172857,
+    "ic_is": 0.000617,
+    "sharpe_oos": 2.859,
+    "sharpe": 0.9435,
+    "score": 0.332437,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "Phân kỳ giữa giá và khối lượng có thể dẫn đến phục hồi.",
+    "expression": "alpha = ts_cov(df['close'], df['volume'], 7)",
+    "ic_oos": 0.167647,
+    "ic_is": 0.070876,
+    "sharpe_oos": 2.8928,
+    "sharpe": 1.2593,
+    "score": 0.332012,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_cov",
+          "role": "covariance_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "Động lực giá đảo chiều từ giảm sang tăng có thể báo hiệu sự phục hồi.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(ts_delta_ratio(df['close'], 10), 7), sign(ts_delta(df['Momentum_3'], 7)))",
+    "ic_oos": 0.192501,
+    "ic_is": 0.030625,
+    "sharpe_oos": 2.6715,
+    "sharpe": 1.3478,
+    "score": 0.329224,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MSN",
+    "idea": "Thay đổi tương quan giữa giá và khối lượng có thể chỉ ra điều chỉnh giá.",
+    "expression": "alpha = ts_corr(df['close'], df['volume'], 30)",
+    "ic_oos": 0.18818,
+    "ic_is": 0.068538,
+    "sharpe_oos": 2.694,
+    "sharpe": 0.8013,
+    "score": 0.328429,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "FPT",
+    "idea": "Mô hình nến tăng sau chuỗi giảm có thể báo hiệu sự đảo chiều.",
+    "expression": "alpha = ts_rank(cwise_mul(ts_rank(ts_delta_ratio(df['close'], 7), 12), sign(ts_delta(df['close'], 15))), 15)",
+    "ic_oos": 0.140349,
+    "ic_is": 0.010415,
+    "sharpe_oos": 3.0504,
+    "sharpe": 1.2018,
+    "score": 0.328241,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SAB",
+    "idea": "Momentum dương với khối lượng cao dự đoán tăng trưởng giá tiếp tục.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['volume'], 5), ts_delta_ratio(df['Momentum_3'], 5))",
+    "ic_oos": 0.234377,
+    "ic_is": 0.002115,
+    "sharpe_oos": 2.2298,
+    "sharpe": 0.7723,
+    "score": 0.319014,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Tương quan tăng giữa giá và OBV có thể chỉ ra xu hướng tăng.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_corr(df['close'], df['OBV'], 5), 5))",
+    "ic_oos": 0.130537,
+    "ic_is": 0.012637,
+    "sharpe_oos": 2.978,
+    "sharpe": 1.3141,
+    "score": 0.316565,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán sự tăng giá mạnh mẽ khi có cảm xúc tích cực.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 7), add(1.0, cwise_mul(0.2, ts_ema(df['MWG_S'], 5))))",
+    "ic_oos": 0.156467,
+    "ic_is": 0.023004,
+    "sharpe_oos": 2.762,
+    "sharpe": 0.7913,
+    "score": 0.314839,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "MWG_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "HDB",
+    "idea": "Cảm xúc tiêu cực trong ngành ngân hàng có thể tạo áp lực giảm giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['HDB_S'], 3), neg(ts_delta_ratio(df['close'], 5))), 15))",
+    "ic_oos": 0.196134,
+    "ic_is": 0.055052,
+    "sharpe_oos": 2.4335,
+    "sharpe": 1.4151,
+    "score": 0.312362,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "HDB_S"
+        ]
+      },
+      "n_components": 5,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Mô hình nến tăng có thể chỉ ra cơ hội mua vào.",
+    "expression": "alpha = ts_delta(df['close'], 7) - ts_delta(df['open'], 10)",
+    "ic_oos": 0.224286,
+    "ic_is": 0.03293,
+    "sharpe_oos": 2.1122,
+    "sharpe": 1.0226,
+    "score": 0.303551,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "open",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "Sự vượt qua SMA 20 với RSI thấp cho thấy sự phục hồi có thể xảy ra sau khi giá đã giảm.",
+    "expression": "alpha = ts_maxmin_scale(cwise_mul(ts_delta_ratio(df['close'], 7), sign(ts_delta(df['SMA_20'], 1))), 25)",
+    "ic_oos": 0.130506,
+    "ic_is": 0.031082,
+    "sharpe_oos": 2.812,
+    "sharpe": 1.0316,
+    "score": 0.303264,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán sự đảo chiều khi có đỉnh cao nhưng khối lượng không tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['high'], 10), neg(ts_delta_ratio(df['volume'], 3)))",
+    "ic_oos": 0.198793,
+    "ic_is": 0.03144,
+    "sharpe_oos": 2.2936,
+    "sharpe": 0.7067,
+    "score": 0.302766,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "high",
+          "volume"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Khối lượng tăng cùng với giá giảm cho thấy có sự bán tháo.",
+    "expression": "alpha = cwise_mul(ts_delta(df['volume'], 5), neg(ts_std(df['close'], 30)))",
+    "ic_oos": 0.132941,
+    "ic_is": 0.055183,
+    "sharpe_oos": 2.7575,
+    "sharpe": 1.0238,
+    "score": 0.300364,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ sự tương tác giữa tâm lý ngân hàng và giá VCB.",
+    "expression": "alpha = ts_maxmin_scale(cwise_mul(ts_zscore_scale(df['BID_S'], 12), ts_delta(df['close'], 12)), 20)",
+    "ic_oos": 0.194461,
+    "ic_is": 0.025825,
+    "sharpe_oos": 2.2926,
+    "sharpe": 0.3558,
+    "score": 0.300086,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "BID_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "CTG",
+    "idea": "Mô hình nến tăng sau chuỗi giảm có thể báo hiệu xu hướng tăng.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_delta_ratio(df['close'], 3) * sign(ts_delta(df['close'], 12)), 10))",
+    "ic_oos": 0.163456,
+    "ic_is": 0.013473,
+    "sharpe_oos": 2.5116,
+    "sharpe": 1.3281,
+    "score": 0.299003,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ độ biến động cao phản ánh sự điều chỉnh giá.",
+    "expression": "alpha = ts_zscore_scale(ts_std(df['close'], 10), 12)",
+    "ic_oos": 0.124544,
+    "ic_is": 0.028316,
+    "sharpe_oos": 2.7861,
+    "sharpe": 0.7348,
+    "score": 0.297615,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "DGC",
+    "idea": "Cảm xúc tích cực của ngành hóa chất kết hợp với động lực giá dự đoán xu hướng tăng.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_delta_ratio(df['close'], 5), ts_ema(df['DGC_S'], 7)), 20)",
+    "ic_oos": 0.135314,
+    "ic_is": 0.044364,
+    "sharpe_oos": 2.6537,
+    "sharpe": 0.6877,
+    "score": 0.293481,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "DGC_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán phục hồi giá khi OBV tăng trong khi giá giảm.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_delta_ratio(df['OBV'], 10), neg(ts_delta(df['close'], 7)) ), 15)",
+    "ic_oos": 0.106036,
+    "ic_is": 0.005735,
+    "sharpe_oos": 2.8725,
+    "sharpe": 0.9901,
+    "score": 0.293426,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "CTG",
+    "idea": "Thị trường ổn định với biến động thấp có thể dẫn đến tăng giá.",
+    "expression": "alpha = ts_ema(df['close'], 10) - ts_std(df['close'], 15)",
+    "ic_oos": 0.131844,
+    "ic_is": 0.056709,
+    "sharpe_oos": 2.6427,
+    "sharpe": 0.4032,
+    "score": 0.290521,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GVR",
+    "idea": "Giá bị bán quá mức và có thể phục hồi khi RSI xuống dưới 30.",
+    "expression": "alpha = cwise_mul(neg(ts_zscore_scale(df['RSI_14'], 14)), ts_zscore_scale(df['BB_Lower'], 30))",
+    "ic_oos": 0.113545,
+    "ic_is": 0.005168,
+    "sharpe_oos": 2.7578,
+    "sharpe": 0.8156,
+    "score": 0.288754,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14",
+          "BB_Lower"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Động lượng dương có thể dẫn đến xu hướng tăng tiếp theo.",
+    "expression": "alpha = cwise_mul(ts_maxmin_scale(df['Momentum_3'], 7), sign(ts_delta(df['close'], 1)))",
+    "ic_oos": 0.152309,
+    "ic_is": 0.059135,
+    "sharpe_oos": 2.4475,
+    "sharpe": 1.5757,
+    "score": 0.287184,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Mô hình nến tăng mạnh có thể dẫn đến tăng giá.",
+    "expression": "alpha = ts_zscore_scale(ts_delta_ratio(df['close'], 1) - ts_delta(df['open'], 1), 25)",
+    "ic_oos": 0.101511,
+    "ic_is": 0.02242,
+    "sharpe_oos": 2.7924,
+    "sharpe": 1.4017,
+    "score": 0.284296,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "open",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Mức RSI thấp cho thấy tình trạng quá bán, tạo cơ hội cho sự phục hồi giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(neg(ts_delta_ratio(df['close'], 5)), relu(ts_rank(minus(df['RSI_14'], 30), 10))), 20))",
+    "ic_oos": 0.11228,
+    "ic_is": 0.0313,
+    "sharpe_oos": 2.6776,
+    "sharpe": 0.7597,
+    "score": 0.281574,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "relu",
+          "role": "threshold"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 8,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Động lượng thấp có thể dẫn đến phục hồi trong môi trường ổn định.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(neg(ts_delta_ratio(df['Momentum_10'], 3)), ts_std(df['close'], 5)), 25)",
+    "ic_oos": 0.130511,
+    "ic_is": 0.0163,
+    "sharpe_oos": 2.5125,
+    "sharpe": 0.6862,
+    "score": 0.279308,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Tăng giá liên tục với khối lượng cao cho thấy khả năng tiếp tục xu hướng.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_delta_ratio(df['close'], 3), greater(df['volume'], ts_ema(df['volume'], 7))), 25)",
+    "ic_oos": 0.156222,
+    "ic_is": 0.047808,
+    "sharpe_oos": 2.2931,
+    "sharpe": 0.9955,
+    "score": 0.277184,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "Tăng OBV có thể dẫn đến giá tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta(df['OBV'], 20) * sign(ts_delta(df['close'], 5)), 20)",
+    "ic_oos": 0.132346,
+    "ic_is": 0.009051,
+    "sharpe_oos": 2.4713,
+    "sharpe": 1.0586,
+    "score": 0.277114,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Sự vượt lên của giá so với SMA có thể dẫn đến tiếp tục đà tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta_ratio(df['close'], 3), 10)",
+    "ic_oos": 0.149534,
+    "ic_is": 0.007861,
+    "sharpe_oos": 2.3345,
+    "sharpe": 1.5663,
+    "score": 0.276481,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIB",
+    "idea": "Cảm xúc tích cực từ ngành ngân hàng thúc đẩy giá VIB.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_zscore_scale(df['HDB_S'], 7), ts_delta(df['close'], 3)), 10))",
+    "ic_oos": 0.105705,
+    "ic_is": 0.068129,
+    "sharpe_oos": 2.659,
+    "sharpe": 1.2721,
+    "score": 0.27614,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "HDB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "HDB",
+    "idea": "Biến động cao có thể dẫn đến giảm giá trong ngắn hạn.",
+    "expression": "alpha = ts_maxmin_scale(neg(ts_std(df['close'], 15)), 10)",
+    "ic_oos": 0.12721,
+    "ic_is": 0.012981,
+    "sharpe_oos": 2.4741,
+    "sharpe": 0.9273,
+    "score": 0.274255,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Độ biến động thấp cho thấy thị trường ổn định.",
+    "expression": "alpha = relu(ts_mean(df['close'], 10) - ts_std(df['close'], 10))",
+    "ic_oos": 0.158895,
+    "ic_is": 0.062613,
+    "sharpe_oos": 2.2337,
+    "sharpe": 1.4355,
+    "score": 0.274031,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_mean",
+          "role": "smoothing"
+        },
+        {
+          "operator": "relu",
+          "role": "threshold"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SAB",
+    "idea": "Khối lượng tăng mạnh khi giá có dấu hiệu giảm có thể dẫn đến sự đảo chiều.",
+    "expression": "alpha = ts_rank(cwise_mul(ts_delta_ratio(df['volume'], 7), neg(ts_delta_ratio(df['close'], 3))), 25)",
+    "ic_oos": 0.179969,
+    "ic_is": 0.009738,
+    "sharpe_oos": 2.0683,
+    "sharpe": 1.0722,
+    "score": 0.273449,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "Sự phục hồi giá sau khi giá giảm liên tục cho thấy khả năng đảo chiều.",
+    "expression": "alpha = ts_delta(df['close'], 5) - ts_delta(df['close'], 7)",
+    "ic_oos": 0.122182,
+    "ic_is": 0.017138,
+    "sharpe_oos": 2.4628,
+    "sharpe": 0.6906,
+    "score": 0.270336,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "Tích lũy trong OBV có thể dẫn đến đợt tăng giá.",
+    "expression": "alpha = ts_delta(df['OBV'], 12)",
+    "ic_oos": 0.114883,
+    "ic_is": 0.027958,
+    "sharpe_oos": 2.4931,
+    "sharpe": 0.6924,
+    "score": 0.268377,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ giá trên mức trung bình di động.",
+    "expression": "alpha = ts_maxmin_scale(neg(ts_zscore_scale(minus(df['close'], df['EMA_10']), 3)), 30)",
+    "ic_oos": 0.108238,
+    "ic_is": 0.011158,
+    "sharpe_oos": 2.5393,
+    "sharpe": 1.0451,
+    "score": 0.26809,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "EMA_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Giá vượt dải trên cùng với khối lượng thấp chỉ ra khả năng điều chỉnh.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(neg(ts_delta(df['close'], 12)), less(df['volume'], ts_ema(df['volume'], 20))), 20))",
+    "ic_oos": 0.128078,
+    "ic_is": 0.046824,
+    "sharpe_oos": 2.3887,
+    "sharpe": 1.6497,
+    "score": 0.267946,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "FPT",
+    "idea": "Tương quan giữa giá và khối lượng có thể chỉ ra xu hướng tăng.",
+    "expression": "alpha = tanh(ts_rank(ts_corr(df['close'], df['volume'], 15) * ts_delta(df['close'], 3), 10))",
+    "ic_oos": 0.105295,
+    "ic_is": 0.022165,
+    "sharpe_oos": 2.5422,
+    "sharpe": 0.5631,
+    "score": 0.266554,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Phân kỳ giữa cảm xúc thị trường và giá có thể dẫn đến phục hồi giá.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_zscore_scale(df['LPB_S'], 7), neg(ts_delta(df['close'], 5))), 20)",
+    "ic_oos": 0.132073,
+    "ic_is": 0.056291,
+    "sharpe_oos": 2.3018,
+    "sharpe": 0.84,
+    "score": 0.263386,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "LPB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Tương quan tích cực giữa volume và price chỉ ra xu hướng tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_corr(df['volume'], df['close'], 7), 15)",
+    "ic_oos": 0.178847,
+    "ic_is": 0.040926,
+    "sharpe_oos": 1.9483,
+    "sharpe": 0.8591,
+    "score": 0.263175,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Giá vượt qua SMA_20 với khối lượng tăng cho thấy sự xác nhận của xu hướng tăng.",
+    "expression": "alpha = cwise_mul(ts_maxmin_scale(ts_delta_ratio(df['close'], 5), 20), ts_zscore_scale(df['SMA_20'], 20))",
+    "ic_oos": 0.116757,
+    "ic_is": 0.002944,
+    "sharpe_oos": 2.4133,
+    "sharpe": 0.1499,
+    "score": 0.263121,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Sức mạnh xu hướng tích cực hỗ trợ cho sự tiếp tục tăng giá.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 7), ts_rank(df['Momentum_10'], 15))",
+    "ic_oos": 0.155025,
+    "ic_is": 0.033519,
+    "sharpe_oos": 2.0884,
+    "sharpe": -0.0026,
+    "score": 0.260089,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Mô hình nến đảo chiều có thể báo hiệu sự tăng giá sắp tới.",
+    "expression": "alpha = ts_zscore_scale(ts_delta_ratio(df['close'], 3) * sign(ts_delta(df['close'], 3)), 30)",
+    "ic_oos": 0.126674,
+    "ic_is": 0.014119,
+    "sharpe_oos": 2.2199,
+    "sharpe": 0.6196,
+    "score": 0.253595,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Cơ hội tăng giá sau khi xuất hiện mô hình nến tăng.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 1), greater(ts_delta(df['close'], 2), 0))",
+    "ic_oos": 0.133343,
+    "ic_is": 0.000549,
+    "sharpe_oos": 2.0587,
+    "sharpe": 0.9345,
+    "score": 0.2447,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ sự thay đổi trong tương quan giữa giá và khối lượng.",
+    "expression": "alpha = ts_rank(ts_corr(df['close'], df['volume'], 10), 20)",
+    "ic_oos": 0.124808,
+    "ic_is": 0.005718,
+    "sharpe_oos": 2.1226,
+    "sharpe": 1.3545,
+    "score": 0.244696,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "CTG",
+    "idea": "OBV tăng trong khi giá giảm cho thấy sự tích lũy có thể dẫn đến tăng giá.",
+    "expression": "alpha = ts_delta(df['OBV'], 7) - ts_delta(df['close'], 5)",
+    "ic_oos": 0.096236,
+    "ic_is": 0.03771,
+    "sharpe_oos": 2.2976,
+    "sharpe": 1.385,
+    "score": 0.241548,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "Momentum dương trong bối cảnh giảm giá có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta(df['Momentum_3'], 5), neg(ts_delta_ratio(df['close'], 5)))",
+    "ic_oos": 0.108543,
+    "ic_is": 0.040286,
+    "sharpe_oos": 2.2023,
+    "sharpe": 1.0236,
+    "score": 0.241312,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Sự quá mua có thể dẫn đến sự điều chỉnh giá.",
+    "expression": "alpha = ts_zscore_scale(minus(df['RSI_14'], 70), 3)",
+    "ic_oos": 0.062396,
+    "ic_is": 0.028531,
+    "sharpe_oos": 2.532,
+    "sharpe": 0.8128,
+    "score": 0.240001,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HPG",
+    "idea": "RSI thấp cho thấy cổ phiếu có thể đã bán quá mức.",
+    "expression": "alpha = neg(ts_maxmin_scale(df['RSI_14'], 14))",
+    "ic_oos": 0.085889,
+    "ic_is": 0.056826,
+    "sharpe_oos": 2.2922,
+    "sharpe": 0.8234,
+    "score": 0.234906,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Sự quá mua có thể dẫn đến điều chỉnh giá.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['RSI_14'], 20), ts_delta_ratio(df['volume'], 12))",
+    "ic_oos": 0.07313,
+    "ic_is": 0.023132,
+    "sharpe_oos": 2.3467,
+    "sharpe": 0.7776,
+    "score": 0.231618,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIB",
+    "idea": "Thị trường ổn định dẫn đến xu hướng tăng.",
+    "expression": "alpha = ts_rank(ts_std(df['close'], 7), 15)",
+    "ic_oos": 0.114196,
+    "ic_is": 0.010098,
+    "sharpe_oos": 2.0128,
+    "sharpe": 0.704,
+    "score": 0.229541,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Giá quá mua với tín hiệu sentiment yếu có thể dẫn đến điều chỉnh.",
+    "expression": "alpha = tanh(ts_maxmin_scale(cwise_mul(ts_zscore_scale(df['BB_Upper'], 10), ts_zscore_scale(df['LPB_S'], 3)), 12))",
+    "ic_oos": 0.108874,
+    "ic_is": 0.053282,
+    "sharpe_oos": 2.0163,
+    "sharpe": 0.9061,
+    "score": 0.226632,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "BB_Upper"
+        ],
+        "sentiment": [
+          "LPB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Khối lượng giao dịch tăng mà không có sự tăng giá có thể chỉ ra sự tích lũy.",
+    "expression": "alpha = cwise_mul(ts_delta(df['volume'], 10), ts_rank(df['close'], 25))",
+    "ic_oos": 0.115455,
+    "ic_is": 0.01049,
+    "sharpe_oos": 1.9447,
+    "sharpe": 1.2176,
+    "score": 0.224853,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Độ biến động cao có thể chỉ ra khả năng điều chỉnh giá.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_std(df['close'], 25), 15))",
+    "ic_oos": 0.086893,
+    "ic_is": 0.095941,
+    "sharpe_oos": 2.152,
+    "sharpe": 1.3324,
+    "score": 0.224292,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Xu hướng tăng mạnh có thể tiếp tục khi giá vẫn dưới trung bình dài hạn.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['Momentum_3'], 15), minus(df['SMA_20'], df['close']))",
+    "ic_oos": 0.13638,
+    "ic_is": 0.021134,
+    "sharpe_oos": 1.7792,
+    "sharpe": 0.728,
+    "score": 0.224163,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Giá dưới BB thấp và RSI thấp có thể dẫn đến phục hồi giá.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(neg(ts_delta(df['close'], 5)), ts_zscore_scale(df['RSI_14'], 7)), 12))",
+    "ic_oos": 0.09058,
+    "ic_is": 0.017806,
+    "sharpe_oos": 2.1001,
+    "sharpe": 0.7174,
+    "score": 0.222353,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MWG",
+    "idea": "Dự đoán sự tiếp diễn của xu hướng khi có khối lượng giao dịch tăng.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta(df['volume'], 7), 3)",
+    "ic_oos": 0.106094,
+    "ic_is": 0.043461,
+    "sharpe_oos": 1.9665,
+    "sharpe": 0.8813,
+    "score": 0.220975,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MBB",
+    "idea": "Giá tăng mà không có khối lượng hỗ trợ cho thấy sự yếu kém trong động lực, tạo cơ hội cho việc điều chỉnh giá.",
+    "expression": "alpha = ts_zscore_scale(ts_delta_ratio(df['close'], 7) - ts_delta_ratio(df['volume'], 3), 20)",
+    "ic_oos": 0.083583,
+    "ic_is": 0.030788,
+    "sharpe_oos": 2.1302,
+    "sharpe": 0.9777,
+    "score": 0.220566,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Sự phục hồi từ mức thấp so với SMA có thể dẫn đến tăng trưởng giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_delta_ratio(df['Momentum_3'], 3) * neg(ts_delta_ratio(df['close'], 20)), 12))",
+    "ic_oos": 0.126524,
+    "ic_is": 0.038006,
+    "sharpe_oos": 1.8074,
+    "sharpe": 0.582,
+    "score": 0.220506,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "Momentum_3"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "DGC",
+    "idea": "Khối lượng cao mà không có biến động giá cho thấy tích lũy.",
+    "expression": "alpha = minus(ts_delta(df['volume'], 10), ts_delta(df['close'], 3))",
+    "ic_oos": 0.105377,
+    "ic_is": 0.023222,
+    "sharpe_oos": 1.95,
+    "sharpe": 0.7053,
+    "score": 0.219229,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "minus",
+          "role": "divergence"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán xu hướng tăng khi giá vượt SMA_20 với khối lượng tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['volume'], 5), greater(df['close'], df['SMA_20']))",
+    "ic_oos": 0.091123,
+    "ic_is": 0.047294,
+    "sharpe_oos": 2.0418,
+    "sharpe": 1.1083,
+    "score": 0.218015,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Sự phân kỳ giữa giá và OBV cho thấy khả năng điều chỉnh.",
+    "expression": "alpha = ts_rank(neg(ts_corr(df['close'], df['OBV'], 15)), 20)",
+    "ic_oos": 0.14026,
+    "ic_is": 0.005864,
+    "sharpe_oos": 1.673,
+    "sharpe": 0.7654,
+    "score": 0.217998,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GVR",
+    "idea": "Tâm lý tích cực có thể hỗ trợ cho sự phục hồi giá sau đợt giảm.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(neg(ts_delta(df['close'], 5)), add(1.0, cwise_mul(0.2, ts_decayed_linear(df['GVR_S'], 5)))), 20))",
+    "ic_oos": 0.060898,
+    "ic_is": 0.04514,
+    "sharpe_oos": 2.2494,
+    "sharpe": 1.0689,
+    "score": 0.21649,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_decayed_linear",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "GVR_S"
+        ]
+      },
+      "n_components": 7,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "STB",
+    "idea": "Đồng thuận cảm xúc tích cực từ ngành ngân hàng có thể thúc đẩy giá cổ phiếu STB.",
+    "expression": "alpha = cwise_mul(ts_delta(df['close'], 7), add(1.0, cwise_mul(0.2, ts_ema(df['STB_S'], 5))))",
+    "ic_oos": 0.143058,
+    "ic_is": 0.068619,
+    "sharpe_oos": 1.6036,
+    "sharpe": 0.6456,
+    "score": 0.214127,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "STB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Khối lượng gia tăng trong bối cảnh giá đang đi lên cho thấy sự mạnh mẽ của xu hướng này.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(ts_delta(df['volume'], 7), ts_delta_ratio(df['close'], 3)), 15))",
+    "ic_oos": 0.102314,
+    "ic_is": 0.075946,
+    "sharpe_oos": 1.8842,
+    "sharpe": 1.1425,
+    "score": 0.212123,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "BID",
+    "idea": "Giá vượt EMA_10 với điều kiện khối lượng tăng cho thấy sự tiếp diễn của xu hướng.",
+    "expression": "alpha = cwise_mul(greater(df['close'], df['EMA_10']), ts_zscore_scale(df['volume'], 25))",
+    "ic_oos": 0.101022,
+    "ic_is": 0.004523,
+    "sharpe_oos": 1.8759,
+    "sharpe": 0.505,
+    "score": 0.210683,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close",
+          "EMA_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSB",
+    "idea": "Phát hiện đợt tăng giá tiềm năng khi giá tăng nhưng khối lượng thấp.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['close'], 7), ts_decayed_linear(df['volume'], 20)), 12))",
+    "ic_oos": 0.127655,
+    "ic_is": 0.024577,
+    "sharpe_oos": 1.6677,
+    "sharpe": 0.3383,
+    "score": 0.210011,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_decayed_linear",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SSI",
+    "idea": "Tăng OBV trong bối cảnh giá giảm có thể dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['OBV'], 7), neg(ts_delta_ratio(df['close'], 10)))",
+    "ic_oos": 0.141399,
+    "ic_is": 0.01786,
+    "sharpe_oos": 1.5363,
+    "sharpe": 0.2047,
+    "score": 0.207744,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán xu hướng tăng khi giá và khối lượng cùng tăng.",
+    "expression": "alpha = ts_delta(df['close'], 7) * ts_delta_ratio(df['volume'], 7)",
+    "ic_oos": 0.113781,
+    "ic_is": 0.006135,
+    "sharpe_oos": 1.7229,
+    "sharpe": 1.0731,
+    "score": 0.206097,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "LPB",
+    "idea": "Giá thấp hơn mức hỗ trợ có thể dẫn đến phục hồi nhờ vào khối lượng tăng.",
+    "expression": "alpha = tanh(ts_maxmin_scale(cwise_mul(neg(ts_delta_ratio(df['close'], 3)), ts_delta_ratio(df['volume'], 10)), 12))",
+    "ic_oos": 0.086864,
+    "ic_is": 0.01356,
+    "sharpe_oos": 1.9208,
+    "sharpe": 0.833,
+    "score": 0.205782,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "CTG",
+    "idea": "Giá tăng và khối lượng giảm cho thấy sự điều chỉnh có thể xảy ra.",
+    "expression": "alpha = ts_maxmin_scale(ts_delta(df['close'], 3) - ts_delta(df['volume'], 7), 12)",
+    "ic_oos": 0.087428,
+    "ic_is": 0.007913,
+    "sharpe_oos": 1.8481,
+    "sharpe": 0.3999,
+    "score": 0.200302,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Tích lũy khi OBV tăng nhưng giá giảm.",
+    "expression": "alpha = cwise_mul(ts_delta(df['OBV'], 12), neg(ts_delta(df['close'], 5)) )",
+    "ic_oos": 0.106973,
+    "ic_is": 0.026056,
+    "sharpe_oos": 1.6441,
+    "sharpe": 0.3842,
+    "score": 0.195711,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Giá vượt ngưỡng trên của Bollinger Bands có thể dẫn đến sự điều chỉnh giảm giá.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(neg(ts_delta(df['close'], 12)), ts_zscore_scale(div(df['close'], df['BB_Middle']), 25)), 15))",
+    "ic_oos": 0.095335,
+    "ic_is": 0.01377,
+    "sharpe_oos": 1.7212,
+    "sharpe": 0.724,
+    "score": 0.194896,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "div",
+          "role": "ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "BB_Middle",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 7,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VIC",
+    "idea": "Giá trên BB cao với khối lượng thấp có thể dẫn đến giảm giá.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(neg(ts_delta(df['close'], 10)), ts_zscore_scale(df['BB_Upper'], 20)), 20)",
+    "ic_oos": 0.107852,
+    "ic_is": 0.010791,
+    "sharpe_oos": 1.6255,
+    "sharpe": 0.5764,
+    "score": 0.194754,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "BB_Upper"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán khả năng phục hồi khi giá dưới BB_lower và RSI_14 thấp.",
+    "expression": "alpha = tanh(ts_maxmin_scale(cwise_mul(sign(neg(df['close'] - df['BB_Lower'])), ts_zscore_scale(df['RSI_14'], 14)), 15))",
+    "ic_oos": 0.060463,
+    "ic_is": 0.035562,
+    "sharpe_oos": 1.9801,
+    "sharpe": 1.0288,
+    "score": 0.194682,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14",
+          "BB_Lower"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "Sự tương quan cao giữa giá và khối lượng có thể dẫn đến sự củng cố xu hướng tăng.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_cov(df['close'], df['volume'], 12), 15))",
+    "ic_oos": 0.042598,
+    "ic_is": 0.047295,
+    "sharpe_oos": 2.0628,
+    "sharpe": 1.3122,
+    "score": 0.19058,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_cov",
+          "role": "covariance_signal"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "FPT",
+    "idea": "Tâm lý tích cực trong ngành công nghệ có thể thúc đẩy giá cổ phiếu tăng.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta(df['close'], 7), add(1.0, cwise_mul(0.2, ts_ema(df['FPT_S'], 3)))), 10))",
+    "ic_oos": 0.103212,
+    "ic_is": 0.026993,
+    "sharpe_oos": 1.4961,
+    "sharpe": 0.4155,
+    "score": 0.181614,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "FPT_S"
+        ]
+      },
+      "n_components": 6,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Sự tăng trưởng giá khi momentum mạnh và giá vượt đường trung bình.",
+    "expression": "alpha = ts_rank(cwise_mul(ts_delta(df['close'], 3), greater(df['close'], df['SMA_20'])), 20)",
+    "ic_oos": 0.067283,
+    "ic_is": 0.001369,
+    "sharpe_oos": 1.7561,
+    "sharpe": 0.9762,
+    "score": 0.180854,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TCB",
+    "idea": "Dự đoán giá giảm khi có mẫu nến tăng theo sau là mẫu nến giảm.",
+    "expression": "alpha = tanh(ts_rank(neg(ts_delta(df['close'], 10)) * sign(ts_delta(df['close'], 1)), 12))",
+    "ic_oos": 0.074545,
+    "ic_is": 0.039062,
+    "sharpe_oos": 1.6959,
+    "sharpe": 0.5355,
+    "score": 0.180395,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Tăng trưởng trong mối tương quan giữa giá và volume cho thấy xu hướng tiếp diễn.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_corr(df['close'], df['volume'], 15), 12))",
+    "ic_oos": 0.061487,
+    "ic_is": 0.000933,
+    "sharpe_oos": 1.7777,
+    "sharpe": 1.0278,
+    "score": 0.179106,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "HDB",
+    "idea": "Sự gia tăng khối lượng trong bối cảnh giá giảm có thể dẫn đến áp lực mua vào, tạo ra tín hiệu đảo chiều tích cực.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 3), ts_zscore_scale(ts_mean(df['volume'], 7), 7))",
+    "ic_oos": 0.073058,
+    "ic_is": 0.011013,
+    "sharpe_oos": 1.6819,
+    "sharpe": 1.1561,
+    "score": 0.178386,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_mean",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Sự kết hợp giữa momentum tích cực và khối lượng tăng mạnh có thể thúc đẩy giá tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['close'], 3), ts_maxmin_scale(df['volume'], 7))",
+    "ic_oos": 0.061301,
+    "ic_is": 0.001882,
+    "sharpe_oos": 1.636,
+    "sharpe": 0.8549,
+    "score": 0.167661,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VRE",
+    "idea": "Sự tương quan tích cực với chỉ số giá thị trường có thể dẫn đến giá tăng.",
+    "expression": "alpha = ts_corr(df['close'], df['OBV'], 15)",
+    "ic_oos": 0.117698,
+    "ic_is": 0.011088,
+    "sharpe_oos": 1.1507,
+    "sharpe": 0.6011,
+    "score": 0.162677,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "DGC",
+    "idea": "RSI quá bán sau đó phục hồi dự báo xu hướng tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['RSI_14'], 7), minus(1, div(df['RSI_14'], 100)))",
+    "ic_oos": 0.057836,
+    "ic_is": 0.031322,
+    "sharpe_oos": 1.5945,
+    "sharpe": 0.6675,
+    "score": 0.162265,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "div",
+          "role": "ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TPB",
+    "idea": "RSI cao cho thấy khả năng điều chỉnh giá đáng kể.",
+    "expression": "alpha = ts_zscore_scale(neg(ts_rank(df['RSI_14'], 15)), 20)",
+    "ic_oos": 0.068735,
+    "ic_is": 0.03452,
+    "sharpe_oos": 1.5128,
+    "sharpe": 0.6189,
+    "score": 0.162262,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MBB",
+    "idea": "Tâm lý tích cực kết hợp với động lượng giá tạo thành tín hiệu tăng.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 5), add(1.0, cwise_mul(0.2, ts_ema(df['MBB_S'], 7))))",
+    "ic_oos": 0.039743,
+    "ic_is": 2.1e-05,
+    "sharpe_oos": 1.6478,
+    "sharpe": 0.2859,
+    "score": 0.155667,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "MBB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "VPB",
+    "idea": "Cảm xúc tích cực trong khi giá giảm có thể dẫn đến sự phục hồi.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['VPB_S'], 12), neg(ts_delta(df['close'], 5)))",
+    "ic_oos": 0.065043,
+    "ic_is": 0.019869,
+    "sharpe_oos": 1.3441,
+    "sharpe": 0.504,
+    "score": 0.146552,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "VPB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "VIB",
+    "idea": "Sự thay đổi tương quan giữa giá và khối lượng dự báo xu hướng giá.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_corr(df['close'], df['volume'], 7), 20))",
+    "ic_oos": -0.074784,
+    "ic_is": 0.013431,
+    "sharpe_oos": 1.2534,
+    "sharpe": 0.6128,
+    "score": 0.145142,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "GAS",
+    "idea": "RSI quá mua có thể dẫn đến sự điều chỉnh giá.",
+    "expression": "alpha = tanh(ts_rank(neg(ts_rank(df['RSI_14'], 15)), 15))",
+    "ic_oos": 0.072791,
+    "ic_is": 0.008019,
+    "sharpe_oos": 1.2247,
+    "sharpe": 0.595,
+    "score": 0.141654,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VNM",
+    "idea": "Biến động thấp có thể tạo cơ hội cho sự tăng giá.",
+    "expression": "alpha = ts_maxmin_scale(ts_std(df['close'], 10), 12)",
+    "ic_oos": 0.075473,
+    "ic_is": 0.029175,
+    "sharpe_oos": 1.2027,
+    "sharpe": 0.2943,
+    "score": 0.141496,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "TCB",
+    "idea": "Dự đoán phục hồi khi khối lượng và giá có sự khác biệt lớn.",
+    "expression": "alpha = ts_corr(df['volume'], df['close'], 10) * ts_delta_ratio(df['close'], 3)",
+    "ic_oos": 0.089531,
+    "ic_is": 0.024144,
+    "sharpe_oos": 0.9601,
+    "sharpe": 0.283,
+    "score": 0.130523,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]

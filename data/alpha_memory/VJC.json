@@ -1,0 +1,180 @@
+[
+  {
+    "ticker": "VJC",
+    "idea": "Cơ hội tăng giá sau khi xuất hiện mô hình nến tăng.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 1), greater(ts_delta(df['close'], 2), 0))",
+    "ic_oos": 0.133343,
+    "ic_is": 0.000549,
+    "sharpe_oos": 2.0587,
+    "sharpe": 0.9345,
+    "score": 0.2447,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Tích lũy khi OBV tăng nhưng giá giảm.",
+    "expression": "alpha = cwise_mul(ts_delta(df['OBV'], 12), neg(ts_delta(df['close'], 5)) )",
+    "ic_oos": 0.106973,
+    "ic_is": 0.026056,
+    "sharpe_oos": 1.6441,
+    "sharpe": 0.3842,
+    "score": 0.195711,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Sự tăng trưởng giá khi momentum mạnh và giá vượt đường trung bình.",
+    "expression": "alpha = ts_rank(cwise_mul(ts_delta(df['close'], 3), greater(df['close'], df['SMA_20'])), 20)",
+    "ic_oos": 0.067283,
+    "ic_is": 0.001369,
+    "sharpe_oos": 1.7561,
+    "sharpe": 0.9762,
+    "score": 0.180854,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Tăng trưởng trong mối tương quan giữa giá và volume cho thấy xu hướng tiếp diễn.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_corr(df['close'], df['volume'], 15), 12))",
+    "ic_oos": 0.061487,
+    "ic_is": 0.000933,
+    "sharpe_oos": 1.7777,
+    "sharpe": 1.0278,
+    "score": 0.179106,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VJC",
+    "idea": "Giá có thể tăng sau giai đoạn ổn định với biến động thấp.",
+    "expression": "alpha = tanh(ts_maxmin_scale(ts_std(df['close'], 5), 15))",
+    "ic_oos": 0.073517,
+    "ic_is": 0.023943,
+    "sharpe_oos": 1.2961,
+    "sharpe": 1.1579,
+    "score": 0.147802,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

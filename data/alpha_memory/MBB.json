@@ -1,0 +1,179 @@
+[
+  {
+    "ticker": "MBB",
+    "idea": "Giá tăng mà không có khối lượng hỗ trợ cho thấy sự yếu kém trong động lực, tạo cơ hội cho việc điều chỉnh giá.",
+    "expression": "alpha = ts_zscore_scale(ts_delta_ratio(df['close'], 7) - ts_delta_ratio(df['volume'], 3), 20)",
+    "ic_oos": 0.083583,
+    "ic_is": 0.030788,
+    "sharpe_oos": 2.1302,
+    "sharpe": 0.9777,
+    "score": 0.220566,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MBB",
+    "idea": "Tương quan giữa khối lượng và giá tăng cho thấy xu hướng tăng giá.",
+    "expression": "alpha = ts_rank(ts_corr(df['volume'], df['close'], 30), 30)",
+    "ic_oos": 0.07196,
+    "ic_is": 0.057558,
+    "sharpe_oos": 2.1395,
+    "sharpe": 0.9382,
+    "score": 0.21434,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MBB",
+    "idea": "Giá giảm dưới trung bình với khối lượng cao dự đoán phục hồi giá.",
+    "expression": "alpha = cwise_mul(ts_delta(df['close'], 10), ts_delta_ratio(df['volume'], 5))",
+    "ic_oos": 0.101811,
+    "ic_is": 0.056946,
+    "sharpe_oos": 1.3798,
+    "sharpe": 1.0514,
+    "score": 0.171469,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "MBB",
+    "idea": "Tâm lý tích cực kết hợp với động lượng giá tạo thành tín hiệu tăng.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['close'], 5), add(1.0, cwise_mul(0.2, ts_ema(df['MBB_S'], 7))))",
+    "ic_oos": 0.039743,
+    "ic_is": 2.1e-05,
+    "sharpe_oos": 1.6478,
+    "sharpe": 0.2859,
+    "score": 0.155667,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_ema",
+          "role": "smoothing"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "add",
+          "role": "combination"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "MBB_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "MBB",
+    "idea": "OBV tăng khi giá giảm cho thấy khả năng đảo chiều.",
+    "expression": "alpha = cwise_mul(ts_delta_ratio(df['OBV'], 7), neg(ts_delta_ratio(df['close'], 12)))",
+    "ic_oos": 0.048104,
+    "ic_is": 0.026499,
+    "sharpe_oos": 1.5093,
+    "sharpe": 0.9769,
+    "score": 0.149609,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  }
+]

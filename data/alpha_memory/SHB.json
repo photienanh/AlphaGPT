@@ -1,0 +1,185 @@
+[
+  {
+    "ticker": "SHB",
+    "idea": "Tương quan tăng giữa giá và OBV có thể chỉ ra xu hướng tăng.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_corr(df['close'], df['OBV'], 5), 5))",
+    "ic_oos": 0.130537,
+    "ic_is": 0.012637,
+    "sharpe_oos": 2.978,
+    "sharpe": 1.3141,
+    "score": 0.316565,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "OBV"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Mô hình nến tăng có thể chỉ ra cơ hội mua vào.",
+    "expression": "alpha = ts_delta(df['close'], 7) - ts_delta(df['open'], 10)",
+    "ic_oos": 0.224286,
+    "ic_is": 0.03293,
+    "sharpe_oos": 2.1122,
+    "sharpe": 1.0226,
+    "score": 0.303551,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "open",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Khối lượng cao trong bối cảnh giá giảm có thể chỉ ra sự phục hồi sắp xảy ra.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_delta_ratio(df['volume'], 5), neg(ts_delta(df['close'], 7))), 20)",
+    "ic_oos": 0.1549,
+    "ic_is": 0.010508,
+    "sharpe_oos": 2.4077,
+    "sharpe": 0.9816,
+    "score": 0.285559,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Sự quá mua có thể dẫn đến sự điều chỉnh giá.",
+    "expression": "alpha = ts_zscore_scale(minus(df['RSI_14'], 70), 3)",
+    "ic_oos": 0.062396,
+    "ic_is": 0.028531,
+    "sharpe_oos": 2.532,
+    "sharpe": 0.8128,
+    "score": 0.240001,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "SHB",
+    "idea": "Khối lượng gia tăng trong bối cảnh giá đang đi lên cho thấy sự mạnh mẽ của xu hướng này.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(ts_delta(df['volume'], 7), ts_delta_ratio(df['close'], 3)), 15))",
+    "ic_oos": 0.102314,
+    "ic_is": 0.075946,
+    "sharpe_oos": 1.8842,
+    "sharpe": 1.1425,
+    "score": 0.212123,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  }
+]

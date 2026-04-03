@@ -1,0 +1,205 @@
+[
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán xu hướng giảm khi có mẫu nến đảo chiều.",
+    "expression": "alpha = ts_rank(cwise_mul(sign(df['high'] - df['open']), neg(ts_delta_ratio(df['close'], 5))), 20)",
+    "ic_oos": 0.123926,
+    "ic_is": 0.019833,
+    "sharpe_oos": 3.3364,
+    "sharpe": 1.1031,
+    "score": 0.341269,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "high",
+          "close",
+          "open"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán phục hồi giá khi OBV tăng trong khi giá giảm.",
+    "expression": "alpha = ts_zscore_scale(cwise_mul(ts_delta_ratio(df['OBV'], 10), neg(ts_delta(df['close'], 7)) ), 15)",
+    "ic_oos": 0.106036,
+    "ic_is": 0.005735,
+    "sharpe_oos": 2.8725,
+    "sharpe": 0.9901,
+    "score": 0.293426,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán xu hướng tăng khi giá vượt SMA_20 với khối lượng tăng.",
+    "expression": "alpha = cwise_mul(ts_delta(df['volume'], 5), greater(df['close'], df['SMA_20']))",
+    "ic_oos": 0.091123,
+    "ic_is": 0.047294,
+    "sharpe_oos": 2.0418,
+    "sharpe": 1.1083,
+    "score": 0.218015,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán xu hướng tăng khi giá và khối lượng cùng tăng.",
+    "expression": "alpha = ts_delta(df['close'], 7) * ts_delta_ratio(df['volume'], 7)",
+    "ic_oos": 0.113781,
+    "ic_is": 0.006135,
+    "sharpe_oos": 1.7229,
+    "sharpe": 1.0731,
+    "score": 0.206097,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "PLX",
+    "idea": "Dự đoán khả năng phục hồi khi giá dưới BB_lower và RSI_14 thấp.",
+    "expression": "alpha = tanh(ts_maxmin_scale(cwise_mul(sign(neg(df['close'] - df['BB_Lower'])), ts_zscore_scale(df['RSI_14'], 14)), 15))",
+    "ic_oos": 0.060463,
+    "ic_is": 0.035562,
+    "sharpe_oos": 1.9801,
+    "sharpe": 1.0288,
+    "score": 0.194682,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14",
+          "BB_Lower"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  }
+]

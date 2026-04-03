@@ -1,0 +1,185 @@
+[
+  {
+    "ticker": "VHM",
+    "idea": "RSI thấp trong bối cảnh giá giảm cho thấy khả năng phục hồi.",
+    "expression": "alpha = ts_zscore_scale(neg(ts_delta(df['close'], 5)) * ts_maxmin_scale(df['RSI_14'], 10), 20)",
+    "ic_oos": 0.191162,
+    "ic_is": 0.010935,
+    "sharpe_oos": 3.9734,
+    "sharpe": 1.3566,
+    "score": 0.432573,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "RSI_14"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "Giá giảm liên tục kèm theo OBV tăng cho thấy sự tích lũy, dẫn đến khả năng phục hồi giá.",
+    "expression": "alpha = ts_delta_ratio(df['OBV'], 7) + neg(ts_delta_ratio(df['close'], 5))",
+    "ic_oos": 0.170498,
+    "ic_is": 0.021954,
+    "sharpe_oos": 2.8777,
+    "sharpe": 1.0411,
+    "score": 0.332519,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "Sự vượt qua SMA 20 với RSI thấp cho thấy sự phục hồi có thể xảy ra sau khi giá đã giảm.",
+    "expression": "alpha = ts_maxmin_scale(cwise_mul(ts_delta_ratio(df['close'], 7), sign(ts_delta(df['SMA_20'], 1))), 25)",
+    "ic_oos": 0.130506,
+    "ic_is": 0.031082,
+    "sharpe_oos": 2.812,
+    "sharpe": 1.0316,
+    "score": 0.303264,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "sign",
+          "role": "direction"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "Sự phục hồi giá sau khi giá giảm liên tục cho thấy khả năng đảo chiều.",
+    "expression": "alpha = ts_delta(df['close'], 5) - ts_delta(df['close'], 7)",
+    "ic_oos": 0.122182,
+    "ic_is": 0.017138,
+    "sharpe_oos": 2.4628,
+    "sharpe": 0.6906,
+    "score": 0.270336,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 1,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VHM",
+    "idea": "Khối lượng tăng mạnh trong khi giá giảm chỉ ra sự bán tháo dẫn đến phục hồi.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['volume'], 10), neg(ts_delta(df['close'], 7)))",
+    "ic_oos": -0.025325,
+    "ic_is": 0.033475,
+    "sharpe_oos": 0.7838,
+    "sharpe": 0.5165,
+    "score": 0.077898,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  }
+]

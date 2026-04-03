@@ -1,0 +1,194 @@
+[
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ sự tương tác giữa tâm lý ngân hàng và giá VCB.",
+    "expression": "alpha = ts_maxmin_scale(cwise_mul(ts_zscore_scale(df['BID_S'], 12), ts_delta(df['close'], 12)), 20)",
+    "ic_oos": 0.194461,
+    "ic_is": 0.025825,
+    "sharpe_oos": 2.2926,
+    "sharpe": 0.3558,
+    "score": 0.300086,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": [
+          "BID_S"
+        ]
+      },
+      "n_components": 4,
+      "uses_sentiment": true
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ độ biến động cao phản ánh sự điều chỉnh giá.",
+    "expression": "alpha = ts_zscore_scale(ts_std(df['close'], 10), 12)",
+    "ic_oos": 0.124544,
+    "ic_is": 0.028316,
+    "sharpe_oos": 2.7861,
+    "sharpe": 0.7348,
+    "score": 0.297615,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ giá trên mức trung bình di động.",
+    "expression": "alpha = ts_maxmin_scale(neg(ts_zscore_scale(minus(df['close'], df['EMA_10']), 3)), 30)",
+    "ic_oos": 0.108238,
+    "ic_is": 0.011158,
+    "sharpe_oos": 2.5393,
+    "sharpe": 1.0451,
+    "score": 0.26809,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "minus",
+          "role": "divergence"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close",
+          "EMA_10"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ sự bất thường giữa OBV và giá.",
+    "expression": "alpha = tanh(ts_zscore_scale(cwise_mul(ts_delta_ratio(df['OBV'], 7), neg(ts_delta(df['close'], 7))), 12))",
+    "ic_oos": 0.152527,
+    "ic_is": 0.024793,
+    "sharpe_oos": 1.9919,
+    "sharpe": 1.3717,
+    "score": 0.250865,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta_ratio",
+          "role": "momentum_ratio"
+        },
+        {
+          "operator": "neg",
+          "role": "transform"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 6,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "VCB",
+    "idea": "Tín hiệu từ sự thay đổi trong tương quan giữa giá và khối lượng.",
+    "expression": "alpha = ts_rank(ts_corr(df['close'], df['volume'], 10), 20)",
+    "ic_oos": 0.124808,
+    "ic_is": 0.005718,
+    "sharpe_oos": 2.1226,
+    "sharpe": 1.3545,
+    "score": 0.244696,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_corr",
+          "role": "correlation_signal"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "volume",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  }
+]
