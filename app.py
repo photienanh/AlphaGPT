@@ -166,11 +166,20 @@ def api_ticker(ticker: str):
                 if col not in av.columns:
                     continue
                 merged = pd.concat([av[col], fwd_ret], axis=1).dropna()
-                merged.columns = ["a","r"]
-                rolling = merged["a"].rolling(20).corr(merged["r"]).dropna().tail(200)
+                merged.columns = ["a", "r"]
+                # Rolling Spearman = rolling Pearson trên rank của từng window.
+                merged["a_rank"] = merged["a"].rolling(20).rank()
+                merged["r_rank"] = merged["r"].rolling(20).rank()
+                rolling = (
+                    merged["a_rank"]
+                    .rolling(20)
+                    .corr(merged["r_rank"])
+                    .dropna()
+                    .tail(200)
+                )
                 rolling_ic_data.append({
                     "alpha_id": a["id"],
-                    "family":   a.get("family","?"),
+                    "family":   a.get("family", "?"),
                     "dates":    [d.strftime("%Y-%m-%d") for d in rolling.index],
                     "values":   [round(float(v), 4) for v in rolling.values if np.isfinite(v)],
                 })

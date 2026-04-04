@@ -1,6 +1,193 @@
 [
   {
     "ticker": "ACB",
+    "idea": "Chốt lời sau đà tăng giá mạnh có thể dẫn đến điều chỉnh giá.",
+    "expression": "alpha = cwise_mul(ts_delta(df['close'], 5), ts_maxmin_scale(df['Momentum_3'], 10))",
+    "ic_oos": 0.122983,
+    "ic_is": 0.004082,
+    "sharpe_oos": 2.0855,
+    "sharpe": 0.8145,
+    "score": 1.0,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_maxmin_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "Momentum_3",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Giá dưới BB thấp và OBV tăng có thể dẫn đến phục hồi giá.",
+    "expression": "alpha = tanh(cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['OBV'], 10)))",
+    "ic_oos": 0.123231,
+    "ic_is": 0.003186,
+    "sharpe_oos": 2.2059,
+    "sharpe": 0.6195,
+    "score": 1.0,
+    "flipped": true,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "OBV",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 4,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Biến động giảm có thể dẫn đến sự ổn định giá và phục hồi.",
+    "expression": "alpha = tanh(ts_zscore_scale(ts_std(df['close'], 25), 10))",
+    "ic_oos": 0.155818,
+    "ic_is": 0.010075,
+    "sharpe_oos": 2.3984,
+    "sharpe": 1.0447,
+    "score": 1.0,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_std",
+          "role": "volatility"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 3,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Xu hướng tăng mạnh vượt qua SMA có thể tiếp tục.",
+    "expression": "alpha = cwise_mul(ts_zscore_scale(df['SMA_20'], 10), df['Momentum_10'])",
+    "ic_oos": 0.182513,
+    "ic_is": 0.024001,
+    "sharpe_oos": 2.0711,
+    "sharpe": 1.5568,
+    "score": 1.0,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "Momentum_10",
+          "SMA_20"
+        ],
+        "sentiment": []
+      },
+      "n_components": 2,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
+    "idea": "Giá vượt BB trên và RSI quá mua có thể dẫn đến điều chỉnh.",
+    "expression": "alpha = tanh(ts_rank(cwise_mul(ts_delta(df['close'], 5), ts_zscore_scale(df['RSI_14'], 12)), 20))",
+    "ic_oos": 0.063585,
+    "ic_is": 0.022909,
+    "sharpe_oos": 1.6921,
+    "sharpe": 0.978,
+    "score": 0.719922,
+    "flipped": false,
+    "decomposition": {
+      "operators": [
+        {
+          "operator": "ts_delta",
+          "role": "momentum"
+        },
+        {
+          "operator": "ts_rank",
+          "role": "rank_transform"
+        },
+        {
+          "operator": "tanh",
+          "role": "soft_clipping"
+        },
+        {
+          "operator": "ts_zscore_scale",
+          "role": "normalization"
+        },
+        {
+          "operator": "cwise_mul",
+          "role": "interaction"
+        }
+      ],
+      "data_sources": {
+        "technical": [
+          "RSI_14",
+          "close"
+        ],
+        "sentiment": []
+      },
+      "n_components": 5,
+      "uses_sentiment": false
+    }
+  },
+  {
+    "ticker": "ACB",
     "idea": "RSI thấp cho thấy cơ hội mua cổ phiếu ACB.",
     "expression": "alpha = minus(ts_maxmin_scale(df['RSI_14'], 25), 1)",
     "ic_oos": 0.026005,

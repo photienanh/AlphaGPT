@@ -198,6 +198,10 @@ def eval_one(alpha_def: dict, df: pd.DataFrame,
     """
     Evaluate one alpha definition with walk-forward OOS metrics.
     Auto-flips if IC_IS is negative (paper mentions directional correction).
+
+    Fix normalize: dùng expanding mean/std thay vì global mean/std.
+    Expanding chỉ dùng data từ đầu đến ngày t → không nhìn tương lai.
+    Sau đó split → IC_OOS thực sự sạch.
     """
     result = deepcopy(alpha_def)
     result.update({
@@ -219,13 +223,21 @@ def eval_one(alpha_def: dict, df: pd.DataFrame,
         result["error_reason"] = reason
         return result
 
-    # Normalize to zero-mean unit-variance
-    norm = (series - series.mean()) / (series.std() + 1e-9)
+    # ── Normalize: expanding window (không dùng future data) ──────────
+    # expanding().mean() tại ngày t = mean của tất cả giá trị từ ngày 0..t
+    # Sau min_periods=30 rows mới bắt đầu normalize để tránh warm-up instability
+    exp_mean = series.expanding(min_periods=30).mean()
+    exp_std  = series.expanding(min_periods=30).std()
+    norm = (series - exp_mean) / (exp_std + 1e-9)
+    # Clip extreme outliers (>5σ) tránh 1 ngày bất thường làm lệch metrics
+    norm = norm.clip(-5.0, 5.0)
+    # Fillna các rows warm-up đầu bằng 0 (neutral signal)
+    norm = norm.fillna(0.0)
 
-    # Walk-forward IC
+    # ── Walk-forward IC: split SAU khi đã normalize ───────────────────
     ic_is, ic_oos = compute_ic_oos(norm, fwd_ret, test_ratio=OOS_TEST_RATIO)
 
-    # Auto-flip: if IS IC is negative, reverse signal
+    # Auto-flip: nếu IS IC âm → đảo signal
     flipped = False
     if not np.isnan(ic_is) and ic_is < 0:
         norm   = -norm
@@ -233,12 +245,14 @@ def eval_one(alpha_def: dict, df: pd.DataFrame,
         ic_oos = -ic_oos if not np.isnan(ic_oos) else ic_oos
         flipped = True
 
-    # Other metrics (computed on full series for display; OOS used for scoring)
+    # Sharpe IS (toàn bộ period, chỉ để tham khảo)
     sharpe     = compute_sharpe(norm, fwd_ret)
+    # Sharpe OOS (30% cuối, dùng để score)
     sharpe_oos = compute_sharpe_oos(norm, fwd_ret, test_ratio=OOS_TEST_RATIO)
+    # Turnover (đặc tính cấu trúc, không cần split)
     turnover   = compute_turnover(norm)
 
-    # 5d IC (full period — indicative only)
+    # IC 5 ngày (full period, chỉ indicative)
     ic_5d = None
     if fwd_ret_5d is not None:
         raw_5d = compute_ic(norm, fwd_ret_5d)

@@ -195,7 +195,6 @@ def enhance_alpha(
     for iteration in range(n_iterations):
         # Generate population of mutants
         mutants = []
-        r = random.random()
 
         for _ in range(population_size):
             r = random.random()

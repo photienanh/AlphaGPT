@@ -44,11 +44,13 @@ def compute_ic_oos(alpha: pd.Series, fwd_ret: pd.Series,
     """
     Returns (ic_in_sample, ic_out_of_sample).
     ic_oos is the honest metric — no lookahead.
+
+    Fix: gọi train_test_split_time đúng 1 lần, unpack đủ 4 giá trị.
+    Trước đây gọi 2 lần riêng biệt — dư thừa và dễ nhầm thứ tự unpack.
     """
-    _, a_test, _, r_test = train_test_split_time(alpha, fwd_ret, test_ratio)
-    a_train, _, r_train, _ = train_test_split_time(alpha, fwd_ret, test_ratio)
+    a_train, a_test, r_train, r_test = train_test_split_time(alpha, fwd_ret, test_ratio)
     ic_is  = compute_ic(a_train, r_train)
-    ic_oos = compute_ic(a_test, r_test)
+    ic_oos = compute_ic(a_test,  r_test)
     return ic_is, ic_oos
 
 
@@ -66,7 +68,7 @@ def compute_sharpe(alpha: pd.Series, fwd_ret: pd.Series) -> float:
 
 def compute_sharpe_oos(alpha: pd.Series, fwd_ret: pd.Series,
                        test_ratio: float = 0.3) -> float:
-    """Sharpe computed on out-of-sample split."""
+    """Sharpe computed on out-of-sample split only."""
     _, a_test, _, r_test = train_test_split_time(alpha, fwd_ret, test_ratio)
     return compute_sharpe(a_test, r_test)
 
@@ -83,18 +85,31 @@ def composite_score(ic_oos: float | None, sharpe_oos: float | None,
     """
     Scoring based on OOS metrics primarily.
     ic_is used as sanity check: if IS >> OOS, penalise (overfit signal).
-    """
-    _ic  = abs(ic_oos)  if ic_oos  is not None and np.isfinite(ic_oos)  else 0.0
-    _sh  = sharpe_oos   if sharpe_oos is not None and np.isfinite(sharpe_oos) else 0.0
 
-    # Overfit penalty: if in-sample IC is >3x out-of-sample IC
+    Scale chuẩn hoá:
+      IC_OOS   range thực tế [0, 0.10] → chia 0.10 → [0, 1]
+      Sharpe   range thực tế [0, 2.0]  → chia 2.0  → [0, 1]
+    → Sau normalize, weight 60/40 mới thực sự là 60/40.
+
+    Overfit penalty: nếu IC_IS > 3× IC_OOS → score × 0.5
+    """
+    _ic = abs(ic_oos)  if ic_oos  is not None and np.isfinite(ic_oos)  else 0.0
+    _sh = sharpe_oos   if sharpe_oos is not None and np.isfinite(sharpe_oos) else 0.0
+
+    # Normalize về [0, 1] dựa trên khoảng thực tế của mỗi metric
+    IC_MAX     = 0.10   # IC_OOS > 0.10 là xuất sắc, hiếm gặp
+    SHARPE_MAX = 2.0    # Sharpe_OOS > 2.0 là xuất sắc, hiếm gặp
+    ic_norm = min(_ic / IC_MAX, 1.0)                        # cap tại 1.0
+    sh_norm = min(max(_sh, 0.0) / SHARPE_MAX, 1.0)         # chỉ phần dương
+
+    # Overfit penalty
     overfit_penalty = 1.0
     if ic_is is not None and _ic > 1e-4:
         ratio = abs(ic_is) / (_ic + 1e-9)
         if ratio > 3.0:
             overfit_penalty = 0.5
 
-    return round((0.6 * _ic + 0.4 * max(_sh / 5.0, 0.0)) * overfit_penalty, 6)
+    return round((0.6 * ic_norm + 0.4 * sh_norm) * overfit_penalty, 6)
 
 
 def rolling_ic_series(alpha: pd.Series, fwd_ret: pd.Series,

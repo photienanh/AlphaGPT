@@ -742,8 +742,8 @@ def compute_composite(ticker: str, alpha_values: pd.DataFrame) -> pd.Series:
             signal += weights[i] * alpha_values[col].fillna(0.0)
 
     # Z-score normalize over rolling 60d
-    mu  = signal.rolling(60, min_periods=10).mean()
-    std = signal.rolling(60, min_periods=10).std()
+    mu  = signal.rolling(60, min_periods=30).mean()
+    std = signal.rolling(60, min_periods=30).std()
     return ((signal - mu) / (std + 1e-9)).rename(f"{ticker}_signal")
 
 
