@@ -1,7 +1,5 @@
 """
-Services package for AlphaGPT
-
-This package contains service modules that provide higher-level functionality.
+services/__init__.py
 """
 from services.state_service import invoke_graph_with_state, get_state_history
 

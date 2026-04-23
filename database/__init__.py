@@ -1,8 +1,8 @@
 """
-Database package for AlphaGPT
-
-This package contains modules for database operations and models.
+database/__init__.py
+Export công khai của package database.
+Chỉ dùng SQLite thông qua db.py — không còn PostgreSQL/checkpointer_api.
 """
-from database.checkpointer_api import AlphaGPTCheckpointer, get_checkpoint_manager
+from database.db import get_db, init_db, AlphaGPTDB
 
-__all__ = ["AlphaGPTCheckpointer", "get_checkpoint_manager"]
+__all__ = ["get_db", "init_db", "AlphaGPTDB"]

@@ -1,71 +1,89 @@
 """
-State management service for AlphaGPT
+services/state_service.py
+Cung cấp hai hàm tiện ích để chạy pipeline và truy vấn lịch sử.
 
-This module provides functions for working with graph states and history.
+Thay đổi so với phiên bản cũ:
+  - Bỏ import get_checkpoint_manager từ checkpointer_api (PostgreSQL)
+  - Dùng AlphaGPTDB (SQLite) từ database.db
+  - checkpoint_id không còn cần thiết (MemorySaver tự quản lý)
+  - get_state_history trả về cấu trúc đầy đủ: hypotheses → alphas → backtest_results
 """
-
+import asyncio
 from typing import Dict, Any, Optional
 
 from state import State
-from database.checkpointer_api import get_checkpoint_manager
-
-# Import graph lazily to avoid circular imports
+from database.db import get_db
 
 
 def invoke_graph_with_state(
     initial_state: State,
     thread_id: Optional[str] = None,
-    checkpoint_id: Optional[str] = None,
-) -> State:
+) -> Dict[str, Any]:
     """
-    Invoke the graph with an initial state, optionally continuing from a thread
+    Chạy pipeline đồng bộ từ initial_state.
 
     Args:
-        initial_state: The initial state to pass to the graph
-        thread_id: Optional thread ID to continue from
-        checkpoint_id: Optional checkpoint ID to continue from
+        initial_state: State khởi đầu, bắt buộc có trading_idea.
+        thread_id: ID để checkpoint MemorySaver theo dõi. Nếu None thì dùng "default".
 
     Returns:
-        Final state from the graph execution
+        Final state dict sau khi pipeline hoàn tất.
     """
-    config_dict = {}
+    from graph import graph  # lazy import tránh circular
 
-    if thread_id:
-        config_dict["configurable"] = {"thread_id": thread_id}
+    config = {"configurable": {"thread_id": thread_id or "default"}}
+    return graph.invoke(initial_state, config)
 
-        if checkpoint_id:
-            config_dict["configurable"]["checkpoint_id"] = checkpoint_id
 
-    # Avoid circular import by importing here
-    from graph import graph
+async def ainvoke_graph_with_state(
+    initial_state: State,
+    thread_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Phiên bản async của invoke_graph_with_state.
+    Dùng khi gọi từ môi trường async (FastAPI, Jupyter, v.v.)
+    """
+    from graph import graph  # lazy import tránh circular
 
-    # Run the graph with the config
-    return graph.invoke(initial_state, config_dict)
+    config = {"configurable": {"thread_id": thread_id or "default"}}
+    return await graph.ainvoke(initial_state, config)
 
 
 def get_state_history(thread_id: str) -> Dict[str, Any]:
     """
-    Get the full history of a thread, including hypotheses, alphas, and backtest results
+    Truy vấn toàn bộ lịch sử của một thread từ SQLite.
 
-    Args:
-        thread_id: Thread ID to get history for
-
-    Returns:
-        Dictionary containing thread history
+    Cấu trúc trả về:
+        {
+            "thread_id": str,
+            "hypotheses": [
+                {
+                    "id": int,
+                    "iteration": int,
+                    "hypothesis": str,
+                    ...các fields khác của hypotheses table...,
+                    "alphas": [
+                        {
+                            "id": int,
+                            "alpha_id": str,
+                            "expression": str,
+                            "ic_oos": float,
+                            "score": float,
+                            ...
+                            "backtest_results": [...]
+                        }
+                    ]
+                }
+            ]
+        }
     """
-    checkpointer = get_checkpoint_manager()
+    db = get_db()
+    hypotheses = db.get_hypothesis_history(thread_id)
 
-    # Get all hypotheses for this thread
-    hypotheses = checkpointer.get_hypothesis_history(thread_id)
-
-    # Get alphas for each hypothesis
-    for hypothesis in hypotheses:
-        hypothesis["alphas"] = checkpointer.get_alphas_for_hypothesis(hypothesis["id"])
-
-        # Get backtest results for each alpha
-        for alpha in hypothesis["alphas"]:
-            alpha["backtest_results"] = checkpointer.get_backtest_results_for_alpha(
-                alpha["id"]
-            )
+    for hyp in hypotheses:
+        alphas = db.get_alphas_for_hypothesis(hyp["id"])
+        for alpha in alphas:
+            alpha["backtest_results"] = db.get_backtest_results_for_alpha(alpha["id"])
+        hyp["alphas"] = alphas
 
     return {"thread_id": thread_id, "hypotheses": hypotheses}

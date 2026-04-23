@@ -5,27 +5,38 @@ from typing import List, Dict, Any, Optional
 
 @dataclass
 class State:
-    """Define the state for alpha generation workflow with RD Agent style fields."""
+    """State cho Alpha-GPT pipeline theo paper (Section 2, 3.1, 4)."""
 
-    # Input/Output
+    # ── Input ────────────────────────────────────────────────────────
     trading_idea: str = ""
 
-    # Hypothesis fields (matching RD Agent structure)
+    # ── Hypothesis (Ideation stage) ──────────────────────────────────
     hypothesis: str = ""
     reason: str = ""
     concise_reason: str = ""
     concise_observation: str = ""
     concise_justification: str = ""
     concise_knowledge: str = ""
+    iteration: int = 0
 
-    # Alpha generation
+    # ── Implementation stage ─────────────────────────────────────────
     seed_alphas: List[Dict[str, Any]] = field(default_factory=list)
-    coded_alphas: List[Dict[str, Any]] = field(default_factory=list)
+    candidate_alphas: List[Dict[str, Any]] = field(default_factory=list)
 
-    # For SOTA tracking and feedback loop
+    # ── Review stage ─────────────────────────────────────────────────
+    evaluated_alphas: List[Dict[str, Any]] = field(default_factory=list)
     sota_alphas: List[Dict[str, Any]] = field(default_factory=list)
-    feedback: Optional[Dict[str, Any]] = None
+    analyst_summary: str = ""
+    analyst_feedback: str = ""
+    analyst_weak_ids: List[str] = field(default_factory=list)
 
-    # Historical data for iterations
+    # ── Loop control ─────────────────────────────────────────────────
+    max_iterations: int = 3
+    should_continue: bool = True
+
+    # ── History ──────────────────────────────────────────────────────
     hypothesis_history: List[Dict[str, Any]] = field(default_factory=list)
     alpha_history: List[Dict[str, Any]] = field(default_factory=list)
+
+    # ── Data reference ────────────────────────────────────────────────
+    thread_id: str = ""
