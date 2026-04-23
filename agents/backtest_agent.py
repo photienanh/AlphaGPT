@@ -11,7 +11,7 @@ from copy import deepcopy
 from typing import Any, Dict, List
 from langchain_core.runnables import RunnableConfig
 from state import State
-from evaluator import eval_alpha
+from evaluator import eval_alpha, IC_SIGNAL_THRESHOLD
 
 log = logging.getLogger(__name__)
 CORR_THRESHOLD      = 0.55
@@ -30,12 +30,20 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
         ic_oos = a.get("ic_oos")
         if ic_is is None or ic_oos is None:
             return True
-        if ic_is * ic_oos < 0 and abs(ic_is) > 0.05:
+        if ic_is * ic_oos < 0:
             return False
         return True
 
+    def _passes_quality(a: Dict[str, Any]) -> bool:
+        ic_oos = a.get("ic_oos")
+        sharpe = a.get("sharpe_oos")
+        ret = a.get("return_oos")
+        if ic_oos is None or sharpe is None or ret is None:
+            return False
+        return ic_oos >= IC_SIGNAL_THRESHOLD and sharpe > 0 and ret > 0
+
     ok = [a for a in evaluated
-          if a.get("status") == "OK" and _is_stable(a)]
+          if a.get("status") == "OK" and _is_stable(a) and _passes_quality(a)]
     ok.sort(key=lambda x: (
         x.get("ic_oos") or 0,
         x.get("sharpe_oos") or 0,

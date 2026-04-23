@@ -15,6 +15,23 @@ from prompts.analyst_prompts import ANALYST_SYSTEM_PROMPT, ANALYST_PROMPT
 log = logging.getLogger(__name__)
 
 
+def _classify_eval_error(err: str) -> str:
+    e = (err or "").lower()
+    if not e:
+        return "unknown"
+    if "takes" in e and "positional argument" in e:
+        return "operator_signature_error"
+    if "keyerror" in e or "not in index" in e:
+        return "missing_field_error"
+    if "syntaxerror" in e or "invalid syntax" in e:
+        return "syntax_error"
+    if "nameerror" in e:
+        return "unknown_symbol_error"
+    if "did not produce pd.series" in e:
+        return "invalid_output_error"
+    return "runtime_error"
+
+
 async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     """Phân tích evaluated_alphas, sinh feedback cho Hypothesis agent."""
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
@@ -62,6 +79,20 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     for a in err_alphas:
         results_text.append(
             f"- {a['id']} [EVAL_ERROR]: {a.get('error', '')[:60]}"
+        )
+
+    # Bổ sung diagnostic cho lỗi kỹ thuật để vòng sau đổi hướng tốt hơn
+    error_groups = {}
+    for a in err_alphas:
+        category = _classify_eval_error(a.get("error", ""))
+        error_groups.setdefault(category, []).append(a.get("id", "?"))
+    if error_groups:
+        diag_lines = []
+        for category, ids in sorted(error_groups.items()):
+            diag_lines.append(f"- {category}: {', '.join(ids)}")
+        results_text.append(
+            "## Error diagnostics (implementation issues, không phải logic thị trường)\n"
+            + "\n".join(diag_lines)
         )
  
     prompt = ANALYST_PROMPT.format(
@@ -119,11 +150,18 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     updated_history = list(state.hypothesis_history) + [current_hyp]
  
     # Quyết định có tiếp tục không
-    MIN_SOTA = 3          # muốn ít nhất 3 alpha tốt
-    MIN_IC   = 0.03       # IC_OOS trung bình tối thiểu
+    MIN_SOTA   = 3          # muốn ít nhất 3 alpha tốt
+    MIN_IC     = 0.03       # IC_OOS trung bình tối thiểu
+    MIN_SHARPE = 0.2        # Sharpe trung bình phải dương rõ ràng
+    MIN_RETURN = 0.0        # Return trung bình không âm
 
     sota_count = len(state.sota_alphas or [])
-    quality_ok = (sota_count >= MIN_SOTA and avg_ic_oos >= MIN_IC)
+    quality_ok = (
+        sota_count >= MIN_SOTA
+        and avg_ic_oos >= MIN_IC
+        and avg_sharpe >= MIN_SHARPE
+        and avg_return >= MIN_RETURN
+    )
     weak_ids = data.get("weak_alpha_ids", [])
     should_continue = (
         state.iteration < state.max_iterations

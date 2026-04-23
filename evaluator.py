@@ -24,6 +24,8 @@ DATA_FIELDS = [
 ]
 
 IC_SIGNAL_THRESHOLD = 0.01  # dưới này là noise với daily VN30 data
+SHARPE_MIN_THRESHOLD = 0.0
+RETURN_MIN_THRESHOLD = 0.0
 
 
 def _build_namespace(df: pd.DataFrame) -> dict:
@@ -121,25 +123,39 @@ def eval_alpha(alpha_def: Dict[str, Any],
     fwd_eval  = fwd_ret.loc[start:]
 
     ic_is, ic_oos = compute_ic_oos(norm_eval, fwd_eval)
-
-    ic_oos_val = ic_oos if not np.isnan(ic_oos) else 0.0
-
-    if ic_oos_val <= 0:
-        status = "WEAK"
-        weak_reason = f"IC_OOS={ic_oos_val:+.4f} ≤ 0: signal sai chiều"
-    elif ic_oos_val < IC_SIGNAL_THRESHOLD:
-        status = "MARGINAL"
-        weak_reason = (
-            f"IC_OOS={ic_oos_val:+.4f} < {IC_SIGNAL_THRESHOLD}: "
-            f"dương nhưng trong vùng noise thống kê"
-        )
-    else:
-        status = "OK"
-        weak_reason = None
- 
     sharpe_oos          = compute_sharpe_oos(norm_eval, fwd_eval)
     ann_return, mdd     = compute_return_oos(norm_eval, fwd_eval)
     turnover            = compute_turnover(norm_eval)
+
+    ic_oos_val = ic_oos if not np.isnan(ic_oos) else 0.0
+    sharpe_val = sharpe_oos if np.isfinite(sharpe_oos) else None
+    return_val = ann_return if np.isfinite(ann_return) else None
+
+    # Theo paper: alpha "được giữ" cần qua đồng thời IC, Sharpe và Return.
+    if ic_oos_val <= 0:
+        status = "WEAK"
+        weak_reason = f"IC_OOS={ic_oos_val:+.4f} ≤ 0: signal sai chiều"
+    else:
+        reasons = []
+        if ic_oos_val < IC_SIGNAL_THRESHOLD:
+            reasons.append(
+                f"IC_OOS={ic_oos_val:+.4f} < {IC_SIGNAL_THRESHOLD} (vùng noise)"
+            )
+        if sharpe_val is None or sharpe_val <= SHARPE_MIN_THRESHOLD:
+            reasons.append(
+                f"Sharpe_OOS={0.0 if sharpe_val is None else sharpe_val:+.4f} <= {SHARPE_MIN_THRESHOLD}"
+            )
+        if return_val is None or return_val <= RETURN_MIN_THRESHOLD:
+            reasons.append(
+                f"Return_OOS={0.0 if return_val is None else return_val:+.4f} <= {RETURN_MIN_THRESHOLD}"
+            )
+
+        if reasons:
+            status = "MARGINAL"
+            weak_reason = "; ".join(reasons)
+        else:
+            status = "OK"
+            weak_reason = None
     result.update({
         "ic_is":      _r(ic_is,      6),
         "ic_oos":     _r(ic_oos,     6),
