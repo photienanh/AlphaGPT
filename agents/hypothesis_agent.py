@@ -1,4 +1,8 @@
 # agents/hypothesis_agent.py
+"""
+Ideation stage — paper Section 2.1.
+Tích hợp RAG từ knowledge base trước khi call LLM.
+"""
 import json
 import logging
 from typing import Any, Dict
@@ -11,26 +15,44 @@ from prompts.hypothesis_prompts import (
     HYPOTHESIS_ITERATION_PROMPT,
     HYPOTHESIS_OUTPUT_FORMAT,
 )
+from knowledge.retriever import retrieve_similar_alphas
+from config import DEFAULT_CONFIG
 
 log = logging.getLogger(__name__)
 
 
+def _format_rag_examples(alphas: list) -> str:
+    if not alphas:
+        return ""
+    lines = ["## Relevant alpha examples from knowledge base\n"]
+    for a in alphas:
+        lines.append(
+            f"- **{a['id']}** [{a.get('family', '?')}]: {a.get('description', '')}\n"
+            f"  `{a.get('expression', '')[:100]}`"
+        )
+    return "\n".join(lines)
+
+
 async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     """
-    Ideation stage — paper Section 2.1.
-    Vòng 1: generate từ trading_idea.
-    Vòng N: refine dựa trên analyst_feedback + hypothesis_history.
+    Vòng 1: generate từ trading_idea + RAG examples.
+    Vòng N: refine dựa trên analyst_feedback + RAG examples.
     """
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
     is_first = not state.hypothesis_history
 
+    # RAG: retrieve similar alphas
+    query = state.trading_idea if is_first else (state.analyst_feedback or state.trading_idea)
+    rag_alphas = retrieve_similar_alphas(query, top_k=DEFAULT_CONFIG.rag_top_k)
+    rag_block = _format_rag_examples(rag_alphas)
+
     if is_first:
         user_prompt = HYPOTHESIS_INITIAL_PROMPT.format(
             trading_idea=state.trading_idea,
+            rag_examples=rag_block,
             output_format=HYPOTHESIS_OUTPUT_FORMAT,
         )
     else:
-        # Format history kèm backtest metrics nếu có
         history_text = ""
         for i, h in enumerate(state.hypothesis_history[-3:], 1):
             history_text += f"\nVòng {h.get('iteration', i)}: {h.get('hypothesis', '')}\n"
@@ -40,6 +62,7 @@ async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, An
         user_prompt = HYPOTHESIS_ITERATION_PROMPT.format(
             hypothesis_history=history_text,
             analyst_feedback=state.analyst_feedback or "Chưa có feedback.",
+            rag_examples=rag_block,
             output_format=HYPOTHESIS_OUTPUT_FORMAT,
         )
 

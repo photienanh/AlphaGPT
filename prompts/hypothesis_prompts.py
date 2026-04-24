@@ -1,5 +1,4 @@
 # prompts/hypothesis_prompts.py
-# Giữ nguyên từ codebase gốc — chất lượng tốt
 
 HYPOTHESIS_SYSTEM_PROMPT = """Bạn là một nhà nghiên cứu tài chính định lượng chuyên xây dựng giả thuyết cho alpha factor.
 
@@ -15,10 +14,14 @@ HYPOTHESIS_INITIAL_PROMPT = """
 Ý tưởng giao dịch: {trading_idea}
 
 Hãy phát triển một giả thuyết toàn diện. Vì đây là vòng lặp đầu tiên, ưu tiên tính rõ ràng và độ vững chắc lý thuyết.
+
+{rag_examples}
+
 Ràng buộc bắt buộc:
-- Hypothesis PHẢI có thể implement bằng: OHLCV, RSI_14, MACD, BB, SMA_5/20, EMA_10, OBV, Momentum_3/10
-- KHÔNG đề cập VIX, P/E ratio, earnings, fundamental data, hay bất kỳ data nào ngoài danh sách trên
-- Tập trung vào price-volume patterns của thị trường HOSE
+- Hypothesis PHẢI có thể implement bằng: OHLCV, vwap, adv20, returns, rsi_14, macd, bb, sma_5/20, ema_10, obv, momentum_3/10
+- KHÔNG đề cập VIX, P/E ratio, earnings, fundamental data ngoài danh sách trên
+- Tập trung vào price-volume patterns
+
 {output_format}
 """
 
@@ -27,6 +30,8 @@ Lịch sử và kết quả các vòng trước:
 {hypothesis_history}
 
 Analyst feedback: {analyst_feedback}
+
+{rag_examples}
 
 Dựa trên kết quả trên, hãy phát triển giả thuyết mới hoặc tinh chỉnh giả thuyết hiện có để cải thiện alpha performance.
 

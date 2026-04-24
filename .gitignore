@@ -5,3 +5,4 @@ __pycache__/
 *.db
 *.json
 *read_db.py
+*.faiss

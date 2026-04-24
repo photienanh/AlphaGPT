@@ -1,14 +1,34 @@
+"""
+alpha_operators.py
+Tất cả operators cho alpha expressions.
+Tên hàm được dùng trực tiếp trong exec() của evaluator.
+"""
 import numpy as np
 import pandas as pd
 from typing import Optional
 
+
+# ── Time-series ───────────────────────────────────────────────────────
+
 def shift(series: pd.Series, period: int) -> pd.Series:
+    return series.shift(period)
+
+def delay(series: pd.Series, period: int) -> pd.Series:
+    """Alias của shift — theo notation trong Kakushadze paper."""
     return series.shift(period)
 
 def ts_corr(s1: pd.Series, s2: pd.Series, window: int) -> pd.Series:
     return s1.rolling(window).corr(s2)
 
+def correlation(s1: pd.Series, s2: pd.Series, window: int) -> pd.Series:
+    """Alias ts_corr — theo Kakushadze."""
+    return s1.rolling(window).corr(s2)
+
 def ts_cov(s1: pd.Series, s2: pd.Series, window: int) -> pd.Series:
+    return s1.rolling(window).cov(s2)
+
+def covariance(s1: pd.Series, s2: pd.Series, window: int) -> pd.Series:
+    """Alias ts_cov — theo Kakushadze."""
     return s1.rolling(window).cov(s2)
 
 def ts_mean(series: pd.Series, window: int) -> pd.Series:
@@ -17,10 +37,22 @@ def ts_mean(series: pd.Series, window: int) -> pd.Series:
 def ts_std(series: pd.Series, window: int) -> pd.Series:
     return series.rolling(window).std()
 
+def stddev(series: pd.Series, window: int) -> pd.Series:
+    """Alias ts_std — theo Kakushadze."""
+    return series.rolling(window).std()
+
 def ts_sum(series: pd.Series, window: int) -> pd.Series:
     return series.rolling(window).sum()
 
+def sum_op(series: pd.Series, window: int) -> pd.Series:
+    """Alias ts_sum — theo Kakushadze (tránh xung đột với builtin sum)."""
+    return series.rolling(window).sum()
+
 def ts_product(series: pd.Series, window: int) -> pd.Series:
+    return series.rolling(window).apply(np.prod, raw=True)
+
+def product(series: pd.Series, window: int) -> pd.Series:
+    """Alias ts_product."""
     return series.rolling(window).apply(np.prod, raw=True)
 
 def ts_min(series: pd.Series, window: int) -> pd.Series:
@@ -48,9 +80,13 @@ def ts_median(series: pd.Series, window: int) -> pd.Series:
     return series.rolling(window).median()
 
 def ts_rank(series: pd.Series, window: int) -> pd.Series:
-    return series.rolling(window).apply(
-        lambda x: pd.Series(x).rank(pct=True).iloc[-1], raw=False
-    )
+    """Time-series rank: vị trí của giá trị hiện tại trong window, normalize về [0,1]."""
+    def _rank_last(x: np.ndarray) -> float:
+        n = len(x)
+        if n <= 1:
+            return 0.5
+        return float((x[:-1] < x[-1]).sum()) / (n - 1)
+    return series.rolling(window).apply(_rank_last, raw=True)
 
 def ts_zscore_scale(series: pd.Series, window: int) -> pd.Series:
     mu  = series.rolling(window).mean()
@@ -71,6 +107,10 @@ def ts_kurt(series: pd.Series, window: int) -> pd.Series:
 def ts_delta(series: pd.Series, period: int) -> pd.Series:
     return series.diff(period)
 
+def delta(series: pd.Series, period: int) -> pd.Series:
+    """Alias ts_delta — theo Kakushadze."""
+    return series.diff(period)
+
 def ts_delta_ratio(series: pd.Series, period: int) -> pd.Series:
     prev = series.shift(period)
     return (series - prev) / (prev.abs() + 1e-9)
@@ -85,6 +125,10 @@ def ts_decayed_linear(series: pd.Series, window: int) -> pd.Series:
     return series.rolling(window).apply(
         lambda x: (x * weights[-len(x):]).sum(), raw=True
     )
+
+def decay_linear(series: pd.Series, window: int) -> pd.Series:
+    """Alias ts_decayed_linear — theo Kakushadze."""
+    return ts_decayed_linear(series, window)
 
 def ts_ema(series: pd.Series, span: int) -> pd.Series:
     return series.ewm(span=span, adjust=False).mean()
@@ -101,7 +145,19 @@ def ts_linear_reg(series: pd.Series, window: int) -> pd.Series:
         return slope
     return series.rolling(window).apply(_slope, raw=True)
 
-# ── Cross-sectional ─────────────────────────────────────────────────
+
+# ── Cross-sectional ───────────────────────────────────────────────────
+
+def rank(series: pd.Series) -> pd.Series:
+    """
+    Cross-sectional rank (expanding) — theo Kakushadze notation.
+    Khi dùng trong panel context (eval per ticker), expanding rank theo thời gian.
+    """
+    return series.expanding().rank(pct=True)
+
+def cs_rank(series: pd.Series) -> pd.Series:
+    """Cross-sectional rank tại mỗi thời điểm (rank trong window hiện tại)."""
+    return series.rank(pct=True)
 
 def zscore_scale(series: pd.Series, window: Optional[int] = None) -> pd.Series:
     if window:
@@ -121,17 +177,39 @@ def winsorize_scale(series: pd.Series, limits: float = 0.05) -> pd.Series:
 def normed_rank(series: pd.Series) -> pd.Series:
     return series.expanding().rank(pct=True)
 
-def cwise_max(s1: pd.Series, s2: pd.Series) -> pd.Series:
-    return pd.concat([s1, s2], axis=1).max(axis=1)
+def cwise_max(s1: pd.Series, s2) -> pd.Series:
+    if isinstance(s2, pd.Series):
+        return pd.concat([s1, s2], axis=1).max(axis=1)
+    return s1.clip(lower=s2)
 
-def cwise_min(s1: pd.Series, s2: pd.Series) -> pd.Series:
-    return pd.concat([s1, s2], axis=1).min(axis=1)
+def cwise_min(s1: pd.Series, s2) -> pd.Series:
+    if isinstance(s2, pd.Series):
+        return pd.concat([s1, s2], axis=1).min(axis=1)
+    return s1.clip(upper=s2)
 
-# ── Group-wise ──────────────────────────────────────────────────────
-# LƯU Ý: grouped_* chỉ nhận pd.Series, KHÔNG nhận DataFrame
+def scale(series: pd.Series, a: float = 1.0) -> pd.Series:
+    """
+    Rescale sao cho sum(abs(x)) = a.
+    Theo Kakushadze: dollar-neutral rescaling.
+    """
+    total = series.abs().sum()
+    return series * (a / (total + 1e-9))
+
+def signed_power(series: pd.Series, exp: float) -> pd.Series:
+    """SignedPower: sign(x) * |x|^exp."""
+    return np.sign(series) * series.abs().pow(exp)
+
+def indneutralize(series: pd.Series, groups: pd.Series) -> pd.Series:
+    """
+    Demean within each industry group.
+    groups: pd.Series với cùng index là industry labels.
+    """
+    return series - series.groupby(groups).transform("mean")
+
+
+# ── Group-wise ────────────────────────────────────────────────────────
 
 def grouped_mean(series: pd.Series, window: int) -> pd.Series:
-    assert isinstance(series, pd.Series), "grouped_mean chỉ nhận pd.Series"
     return series.rolling(window).mean()
 
 def grouped_std(series: pd.Series, window: int) -> pd.Series:
@@ -161,7 +239,8 @@ def grouped_winsorize_scale(series: pd.Series, window: int,
         return 2 * (clipped - lo) / (hi - lo + 1e-9) - 1
     return series.rolling(window).apply(_wins, raw=True)
 
-# ── Element-wise ────────────────────────────────────────────────────
+
+# ── Element-wise ──────────────────────────────────────────────────────
 
 def relu(series: pd.Series) -> pd.Series:
     return series.clip(lower=0)
@@ -170,6 +249,10 @@ def neg(series: pd.Series) -> pd.Series:
     return -series
 
 def abso(series: pd.Series) -> pd.Series:
+    return series.abs()
+
+def abs_op(series: pd.Series) -> pd.Series:
+    """Alias abso."""
     return series.abs()
 
 def log(series: pd.Series) -> pd.Series:
@@ -201,17 +284,16 @@ def minus(s1, s2) -> pd.Series:
     return s1 - s2
 
 def div(s1, s2) -> pd.Series:
-    """Chia 2 series hoặc scalar/series. Tránh chia cho 0."""
     if isinstance(s2, pd.Series):
         denom = s2.replace(0, np.nan).fillna(1e-9)
     else:
-        denom = s2 if abs(s2) > 1e-9 else 1e-9
+        denom = s2 if abs(float(s2)) > 1e-9 else 1e-9
     return s1 / denom
 
-def greater(s1: pd.Series, s2: pd.Series) -> pd.Series:
+def greater(s1: pd.Series, s2) -> pd.Series:
     return (s1 > s2).astype(float)
 
-def less(s1: pd.Series, s2: pd.Series) -> pd.Series:
+def less(s1: pd.Series, s2) -> pd.Series:
     return (s1 < s2).astype(float)
 
 def cwise_mul(s1, s2) -> pd.Series:

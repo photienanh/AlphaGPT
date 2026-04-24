@@ -1,7 +1,6 @@
 # agents/analyst_agent.py
 """
 Analyst agent — paper Section 2.3 (Review).
-Tổng hợp kết quả backtest thành NL summary + feedback cho vòng tiếp theo.
 """
 import json
 import logging
@@ -11,6 +10,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from state import State
 from prompts.analyst_prompts import ANALYST_SYSTEM_PROMPT, ANALYST_PROMPT
+from config import DEFAULT_CONFIG
 
 log = logging.getLogger(__name__)
 
@@ -29,85 +29,64 @@ def _classify_eval_error(err: str) -> str:
         return "unknown_symbol_error"
     if "did not produce pd.series" in e:
         return "invalid_output_error"
+    if "validation:" in e:
+        return "validation_error"
     return "runtime_error"
 
 
 async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
-    """Phân tích evaluated_alphas, sinh feedback cho Hypothesis agent."""
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
- 
+
     ok_alphas   = [a for a in state.evaluated_alphas if a.get("status") == "OK"]
     weak_alphas = [a for a in state.evaluated_alphas if a.get("status") == "WEAK"]
     err_alphas  = [a for a in state.evaluated_alphas if a.get("status") == "EVAL_ERROR"]
-    marginal_alphas = [a for a in state.evaluated_alphas if a.get("status") == "MARGINAL"]
- 
-    avg_ic_oos = (np.mean([abs(a.get("ic_oos") or 0) for a in ok_alphas])
-                  if ok_alphas else 0.0)
-    avg_sharpe = (np.mean([a.get("sharpe_oos") or 0 for a in ok_alphas])
-                  if ok_alphas else 0.0)
-    avg_return  = (np.mean([a.get("return_oos") or 0 for a in ok_alphas])
-                   if ok_alphas else 0.0)
- 
-    # Format kết quả từng alpha — bao gồm WEAK để Analyst phân tích
+
+    avg_ic_oos = (np.mean([abs(a.get("ic_oos") or 0) for a in ok_alphas]) if ok_alphas else 0.0)
+    avg_sharpe = (np.mean([a.get("sharpe_oos") or 0 for a in ok_alphas]) if ok_alphas else 0.0)
+    avg_return = (np.mean([a.get("return_oos") or 0 for a in ok_alphas]) if ok_alphas else 0.0)
+
     results_text = []
     for a in ok_alphas:
-        ret_str = (f"{a.get('return_oos', 0)*100:+.1f}%"
-                   if a.get("return_oos") is not None else "N/A")
-        mdd_str = (f"{a.get('mdd', 0)*100:.1f}%"
-                   if a.get("mdd") is not None else "N/A")
+        ret_str = (f"{a.get('return_oos', 0)*100:+.1f}%" if a.get("return_oos") is not None else "N/A")
+        mdd_str = (f"{a.get('mdd', 0)*100:.1f}%" if a.get("mdd") is not None else "N/A")
         results_text.append(
             f"- {a['id']} [{a.get('family','?')}] status=OK\n"
-            f"  IC_IS={a.get('ic_is',0):+.4f}  "
-            f"IC_OOS={a.get('ic_oos',0):+.4f}  "
-            f"Sharpe={a.get('sharpe_oos',0):+.3f}  "
-            f"Return={ret_str}  MDD={mdd_str}  "
+            f"  IC_IS={a.get('ic_is',0):+.4f}  IC_OOS={a.get('ic_oos',0):+.4f}  "
+            f"Sharpe={a.get('sharpe_oos',0):+.3f}  Return={ret_str}  MDD={mdd_str}  "
             f"Turnover={a.get('turnover',0):.3f}\n"
             f"  {a.get('description','')[:80]}"
         )
     for a in weak_alphas:
         results_text.append(
             f"- {a['id']} [{a.get('family', '?')}] status=WEAK\n"
-            f"  IC_OOS={a.get('ic_oos', 0):+.4f} — {a.get('weak_reason', 'signal sai chiều')}\n"
-            f"  expression: {a.get('expression', '')[:80]}"
-        )
-    for a in marginal_alphas:
-        results_text.append(
-            f"- {a['id']} [{a.get('family', '?')}] status=MARGINAL\n"
-            f"  IC_OOS={a.get('ic_oos', 0):+.4f} — {a.get('weak_reason', 'dương nhưng trong vùng noise thống kê')}\n"
+            f"  IC_OOS={a.get('ic_oos', 0):+.4f} — {a.get('weak_reason', '')}\n"
             f"  expression: {a.get('expression', '')[:80]}"
         )
     for a in err_alphas:
-        results_text.append(
-            f"- {a['id']} [EVAL_ERROR]: {a.get('error', '')[:60]}"
-        )
+        results_text.append(f"- {a['id']} [EVAL_ERROR]: {a.get('error', '')[:60]}")
 
-    # Bổ sung diagnostic cho lỗi kỹ thuật để vòng sau đổi hướng tốt hơn
     error_groups = {}
     for a in err_alphas:
         category = _classify_eval_error(a.get("error", ""))
         error_groups.setdefault(category, []).append(a.get("id", "?"))
     if error_groups:
-        diag_lines = []
-        for category, ids in sorted(error_groups.items()):
-            diag_lines.append(f"- {category}: {', '.join(ids)}")
+        diag_lines = [f"- {cat}: {', '.join(ids)}" for cat, ids in sorted(error_groups.items())]
         results_text.append(
-            "## Error diagnostics (implementation issues, không phải logic thị trường)\n"
-            + "\n".join(diag_lines)
+            "## Error diagnostics\n" + "\n".join(diag_lines)
         )
- 
+
     prompt = ANALYST_PROMPT.format(
         round_num=state.iteration,
         alpha_results="\n".join(results_text),
         n_ok=len(ok_alphas),
         n_weak=len(weak_alphas),
-        n_marginal=len(marginal_alphas),
         n_err=len(err_alphas),
         n_total=len(state.evaluated_alphas),
         avg_ic_oos=avg_ic_oos,
         avg_sharpe=avg_sharpe,
         avg_return=avg_return * 100,
     )
- 
+
     try:
         response = await llm.ainvoke([
             {"role": "system", "content": ANALYST_SYSTEM_PROMPT},
@@ -123,44 +102,33 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
             "overall_assessment": "Analysis unavailable",
             "market_behavior": "unknown",
             "alpha_analyses": [],
-            "weak_alpha_ids": (
-                [a["id"] for a in weak_alphas + marginal_alphas + err_alphas]
-            ),
+            "weak_alpha_ids": [a["id"] for a in weak_alphas + err_alphas],
             "refinement_directions": [],
             "polisher_feedback": "",
             "round_summary": f"Round {state.iteration} completed",
         }
- 
+
     summary = data.get("round_summary", "")
     log.info(f"[Analyst] Round {state.iteration}: {summary}")
- 
-    # Lưu hypothesis hiện tại vào history kèm alpha summary
+
     current_hyp = {
         "iteration":     state.iteration,
         "hypothesis":    state.hypothesis,
         "alpha_summary": (
-            f"IC_OOS={avg_ic_oos:.4f} "
-            f"Sharpe={avg_sharpe:.3f} "
-            f"Return={avg_return*100:+.1f}% "
-            f"OK={len(ok_alphas)}/{len(state.evaluated_alphas)}"
+            f"IC_OOS={avg_ic_oos:.4f} Sharpe={avg_sharpe:.3f} "
+            f"Return={avg_return*100:+.1f}% OK={len(ok_alphas)}/{len(state.evaluated_alphas)}"
         ),
         "weak_alpha_ids": data.get("weak_alpha_ids", []),
-        "analyst":       data,
+        "analyst":        data,
     }
     updated_history = list(state.hypothesis_history) + [current_hyp]
- 
-    # Quyết định có tiếp tục không
-    MIN_SOTA   = 3          # muốn ít nhất 3 alpha tốt
-    MIN_IC     = 0.03       # IC_OOS trung bình tối thiểu
-    MIN_SHARPE = 0.2        # Sharpe trung bình phải dương rõ ràng
-    MIN_RETURN = 0.0        # Return trung bình không âm
 
     sota_count = len(state.sota_alphas or [])
     quality_ok = (
-        sota_count >= MIN_SOTA
-        and avg_ic_oos >= MIN_IC
-        and avg_sharpe >= MIN_SHARPE
-        and avg_return >= MIN_RETURN
+        sota_count >= DEFAULT_CONFIG.min_sota
+        and avg_ic_oos >= DEFAULT_CONFIG.min_ic
+        and avg_sharpe >= DEFAULT_CONFIG.min_sharpe
+        and avg_return >= DEFAULT_CONFIG.min_return
     )
     weak_ids = data.get("weak_alpha_ids", [])
     should_continue = (
@@ -168,7 +136,7 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         and not quality_ok
         and len(weak_ids) > 0
     )
- 
+
     return {
         "analyst_summary":    data.get("overall_assessment", ""),
         "analyst_feedback":   data.get("polisher_feedback", ""),

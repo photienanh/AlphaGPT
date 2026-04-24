@@ -1,122 +1,275 @@
 """
 backtester.py
-Walk-forward IC/Sharpe evaluation — dùng cho cả GP fitness và full review.
+Cross-sectional IC evaluation và portfolio metrics.
+
+Quá trình tính return:
+  1. Mỗi ngày t trong OOS period:
+     - Long leg  = các ticker có signal[t] > median → equal weight
+     - Short leg = các ticker có signal[t] <= median → equal weight
+     - daily_pnl[t] = mean(long leg returns[t]) - mean(short leg returns[t])
+       = long-short spread return (dollar-neutral, equal-weight)
+
+  2. Annualized return = geometric:
+     total_return = prod(1 + daily_pnl) - 1
+     ann_return   = (1 + total_return)^(252/n_days) - 1
+
+  Ý nghĩa: spread return chưa trừ transaction cost, chưa tính leverage.
+
+Sharpe:
+  Sharpe = mean(daily_pnl) / std(daily_pnl) * sqrt(252)
+  Đây là Sharpe của long-short spread portfolio.
 """
 import numpy as np
 import pandas as pd
 from typing import Tuple, Optional
+from config import DEFAULT_CONFIG
 
 
-# ── Helpers ───────────────────────────────────────────────────────────
- 
-def _train_test_split(alpha: pd.Series, fwd_ret: pd.Series,
-                      test_ratio: float = 0.3):
-    """Chronological split. Trả về (a_train, a_test, r_train, r_test)."""
-    merged = pd.concat([alpha, fwd_ret], axis=1).dropna()
-    n = len(merged)
-    split = int(n * (1 - test_ratio))
-    train = merged.iloc[:split]
-    test  = merged.iloc[split:]
-    return (train.iloc[:, 0], test.iloc[:, 0],
-            train.iloc[:, 1], test.iloc[:, 1])
+def _is_constant_series(s: pd.Series) -> bool:
+    """True nếu series không có đủ biến thiên để tính correlation."""
+    if s is None:
+        return True
+    x = s.dropna()
+    if len(x) < 2:
+        return True
+    return x.nunique() < 2
 
 
-# ── IC ────────────────────────────────────────────────────────────────
- 
-def compute_ic(alpha: pd.Series, fwd_ret: pd.Series) -> float:
-    """Spearman IC trên toàn bộ data được truyền vào."""
-    c = pd.concat([alpha, fwd_ret], axis=1).dropna()
-    if len(c) < 30:
-        return np.nan
-    return float(c.iloc[:, 0].corr(c.iloc[:, 1], method="spearman"))
+# ── Cross-sectional IC ────────────────────────────────────────────────
 
-def compute_ic_oos(alpha: pd.Series, fwd_ret: pd.Series,
-                   test_ratio: float = 0.3) -> Tuple[float, float]:
+def compute_ic_cross_sectional(
+    signal_df: pd.DataFrame,
+    fwd_ret_df: pd.DataFrame,
+) -> Tuple[float, float, pd.Series]:
     """
-    Walk-forward IC.
-    Returns (ic_is, ic_oos).
+    Tính Spearman IC cross-sectional.
+    Tại mỗi ngày t: corr(signal[t, :], fwd_ret[t, :]) across tickers.
+    Returns: (mean_ic, ic_ir, ic_series)
+      mean_ic:   E[IC_t]
+      ic_ir:     mean_ic / std_ic  — đo tính ổn định của alpha
+      ic_series: Series IC theo ngày
     """
-    merged = pd.concat([alpha, fwd_ret], axis=1).dropna()
-    n = len(merged)
-    if n < 60:
-        ic = compute_ic(merged.iloc[:, 0], merged.iloc[:, 1])
-        return ic, ic
-    split = int(n * (1 - test_ratio))
-    train = merged.iloc[:split]
-    test  = merged.iloc[split:]
-    return (compute_ic(train.iloc[:, 0], train.iloc[:, 1]),
-            compute_ic(test.iloc[:, 0],  test.iloc[:, 1]))
+    common_dates   = signal_df.index.intersection(fwd_ret_df.index)
+    common_tickers = signal_df.columns.intersection(fwd_ret_df.columns)
+
+    sig = signal_df.loc[common_dates, common_tickers]
+    fwd = fwd_ret_df.loc[common_dates, common_tickers]
+
+    ic_list = []
+    for date in common_dates:
+        row_sig = sig.loc[date].dropna()
+        row_fwd = fwd.loc[date].dropna()
+        common_t = row_sig.index.intersection(row_fwd.index)
+        if len(common_t) < 5:
+            continue
+        s_sig = row_sig[common_t]
+        s_fwd = row_fwd[common_t]
+        if _is_constant_series(s_sig) or _is_constant_series(s_fwd):
+            continue
+        ic = s_sig.corr(s_fwd, method="spearman")
+        if not np.isnan(ic):
+            ic_list.append((date, ic))
+
+    if not ic_list:
+        return np.nan, np.nan, pd.Series(dtype=float)
+
+    ic_series = pd.Series({d: v for d, v in ic_list}, name="ic")
+    mean_ic   = float(ic_series.mean())
+    std_ic    = float(ic_series.std())
+    ic_ir     = mean_ic / (std_ic + 1e-9)
+
+    return mean_ic, ic_ir, ic_series
+
+
+def compute_ic_cross_sectional_oos(
+    signal_df: pd.DataFrame,
+    fwd_ret_df: pd.DataFrame,
+    test_ratio: float = None,
+) -> Tuple[float, float, float, float]:
+    """
+    Walk-forward cross-sectional IC, tách IS/OOS theo thời gian.
+    Returns: (mean_ic_is, mean_ic_oos, ic_ir_is, ic_ir_oos)
+    """
+    if test_ratio is None:
+        test_ratio = DEFAULT_CONFIG.test_ratio
+
+    common_dates = sorted(signal_df.index.intersection(fwd_ret_df.index))
+    if len(common_dates) < 60:
+        ic, ir, _ = compute_ic_cross_sectional(signal_df, fwd_ret_df)
+        return ic, ic, ir, ir
+
+    split_idx   = int(len(common_dates) * (1 - test_ratio))
+    train_dates = common_dates[:split_idx]
+    test_dates  = common_dates[split_idx:]
+
+    ic_is,  ir_is,  _ = compute_ic_cross_sectional(
+        signal_df.loc[train_dates], fwd_ret_df.loc[train_dates]
+    )
+    ic_oos, ir_oos, _ = compute_ic_cross_sectional(
+        signal_df.loc[test_dates],  fwd_ret_df.loc[test_dates]
+    )
+    return ic_is, ic_oos, ir_is, ir_oos
+
+
+# ── Portfolio daily PnL helper ────────────────────────────────────────
+
+def _build_daily_pnl(
+    signal_df: pd.DataFrame,
+    fwd_ret_df: pd.DataFrame,
+    test_dates: list,
+) -> np.ndarray:
+    """
+    Tính daily portfolio return với rank-based continuous positions.
+
+    Mỗi ngày t:
+      1. Rank signal[t] across tickers: rank 1..n
+      2. position_i = (rank_i - (n+1)/2) / ((n-1)/2)
+         → top ticker:    position = +1.0  (mua nhiều nhất)
+         → median ticker: position =  0.0  (không giao dịch)
+         → bottom ticker: position = -1.0  (bán nhiều nhất)
+      3. Normalize: pos = pos / sum(|pos|)  → sum(|pos|) = 1
+      4. daily_pnl[t] = sum(pos_i * fwd_ret_i)
+
+    Tính chất:
+      - Dollar-neutral: sum(pos) = 0
+      - Signal mạnh → position lớn, signal yếu → position nhỏ
+      - Liên tục, không bị mất thông tin như binary +1/-1
+    """
+    common_tickers = signal_df.columns.intersection(fwd_ret_df.columns)
+    sig = signal_df[common_tickers]
+    fwd = fwd_ret_df[common_tickers]
+
+    daily_pnl = []
+    for date in test_dates:
+        if date not in sig.index or date not in fwd.index:
+            continue
+        row_sig = sig.loc[date].dropna()
+        row_fwd = fwd.loc[date].dropna()
+        common_t = row_sig.index.intersection(row_fwd.index)
+        n = len(common_t)
+        if n < 4:
+            continue
+
+        # Rank-based continuous positions
+        ranks = row_sig[common_t].rank(ascending=True)        # rank 1..n
+        pos   = (ranks - (n + 1) / 2) / ((n - 1) / 2 + 1e-9) # center, scale [-1,1]
+
+        abs_sum = pos.abs().sum()
+        if abs_sum < 1e-9:
+            continue
+        pos = pos / abs_sum  # normalize: sum(|pos|) = 1
+
+        pnl = float((pos * row_fwd[common_t]).sum())
+        daily_pnl.append(pnl)
+
+    return np.array(daily_pnl)
 
 
 # ── Sharpe ratio ──────────────────────────────────────────────────────
 
-def compute_sharpe_oos(alpha: pd.Series, fwd_ret: pd.Series,
-                       test_ratio: float = 0.3) -> float:
-    merged = pd.concat([alpha, fwd_ret], axis=1).dropna()
-    n = len(merged)
-    if n < 60:
+def compute_sharpe_oos(
+    signal_df: pd.DataFrame,
+    fwd_ret_df: pd.DataFrame,
+    test_ratio: float = None,
+) -> float:
+    """
+    Annualized Sharpe của long-short portfolio trên OOS period.
+    Sharpe = mean(daily_pnl) / std(daily_pnl) * sqrt(252)
+    """
+    if test_ratio is None:
+        test_ratio = DEFAULT_CONFIG.test_ratio
+
+    common_dates = sorted(signal_df.index.intersection(fwd_ret_df.index))
+    if len(common_dates) < 60:
         return np.nan
-    split = int(n * (1 - test_ratio))
-    test = merged.iloc[split:]
-    a, r = test.iloc[:, 0], test.iloc[:, 1]
-    pos = np.where(a > a.median(), 1.0, -1.0)
-    pnl = pos * r
-    if pnl.std() < 1e-9:
+
+    split_idx  = int(len(common_dates) * (1 - test_ratio))
+    test_dates = common_dates[split_idx:]
+
+    arr = _build_daily_pnl(signal_df, fwd_ret_df, test_dates)
+    if len(arr) < 20:
         return np.nan
-    return float(pnl.mean() / pnl.std() * np.sqrt(252))
+
+    std = arr.std()
+    if std < 1e-9:
+        return np.nan
+    return float(arr.mean() / std * np.sqrt(252))
 
 
-# ── Backtest return ───────────────────────────────────────────────────
- 
-def compute_return_oos(alpha: pd.Series, fwd_ret: pd.Series,
-                       test_ratio: float = 0.3) -> Tuple[float, float]:
+# ── Return ────────────────────────────────────────────────────────────
+
+def compute_return_oos(
+    signal_df: pd.DataFrame,
+    fwd_ret_df: pd.DataFrame,
+    test_ratio: float = None,
+) -> float:
     """
-    Annualized return và Max Drawdown trên OOS period.
-    Đây là metric thứ ba trong paper Section 2.3: "backtest returns".
- 
-    Cách tính:
-    1. Tạo position: long (+1) khi signal > median, short (-1) khi <= median
-    2. Daily P&L = position × forward_return
-    3. Annualized return = mean(daily_pnl) × 252
-    4. Max drawdown = max peak-to-trough trên cumulative P&L
- 
-    Returns: (annualized_return, max_drawdown)
-      annualized_return: float, ví dụ 0.12 = 12%/năm
-      max_drawdown: float dương, ví dụ 0.05 = drawdown tối đa 5%
+    Annualized return của long-short portfolio trên OOS period.
+
+    daily_pnl[t] = mean(long leg returns[t]) - mean(short leg returns[t])
+
+    Geometric annualization:
+      total_return = prod(1 + daily_pnl) - 1
+      ann_return   = (1 + total_return)^(252/n_days) - 1
+
+    Returns: annualized_return
     """
-    merged = pd.concat([alpha, fwd_ret], axis=1).dropna()
-    n = len(merged)
-    if n < 60:
-        return np.nan, np.nan
- 
-    split = int(n * (1 - test_ratio))
-    test  = merged.iloc[split:]
-    a, r  = test.iloc[:, 0], test.iloc[:, 1]
- 
-    # Long/short position dựa trên median của OOS period
-    pos     = np.where(a > a.median(), 1.0, -1.0)
-    daily   = pos * r.values
- 
-    # Annualized return: giả sử 252 trading days/năm
-    ann_ret = float(np.mean(daily) * 252)
- 
-    # Max Drawdown: tính trên cumulative P&L
-    cum = np.cumsum(daily)
-    peak = np.maximum.accumulate(cum)
-    drawdown = peak - cum
-    mdd = float(np.max(drawdown)) if len(drawdown) > 0 else 0.0
- 
-    return ann_ret, mdd
- 
- 
+    if test_ratio is None:
+        test_ratio = DEFAULT_CONFIG.test_ratio
+
+    common_dates = sorted(signal_df.index.intersection(fwd_ret_df.index))
+    if len(common_dates) < 60:
+        return np.nan
+
+    split_idx  = int(len(common_dates) * (1 - test_ratio))
+    test_dates = common_dates[split_idx:]
+
+    arr = _build_daily_pnl(signal_df, fwd_ret_df, test_dates)
+    if len(arr) < 20:
+        return np.nan
+
+    # Arithmetic annualization: mean*252
+    # Với daily_pnl scale ~0.01-0.1%, arithmetic ≈ geometric
+    # Arithmetic ổn định hơn khi total_return âm (tránh NaN)
+    return float(arr.mean() * 252)
+
+
 # ── Turnover ──────────────────────────────────────────────────────────
- 
-def compute_turnover(alpha: pd.Series) -> float:
+
+def compute_turnover(signal_df: pd.DataFrame) -> float:
     """
-    Tốc độ thay đổi position — proxy cho transaction costs.
-    Turnover cao → chi phí giao dịch lớn → return thực tế thấp hơn.
+    Tốc độ thay đổi signal — proxy cho transaction costs.
+    Turnover = mean(|signal[t] - signal[t-1]|) / mean(|signal[t]|)
     """
-    scale = alpha.abs().mean()
-    if scale < 1e-9:
+    diffs = signal_df.diff().abs().mean(axis=1)
+    scale = signal_df.abs().mean(axis=1)
+    return float((diffs / (scale + 1e-9)).mean())
+
+
+# ── Legacy single-stock helpers (GP fast path) ───────────────────────
+
+def compute_ic_single(alpha: pd.Series, fwd_ret: pd.Series) -> float:
+    c = pd.concat([alpha, fwd_ret], axis=1).dropna()
+    if len(c) < 30:
         return np.nan
-    return float(alpha.diff().abs().mean() / scale)
+    if _is_constant_series(c.iloc[:, 0]) or _is_constant_series(c.iloc[:, 1]):
+        return np.nan
+    return float(c.iloc[:, 0].corr(c.iloc[:, 1], method="spearman"))
+
+
+def compute_ic_oos_single(
+    alpha: pd.Series,
+    fwd_ret: pd.Series,
+    test_ratio: float = None,
+) -> Tuple[float, float]:
+    if test_ratio is None:
+        test_ratio = DEFAULT_CONFIG.test_ratio
+    merged = pd.concat([alpha, fwd_ret], axis=1).dropna()
+    n = len(merged)
+    if n < 60:
+        ic = compute_ic_single(merged.iloc[:, 0], merged.iloc[:, 1])
+        return ic, ic
+    split = int(n * (1 - test_ratio))
+    train, test = merged.iloc[:split], merged.iloc[split:]
+    return (compute_ic_single(train.iloc[:, 0], train.iloc[:, 1]),
+            compute_ic_single(test.iloc[:, 0],  test.iloc[:, 1]))

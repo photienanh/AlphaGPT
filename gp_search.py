@@ -1,35 +1,43 @@
 """
 gp_search.py
-Lightweight GP enhancement — bước 2.2 trong paper.
-Fitness function dùng IC_IS (nhanh), không dùng OOS để tránh overfit.
+Lightweight GP enhancement — paper Section 2.2, Alpha Compute Framework.
+Fitness = cross-sectional IC trên sampled universe (~20 tickers).
+Nhất quán với final backtest metric, nhanh hơn full 403 tickers.
 """
 import re
 import random
 import logging
 from copy import deepcopy
-from typing import Callable, Dict, Any, List, Optional
+from typing import Callable, Dict, Any, List, Set, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+
+from validators import validate_expression, normalize_expression
+from backtester import compute_ic_cross_sectional
+from config import DEFAULT_CONFIG
 
 log = logging.getLogger(__name__)
 
 WINDOW_VALUES = [3, 5, 7, 10, 12, 15, 20, 25, 30]
 
 OPERATOR_FAMILIES = {
-    "smoothing":     ["ts_mean", "ts_ema", "ts_decayed_linear"],
+    "smoothing":     ["ts_mean", "ts_ema", "ts_decayed_linear", "decay_linear"],
     "normalization": ["ts_zscore_scale", "ts_maxmin_scale", "ts_rank"],
-    "momentum":      ["ts_delta", "ts_delta_ratio"],
-    "volatility":    ["ts_std", "ts_ir"],
+    "momentum":      ["ts_delta", "ts_delta_ratio", "delta"],
+    "volatility":    ["ts_std", "stddev", "ts_ir"],
     "extreme":       ["ts_max", "ts_min"],
-    "correlation":   ["ts_corr", "ts_cov"],
+    "correlation":   ["ts_corr", "ts_cov", "correlation", "covariance"],
 }
+
+# Số tickers sample cho GP fitness — đủ để cross-sectional có ý nghĩa,
+# ít hơn full universe để nhanh
+GP_SAMPLE_SIZE = 30
 
 
 # ── Mutation functions ────────────────────────────────────────────────
 
 def mutate_window(expr: str) -> str:
-    """Thay đổi một window size."""
     matches = [(m.start(), m.end(), int(m.group()))
                for m in re.finditer(r"\b(\d{1,2})\b", expr)
                if 3 <= int(m.group()) <= 60]
@@ -44,7 +52,6 @@ def mutate_window(expr: str) -> str:
 
 
 def mutate_operator(expr: str) -> str:
-    """Swap operator trong cùng family."""
     for fam, ops in OPERATOR_FAMILIES.items():
         for op_name in ops:
             if op_name + "(" in expr:
@@ -55,7 +62,6 @@ def mutate_operator(expr: str) -> str:
 
 
 def mutate_wrap_normalize(expr: str) -> str:
-    """Wrap toàn bộ alpha bằng normalization."""
     if "alpha = " not in expr:
         return expr
     rhs = expr.split("alpha = ", 1)[1].strip()
@@ -70,7 +76,6 @@ def mutate_wrap_normalize(expr: str) -> str:
 
 
 def crossover(expr_a: str, expr_b: str) -> str:
-    """Lấy cấu trúc A nhưng thay một argument bằng từ B."""
     func_pat = re.compile(r"(ts_[a-z_]+|grouped_[a-z_]+)\(")
     ops_a = {m.group(1) for m in func_pat.finditer(expr_a)}
     ops_b = {m.group(1) for m in func_pat.finditer(expr_b)}
@@ -85,32 +90,140 @@ def crossover(expr_a: str, expr_b: str) -> str:
     return expr_a[:m_a.start(1)] + m_b.group(1) + expr_a[m_a.end(1):]
 
 
+# ── Cross-sectional fitness ───────────────────────────────────────────
+
+def _compute_cs_fitness(
+    expression: str,
+    ticker_dfs: Dict[str, pd.DataFrame],
+    fwd_ret_multi: pd.DataFrame,
+) -> float:
+    """
+    Tính cross-sectional IC trên sampled universe.
+    Trả về mean_ic (float), NaN nếu không tính được.
+    """
+    import alpha_operators as op_module
+
+    def _exec_ticker(expr, df_t):
+        import numpy as np
+        ns = {name: getattr(op_module, name)
+              for name in dir(op_module) if not name.startswith("_")}
+        ns.update({"df": df_t, "np": np})
+        for col in df_t.columns:
+            ns[col] = df_t[col]
+        exec(expr, ns)
+        series = ns.get("alpha")
+        if not isinstance(series, pd.Series):
+            return None
+        series = series.replace([float("inf"), float("-inf")], float("nan"))
+        mu  = series.expanding(min_periods=20).mean()
+        std = series.expanding(min_periods=20).std()
+        return ((series - mu) / (std + 1e-9)).clip(-5, 5)
+
+    signal_parts = {}
+    for ticker, df_t in ticker_dfs.items():
+        try:
+            norm = _exec_ticker(expression, df_t)
+            if norm is not None and norm.dropna().std() > 1e-9:
+                signal_parts[ticker] = norm
+        except Exception:
+            pass
+
+    if len(signal_parts) < 5:
+        return float("nan")
+
+    signal_df = pd.DataFrame(signal_parts)
+    signal_df.index = pd.to_datetime(signal_df.index)
+
+    fwd = fwd_ret_multi.copy()
+    fwd.index = pd.to_datetime(fwd.index)
+
+    # Cross-sectional normalize mỗi ngày
+    signal_norm = signal_df.apply(
+        lambda row: (row - row.mean()) / (row.std() + 1e-9),
+        axis=1,
+    )
+
+    mean_ic, _, _ = compute_ic_cross_sectional(signal_norm, fwd)
+    return mean_ic if mean_ic is not None and not (mean_ic != mean_ic) else float("nan")
+
+
+def _sample_universe(
+    ticker_dfs: Dict[str, pd.DataFrame],
+    fwd_ret_multi: pd.DataFrame,
+    sample_size: int = GP_SAMPLE_SIZE,
+) -> Tuple[Dict[str, pd.DataFrame], pd.DataFrame]:
+    """
+    Sample ngẫu nhiên sample_size tickers từ universe.
+    Ưu tiên tickers có nhiều dữ liệu hơn.
+    """
+    all_tickers = list(ticker_dfs.keys())
+    if len(all_tickers) <= sample_size:
+        return ticker_dfs, fwd_ret_multi
+
+    # Sort theo số rows giảm dần, lấy top 2*sample_size rồi random sample
+    sorted_tickers = sorted(all_tickers, key=lambda t: len(ticker_dfs[t]), reverse=True)
+    pool = sorted_tickers[:min(len(sorted_tickers), 2 * sample_size)]
+    sampled = random.sample(pool, sample_size)
+
+    sampled_dfs = {t: ticker_dfs[t] for t in sampled}
+    sampled_fwd = fwd_ret_multi[[t for t in sampled if t in fwd_ret_multi.columns]]
+    return sampled_dfs, sampled_fwd
+
+
 # ── Main GP loop ──────────────────────────────────────────────────────
 
 def enhance_alpha(
     seed: Dict[str, Any],
-    df: pd.DataFrame,
-    fwd_ret: pd.Series,
-    eval_fn: Callable,
-    n_iterations: int = 15,
-    population_size: int = 6,
+    ticker_dfs: Dict[str, pd.DataFrame],
+    fwd_ret_multi: pd.DataFrame,
+    n_iterations: int = None,
+    population_size: int = None,
+    seen_expressions: Set[str] = None,
 ) -> Dict[str, Any]:
     """
     GP enhancement cho một seed alpha.
-    eval_fn nhận (alpha_def, df, fwd_ret, full=False) → result dict.
-    Fitness = IC_IS (fast path).
+    Fitness = cross-sectional IC trên sampled universe.
     """
-    best = eval_fn(seed, df, fwd_ret, full=False)
-    if best.get("status") != "OK":
-        return best
+    if n_iterations is None:
+        n_iterations = DEFAULT_CONFIG.gp_iterations
+    if population_size is None:
+        population_size = DEFAULT_CONFIG.population_size
+    if seen_expressions is None:
+        seen_expressions = set()
 
-    best_ic = best.get("ic_is") or 0.0
-    mutation_fns = [mutate_window, mutate_operator,
-                    mutate_wrap_normalize,
-                    lambda e: crossover(e, best.get("expression", e))]
+    expr = seed.get("expression", "")
+    if not expr:
+        return seed
+
+    # Sample universe cho toàn bộ GP run của seed này
+    sampled_dfs, sampled_fwd = _sample_universe(ticker_dfs, fwd_ret_multi)
+
+    best_ic   = _compute_cs_fitness(expr, sampled_dfs, sampled_fwd)
+    best_expr = expr
+    seen_expressions.add(normalize_expression(expr))
+
+    # Seed không có signal hợp lệ trên sampled universe
+    if best_ic != best_ic:  # isnan
+        best_ic = 0.0
+
+    log.debug(
+        f"[GP] Seed {seed.get('id','?')} "
+        f"baseline IC={best_ic:+.4f} "
+        f"({len(sampled_dfs)} tickers sampled)"
+    )
+
+    best_result = deepcopy(seed)
+    best_result["ic_is"] = round(float(best_ic), 6) if best_ic == best_ic else None
+
+    mutation_fns = [
+        mutate_window,
+        mutate_operator,
+        mutate_wrap_normalize,
+        lambda e: crossover(e, best_expr),
+    ]
     probs = [0.50, 0.25, 0.15, 0.10]
 
-    for _ in range(n_iterations):
+    for iteration in range(n_iterations):
         mutants = []
         for _ in range(population_size):
             r = random.random()
@@ -121,42 +234,64 @@ def enhance_alpha(
                 if r < cumul:
                     chosen_fn = fn
                     break
-            new_expr = chosen_fn(best.get("expression", seed["expression"]))
-            if new_expr != best.get("expression"):
-                mutants.append(new_expr)
+            # crossover closure cần capture best_expr tại thời điểm hiện tại
+            if chosen_fn is mutation_fns[3]:
+                new_expr = crossover(best_expr, best_expr)
+            else:
+                new_expr = chosen_fn(best_expr)
+            if not new_expr:
+                continue
+            is_valid, _ = validate_expression(new_expr)
+            if not is_valid:
+                continue
+            norm_expr = normalize_expression(new_expr)
+            if norm_expr in seen_expressions:
+                continue
+            seen_expressions.add(norm_expr)
+            mutants.append(new_expr)
 
-        for expr in mutants:
-            candidate = deepcopy(seed)
-            candidate["expression"] = expr
-            result = eval_fn(candidate, df, fwd_ret, full=False)
-            if result.get("status") == "OK" and (result.get("ic_is") or 0) > best_ic:
-                best_ic = result["ic_is"]
-                best = deepcopy(result)
-                best["expression"] = expr
+        improved = False
+        for mut_expr in mutants:
+            ic = _compute_cs_fitness(mut_expr, sampled_dfs, sampled_fwd)
+            if ic == ic and ic > best_ic:  # ic không phải NaN và tốt hơn
+                best_ic   = ic
+                best_expr = mut_expr
+                improved  = True
 
-    return best
+        if improved:
+            log.debug(f"[GP] iter {iteration+1}: IC improved to {best_ic:+.4f}")
+
+    best_result["expression"] = best_expr
+    best_result["ic_is"]      = round(float(best_ic), 6) if best_ic == best_ic else None
+    best_result["status"]     = "OK" if (best_ic == best_ic and best_ic > 0) else "WEAK"
+    return best_result
 
 
 def enhance_population(
     seeds: List[Dict[str, Any]],
-    df: pd.DataFrame,
-    fwd_ret: pd.Series,
-    eval_fn: Callable,
-    n_iterations: int = 15,
+    ticker_dfs: Dict[str, pd.DataFrame],
+    fwd_ret_multi: pd.DataFrame,
+    n_iterations: int = None,
 ) -> List[Dict[str, Any]]:
     """GP enhancement cho toàn bộ population."""
+    if n_iterations is None:
+        n_iterations = DEFAULT_CONFIG.gp_iterations
+
+    seen_expressions: Set[str] = set()
+
     results = []
     for seed in seeds:
-        if seed.get("status") == "EVAL_ERROR":
-            results.append(seed)
-            continue
         try:
-            enhanced = enhance_alpha(seed, df, fwd_ret, eval_fn, n_iterations)
-            enhanced["id"]          = seed.get("id", enhanced.get("id"))
+            enhanced = enhance_alpha(
+                seed, ticker_dfs, fwd_ret_multi,
+                n_iterations=n_iterations,
+                seen_expressions=seen_expressions,
+            )
+            enhanced["id"]          = seed.get("id", enhanced.get("id", ""))
             enhanced["description"] = seed.get("description", "")
             enhanced["family"]      = seed.get("family", "")
             results.append(enhanced)
         except Exception as e:
-            log.warning(f"GP failed for alpha {seed.get('id')}: {e}")
+            log.warning(f"[GP] Failed for {seed.get('id','?')}: {e}")
             results.append(seed)
     return results

@@ -9,7 +9,8 @@ Ba metrics chính cần phân tích (theo paper Section 2.3):
 
 Phân tích cần actionable:
 - Alpha OK: tại sao IC cao / Return tốt?
-- Alpha WEAK (IC_OOS âm): expression dự đoán sai chiều — hypothesis sai hay implement sai?
+- Alpha WEAK: không vượt qua 1 hoặc nhiều điều kiện (IC, Sharpe, Return),
+  bao gồm cả trường hợp IC_OOS âm hoặc IC_OOS dương nhưng yếu.
 - Alpha EVAL_ERROR: expression có lỗi syntax hoặc dùng field không tồn tại
 - Turnover cao → chi phí giao dịch ăn vào return thực tế
 - IC_IS >> IC_OOS → overfit
@@ -25,13 +26,13 @@ ANALYST_PROMPT = """
 {alpha_results}
 
 Tóm tắt:
-- OK: {n_ok}/{n_total}  |  WEAK (sai chiều): {n_weak}/{n_total}
+- OK: {n_ok}/{n_total}  |  WEAK: {n_weak}/{n_total}  |  ERR: {n_err}/{n_total}
 - Avg IC_OOS: {avg_ic_oos:.4f}
 - Avg Sharpe_OOS: {avg_sharpe:.3f}
 - Avg Return_OOS: {avg_return:+.1f}%/năm
 
-Lưu ý: WEAK = IC_OOS ≤ 0, tức signal dự đoán NGƯỢC chiều thực tế.
-KHÔNG đảo chiều signal — phân tích tại sao sai và đề xuất viết lại.
+Lưu ý: WEAK bao gồm cả trường hợp IC_OOS ≤ 0 hoặc không đạt ngưỡng Sharpe/Return.
+KHÔNG đảo chiều signal máy móc — phân tích lý do và đề xuất viết lại.
 
 Trả về JSON:
 {{
