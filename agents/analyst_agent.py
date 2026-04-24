@@ -48,11 +48,10 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     results_text = []
     for a in ok_alphas:
         ret_str = (f"{a.get('return_oos', 0)*100:+.1f}%" if a.get("return_oos") is not None else "N/A")
-        mdd_str = (f"{a.get('mdd', 0)*100:.1f}%" if a.get("mdd") is not None else "N/A")
         results_text.append(
             f"- {a['id']} [{a.get('family','?')}] status=OK\n"
             f"  IC_IS={a.get('ic_is',0):+.4f}  IC_OOS={a.get('ic_oos',0):+.4f}  "
-            f"Sharpe={a.get('sharpe_oos',0):+.3f}  Return={ret_str}  MDD={mdd_str}  "
+            f"Sharpe={a.get('sharpe_oos',0):+.3f}  Return={ret_str}  "
             f"Turnover={a.get('turnover',0):.3f}\n"
             f"  {a.get('description','')[:80]}"
         )

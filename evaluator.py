@@ -89,7 +89,7 @@ def eval_alpha(
     result.update({
         "ic_is": None, "ic_oos": None,
         "sharpe_oos": None, "return_oos": None,
-        "mdd": None, "turnover": None,
+        "turnover": None,
         "status": "EVAL_ERROR", "series": None,
         "gp_enhanced": False,
     })

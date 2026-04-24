@@ -50,7 +50,6 @@ def init_db(db_path: str = DB_PATH) -> None:
             ic_oos          REAL,
             sharpe_oos      REAL,
             return_oos      REAL,
-            mdd             REAL,
             turnover        REAL,
             created_at      TEXT DEFAULT (datetime('now'))
         );
@@ -63,7 +62,6 @@ def init_db(db_path: str = DB_PATH) -> None:
             ic_oos      REAL,
             sharpe_oos  REAL,
             return_oos  REAL,
-            mdd         REAL,
             turnover    REAL,
             is_sota     INTEGER DEFAULT 0,
             extra_json  TEXT,
@@ -76,10 +74,10 @@ def init_db(db_path: str = DB_PATH) -> None:
         CREATE INDEX IF NOT EXISTS idx_bt_sota ON backtest_results(is_sota);
     """)
     _ensure_columns(conn, "alphas", {
-        "return_oos": "REAL", "mdd": "REAL",
+        "return_oos": "REAL",
     })
     _ensure_columns(conn, "backtest_results", {
-        "return_oos": "REAL", "mdd": "REAL",
+        "return_oos": "REAL",
     })
     conn.commit()
     conn.close()
@@ -139,8 +137,8 @@ class AlphaGPTDB:
                 INSERT INTO alphas
                     (thread_id, hypothesis_id, alpha_id, expression,
                     description, family, ic_is, ic_oos, sharpe_oos,
-                    return_oos, mdd, turnover)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                    return_oos, turnover)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?)
             """, (
                 thread_id, hypothesis_id,
                 alpha.get("id", ""),
@@ -151,7 +149,6 @@ class AlphaGPTDB:
                 alpha.get("ic_oos"),
                 alpha.get("sharpe_oos"),
                 alpha.get("return_oos"),
-                alpha.get("mdd"),
                 alpha.get("turnover"),
             ))
             return cur.lastrowid
@@ -160,18 +157,18 @@ class AlphaGPTDB:
                       result: Dict[str, Any], is_sota: bool = False) -> None:
         extra = {k: v for k, v in result.items()
                  if k not in ("ic_is", "ic_oos", "sharpe_oos",
-                              "return_oos", "mdd", "turnover", "score")}
+                              "return_oos", "turnover", "score")}
         with self._conn() as conn:
             conn.execute("""
                 INSERT INTO backtest_results
                     (thread_id, alpha_id, ic_is, ic_oos, sharpe_oos,
-                    return_oos, mdd, turnover, is_sota, extra_json)
-                VALUES (?,?,?,?,?,?,?,?,?,?)
+                    return_oos, turnover, is_sota, extra_json)
+                VALUES (?,?,?,?,?,?,?,?,?)
             """, (
                 thread_id, alpha_db_id,
                 result.get("ic_is"), result.get("ic_oos"),
                 result.get("sharpe_oos"), result.get("return_oos"),
-                result.get("mdd"), result.get("turnover"),
+                result.get("turnover"),
                 1 if is_sota else 0,
                 json.dumps(extra),
             ))
@@ -180,7 +177,7 @@ class AlphaGPTDB:
         with self._conn() as conn:
             rows = conn.execute("""
                 SELECT a.*, b.ic_oos as b_ic_oos, b.sharpe_oos as b_sharpe,
-                       b.return_oos as b_return_oos, b.mdd as b_mdd
+                      b.return_oos as b_return_oos
                 FROM alphas a
                 JOIN backtest_results b ON b.alpha_id = a.id
                 WHERE a.thread_id=? AND b.is_sota=1
