@@ -198,7 +198,7 @@ def eval_alpha(
         if return_val is None or return_val <= RETURN_MIN_THRESHOLD:
             rv = 0.0 if return_val is None else return_val
             reasons.append(f"Return_OOS={rv:+.4f} <= {RETURN_MIN_THRESHOLD}")
-        status      = "MARGINAL" if reasons else "OK"
+        status      = "WEAK" if reasons else "OK"
         weak_reason = "; ".join(reasons) if reasons else None
 
     result.update({
