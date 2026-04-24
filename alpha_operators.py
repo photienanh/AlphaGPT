@@ -130,8 +130,15 @@ def decay_linear(series: pd.Series, window: int) -> pd.Series:
     """Alias ts_decayed_linear — theo Kakushadze."""
     return ts_decayed_linear(series, window)
 
-def ts_ema(series: pd.Series, span: int) -> pd.Series:
-    return series.ewm(span=span, adjust=False).mean()
+def ts_ema(series: pd.Series, span: int, alpha: Optional[float] = None) -> pd.Series:
+    """
+    Exponential moving average.
+    - Nếu alpha được cung cấp: dùng alpha trực tiếp làm smoothing factor (0 < alpha <= 1)
+    - Nếu không: tính từ span theo công thức alpha = 2/(span+1)
+    """
+    if alpha is not None:
+        return series.ewm(alpha=float(alpha), adjust=False).mean()
+    return series.ewm(span=int(span), adjust=False).mean()
 
 def ts_percentile(series: pd.Series, window: int, pct: float = 0.5) -> pd.Series:
     return series.rolling(window).quantile(pct)
@@ -150,9 +157,24 @@ def ts_linear_reg(series: pd.Series, window: int) -> pd.Series:
 
 def rank(series: pd.Series) -> pd.Series:
     """
-    Cross-sectional rank (expanding) — theo Kakushadze notation.
-    Khi dùng trong panel context (eval per ticker), expanding rank theo thời gian.
+    TIME-SERIES percentile rank theo expanding window.
+
+    LƯU Ý QUAN TRỌNG: Đây KHÔNG phải cross-sectional rank như định nghĩa
+    trong Kakushadze (2016). Do pipeline evaluate per-ticker, rank() ở đây
+    trả về percentile của giá trị hiện tại trong lịch sử của chính ticker đó.
+
+    Để dùng time-series rank với rolling window cụ thể, dùng ts_rank(s, window).
     """
+    return series.expanding().rank(pct=True)
+
+def rank_ts(series: pd.Series, window: Optional[int] = None) -> pd.Series:
+    """
+    Alias rõ ràng cho time-series rank.
+    Nếu window=None: expanding (toàn bộ lịch sử).
+    Nếu window được cung cấp: rolling window.
+    """
+    if window:
+        return ts_rank(series, window)
     return series.expanding().rank(pct=True)
 
 def cs_rank(series: pd.Series) -> pd.Series:

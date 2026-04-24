@@ -21,7 +21,10 @@ ts_argmaxmin_diff(s, w)       ts_max_diff(s, w)         ts_min_diff(s, w)
 ts_product(s, w)              product(s, w)
 
 ### Cross-sectional
-rank(s)           cs_rank(s)
+rank(s)       # TIME-SERIES percentile (expanding) — KHÔNG phải cross-sectional
+rank_ts(s)    # alias rõ ràng hơn cho time-series rank
+rank_ts(s, w) # rolling time-series rank trong window w ngày
+cs_rank(s)    # cross-sectional rank tại thời điểm hiện tại (single-point)
 scale(s, a=1.0)   signed_power(s, exp)
 zscore_scale(s)   winsorize_scale(s)
 normed_rank(s)    cwise_max(s1, s2)    cwise_min(s1, s2)

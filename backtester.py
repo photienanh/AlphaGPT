@@ -55,12 +55,16 @@ def compute_ic_cross_sectional(
     sig = signal_df.loc[common_dates, common_tickers]
     fwd = fwd_ret_df.loc[common_dates, common_tickers]
 
+    # Adaptive min_tickers: 30% universe, floor tại 10
+    n_universe = len(common_tickers)
+    min_tickers_for_ic = max(10, int(n_universe * 0.30))
+
     ic_list = []
     for date in common_dates:
         row_sig = sig.loc[date].dropna()
         row_fwd = fwd.loc[date].dropna()
         common_t = row_sig.index.intersection(row_fwd.index)
-        if len(common_t) < 5:
+        if len(common_t) < min_tickers_for_ic:
             continue
         s_sig = row_sig[common_t]
         s_fwd = row_fwd[common_t]
@@ -206,13 +210,11 @@ def compute_return_oos(
     """
     Annualized return của long-short portfolio trên OOS period.
 
-    daily_pnl[t] = mean(long leg returns[t]) - mean(short leg returns[t])
-
     Geometric annualization:
       total_return = prod(1 + daily_pnl) - 1
       ann_return   = (1 + total_return)^(252/n_days) - 1
 
-    Returns: annualized_return
+    Fallback về arithmetic nếu total_return < -0.99 (tránh domain error).
     """
     if test_ratio is None:
         test_ratio = DEFAULT_CONFIG.test_ratio
@@ -228,10 +230,16 @@ def compute_return_oos(
     if len(arr) < 20:
         return np.nan
 
-    # Arithmetic annualization: mean*252
-    # Với daily_pnl scale ~0.01-0.1%, arithmetic ≈ geometric
-    # Arithmetic ổn định hơn khi total_return âm (tránh NaN)
-    return float(arr.mean() * 252)
+    n_days = len(arr)
+
+    arr_clipped = np.clip(arr, -0.5, 0.5)
+    total_return = float(np.prod(1.0 + arr_clipped) - 1.0)
+
+    if total_return <= -0.99:
+        return float(arr.mean() * 252)
+
+    ann_return = (1.0 + total_return) ** (252.0 / n_days) - 1.0
+    return float(ann_return)
 
 
 # ── Turnover ──────────────────────────────────────────────────────────

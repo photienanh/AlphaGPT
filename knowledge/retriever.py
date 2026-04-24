@@ -210,22 +210,19 @@ def load_alpha_kb() -> List[Dict]:
 
 def retrieve_similar_alphas(query: str, top_k: int = 5) -> List[Dict]:
     """
-    Retrieve top-k alphas liên quan đến query.
-    Nguồn: FAISS index (Kakushadze KB + alpha_library).
-    Fallback về random nếu faiss/sentence-transformers chưa install.
+    Retrieve top-k alphas liên quan đến query, đảm bảo family diversity.
+    Tối đa 2 alpha mỗi family trong kết quả trả về.
     """
     index, meta = _load_index()
 
     if index is None or meta is None:
-        # Fallback: random từ KB + library
         all_alphas = _collect_all_alphas()
-        n = min(top_k, len(all_alphas))
-        return random.sample(all_alphas, n)
+        return _diverse_sample(all_alphas, top_k)
 
     model = _load_model()
     if model is None:
         all_alphas = _collect_all_alphas()
-        return random.sample(all_alphas, min(top_k, len(all_alphas)))
+        return _diverse_sample(all_alphas, top_k)
 
     try:
         import numpy as np
@@ -233,16 +230,70 @@ def retrieve_similar_alphas(query: str, top_k: int = 5) -> List[Dict]:
         norm = np.linalg.norm(vec, axis=1, keepdims=True)
         vec_norm = vec / (norm + 1e-9)
 
-        k = min(top_k, index.ntotal)
-        _, indices = index.search(vec_norm, k)
+        # Lấy nhiều hơn top_k để có chỗ filter diversity
+        k_fetch = min(top_k * 3, index.ntotal)
+        _, indices = index.search(vec_norm, k_fetch)
 
-        results = []
+        candidates = []
         for idx in indices[0]:
             if 0 <= idx < len(meta):
-                results.append(meta[idx])
-        return results
+                candidates.append(meta[idx])
+
+        return _ensure_family_diversity(candidates, top_k)
 
     except Exception as e:
         log.warning(f"[Retriever] FAISS search failed: {e}")
         all_alphas = _collect_all_alphas()
-        return random.sample(all_alphas, min(top_k, len(all_alphas)))
+        return _diverse_sample(all_alphas, top_k)
+    
+def _ensure_family_diversity(candidates: List[Dict], top_k: int,
+                              max_per_family: int = 2) -> List[Dict]:
+    """
+    Từ danh sách candidates (đã sorted theo similarity),
+    chọn top_k với constraint: tối đa max_per_family alpha mỗi family.
+    """
+    family_count = {}
+    results = []
+
+    for c in candidates:
+        fam = c.get("family", "unknown")
+        if family_count.get(fam, 0) < max_per_family:
+            results.append(c)
+            family_count[fam] = family_count.get(fam, 0) + 1
+        if len(results) >= top_k:
+            break
+
+    # Bổ sung nếu chưa đủ top_k (bỏ qua constraint diversity)
+    if len(results) < top_k:
+        for c in candidates:
+            if c not in results:
+                results.append(c)
+            if len(results) >= top_k:
+                break
+
+    return results
+
+
+def _diverse_sample(alphas: List[Dict], top_k: int) -> List[Dict]:
+    """Random sample với family diversity cho fallback case."""
+    if len(alphas) <= top_k:
+        return list(alphas)
+
+    # Group by family
+    by_family = {}
+    for a in alphas:
+        fam = a.get("family", "unknown")
+        by_family.setdefault(fam, []).append(a)
+
+    results = []
+    families = list(by_family.keys())
+    random.shuffle(families)
+
+    # Round-robin từ các family
+    while len(results) < top_k and any(by_family.values()):
+        for fam in families:
+            if by_family[fam] and len(results) < top_k:
+                idx = random.randrange(len(by_family[fam]))
+                results.append(by_family[fam].pop(idx))
+
+    return results

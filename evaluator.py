@@ -9,6 +9,7 @@ from typing import Dict, Any, Optional
 
 import alpha_operators as op
 from backtester import (
+    compute_ic_cross_sectional,
     compute_ic_cross_sectional_oos,
     compute_sharpe_oos,
     compute_return_oos,
@@ -165,10 +166,13 @@ def eval_alpha(
             f"(valid={len(signal_parts)}, skipped={skip_count})"
         )
 
-        if len(common_tickers) < 3 or len(common_dates) < 60:
+        n_universe = len(signal_norm.columns)
+        min_tickers_eval = max(10, int(n_universe * 0.30))
+
+        if len(common_tickers) < min_tickers_eval or len(common_dates) < 60:
             result["error"] = (
-                f"không đủ overlap: {len(common_tickers)} tickers, "
-                f"{len(common_dates)} dates"
+                f"không đủ overlap: {len(common_tickers)} tickers "
+                f"(cần {min_tickers_eval}), {len(common_dates)} dates"
             )
             return result
 
@@ -200,16 +204,31 @@ def eval_alpha(
             reasons.append(f"Return_OOS={rv:+.4f} <= {RETURN_MIN_THRESHOLD}")
         status      = "WEAK" if reasons else "OK"
         weak_reason = "; ".join(reasons) if reasons else None
+    
+    # Tính IC-series trên OOS period để dùng cho decorrelation
+    common_dates_all = sorted(signal_norm.index.intersection(fwd_ret_multi.index))
+    split_idx_ic     = int(len(common_dates_all) * (1 - DEFAULT_CONFIG.test_ratio))
+    oos_dates_ic     = common_dates_all[split_idx_ic:]
+
+    if len(oos_dates_ic) >= 20:
+        _, _, ic_series_oos = compute_ic_cross_sectional(
+            signal_norm.loc[oos_dates_ic],
+            fwd_ret_multi.loc[oos_dates_ic],
+        )
+    else:
+        ic_series_oos = pd.Series(dtype=float)
 
     result.update({
-        "ic_is":      _r(ic_is,      6),
-        "ic_oos":     _r(ic_oos,     6),
-        "sharpe_oos": _r(sharpe_oos, 4),
-        "return_oos": _r(ann_return, 4),
-        "turnover":   _r(turnover,   4),
-        "status":     status,
-        "series":     signal_norm,
+        "ic_is":       _r(ic_is,      6),
+        "ic_oos":      _r(ic_oos,     6),
+        "sharpe_oos":  _r(sharpe_oos, 4),
+        "return_oos":  _r(ann_return, 4),
+        "turnover":    _r(turnover,   4),
+        "status":      status,
+        "series":      signal_norm,
+        "_ic_series":  ic_series_oos,
     })
+
     if weak_reason is not None:
         result["weak_reason"] = weak_reason
     return result

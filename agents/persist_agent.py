@@ -7,6 +7,8 @@ alpha_library.json: file chung tích lũy tất cả alpha OK qua mọi run,
 import json
 import logging
 import os
+import pandas as pd
+import numpy as np
 from datetime import datetime
 from typing import Any, Dict, List
 
@@ -38,21 +40,30 @@ def _normalize_expr(expr: str) -> str:
     """Normalize expression để dedup."""
     return " ".join(expr.split()).lower()
 
+def _load_existing_ic_series(library: List[Dict]) -> Dict[str, Any]:
+    """Load IC-series đã lưu của các alpha trong library."""
+    result = {}
+    for a in library:
+        ic_dict = a.get("ic_series")
+        if ic_dict and isinstance(ic_dict, dict):
+            try:
+                s = pd.Series(ic_dict)
+                s.index = pd.to_datetime(s.index)
+                result[a["id"]] = s
+            except Exception:
+                pass
+    return result
 
 def _append_to_library(sota_alphas: List[Dict], thread_id: str,
                        hypothesis: str) -> int:
-    """
-    Append alpha OK mới vào alpha_library.json.
-    Dedup theo normalized expression.
-    Trả về số alpha thực sự được thêm mới.
-    """
     library = _load_library(LIBRARY_PATH)
-
-    # Build set các expression đã có để dedup
     existing_exprs = {
         _normalize_expr(a.get("expression", ""))
         for a in library
     }
+
+    # Load IC-series của alpha đã có để cross-run dedup
+    existing_ic_series = _load_existing_ic_series(library)
 
     next_no = len(library) + 1
     added   = 0
@@ -61,9 +72,31 @@ def _append_to_library(sota_alphas: List[Dict], thread_id: str,
         expr = a.get("expression", "")
         if not expr:
             continue
+
+        # Dedup theo expression
         if _normalize_expr(expr) in existing_exprs:
             log.debug(f"[Persist] Duplicate expression, skip: {a.get('id')}")
             continue
+
+        # Cross-run IC-series similarity check
+        new_ic = a.get("_ic_series")   # pd.Series, được thêm bởi evaluator
+        if new_ic is not None and isinstance(new_ic, pd.Series) and len(new_ic) > 0:
+            too_similar = False
+            for lib_id, lib_ic in existing_ic_series.items():
+                merged = pd.concat([new_ic, lib_ic], axis=1).dropna()
+                if len(merged) < 20:
+                    continue
+                corr = abs(merged.iloc[:, 0].corr(merged.iloc[:, 1]))
+                if corr >= 0.55:   # dùng cùng corr_threshold
+                    log.info(
+                        f"[Persist] {a.get('id')} too similar to existing "
+                        f"{lib_id} (IC-series corr={corr:.3f}), skip"
+                    )
+                    too_similar = True
+                    break
+            if too_similar:
+                continue
+
 
         ic  = a.get("ic_oos")
         ret = a.get("return_oos")
@@ -74,15 +107,17 @@ def _append_to_library(sota_alphas: List[Dict], thread_id: str,
             "family":      a.get("family", "unknown"),
             "description": a.get("description", ""),
             "expression":  expr,
-            "ic_oos":      round(float(ic), 6)    if ic    is not None else None,
+            "ic_oos":      round(float(ic), 6)  if ic  is not None else None,
             "sharpe_oos":  round(float(a.get("sharpe_oos", 0) or 0), 4),
-            "return_oos":  round(float(ret), 4)   if ret   is not None else None,
+            "return_oos":  round(float(ret), 4) if ret is not None else None,
             "thread_id":   thread_id,
             "hypothesis":  hypothesis,
             "saved_at":    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         library.append(entry)
         existing_exprs.add(_normalize_expr(expr))
+        if new_ic is not None:
+            existing_ic_series[a.get("id")] = new_ic
         next_no += 1
         added   += 1
 

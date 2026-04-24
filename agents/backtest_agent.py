@@ -17,10 +17,6 @@ log = logging.getLogger(__name__)
 
 
 def _select_sota(evaluated: List[Dict]) -> List[Dict]:
-    """
-    Greedy decorrelation selection.
-    Chỉ chọn alpha status="OK", loại duplicate expressions trước.
-    """
     def _is_stable(a: Dict) -> bool:
         ic_is  = a.get("ic_is")
         ic_oos = a.get("ic_oos")
@@ -42,7 +38,6 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
           if a.get("status") == "OK" and _is_stable(a) and _passes_quality(a)]
     ok.sort(key=lambda x: (x.get("ic_oos") or 0, x.get("sharpe_oos") or 0), reverse=True)
 
-    # Deduplication trước khi decorrelation
     seen_exprs = set()
     deduped = []
     for a in ok:
@@ -55,30 +50,49 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
     for cand in deduped:
         if len(selected) >= DEFAULT_CONFIG.max_sota:
             break
-        s_cand = cand.get("_series")
-        if s_cand is None:
-            selected.append(cand)
-            continue
+
+        ic_cand = cand.get("_ic_series")
+        s_cand  = cand.get("_series")
         corr_ok = True
+
         for sel in selected:
-            s_sel = sel.get("_series")
-            if s_sel is None:
-                continue
-            # s_cand và s_sel là DataFrame (panel signal), tính correlation theo IC series
-            try:
-                merged = pd.concat([s_cand.stack(), s_sel.stack()], axis=1).dropna()
+            ic_sel = sel.get("_ic_series")
+            s_sel  = sel.get("_series")
+
+            # Ưu tiên IC-series correlation
+            if (ic_cand is not None and ic_sel is not None
+                    and len(ic_cand) > 0 and len(ic_sel) > 0):
+                merged = pd.concat([ic_cand, ic_sel], axis=1).dropna()
                 if len(merged) >= 20:
-                    cv = abs(merged.iloc[:, 0].corr(merged.iloc[:, 1], method="spearman"))
+                    cv = abs(merged.iloc[:, 0].corr(merged.iloc[:, 1]))
                     if cv >= DEFAULT_CONFIG.corr_threshold:
                         corr_ok = False
                         break
-            except Exception:
-                pass
+                    continue
+
+            # Fallback: signal-level correlation
+            if s_cand is not None and s_sel is not None:
+                try:
+                    merged = pd.concat(
+                        [s_cand.stack(), s_sel.stack()], axis=1
+                    ).dropna()
+                    if len(merged) >= 20:
+                        cv = abs(merged.iloc[:, 0].corr(
+                            merged.iloc[:, 1], method="spearman"
+                        ))
+                        if cv >= DEFAULT_CONFIG.corr_threshold:
+                            corr_ok = False
+                            break
+                except Exception:
+                    pass
+
         if corr_ok:
             selected.append(cand)
 
     for a in selected:
-        a.pop("_series", None)
+        a.pop("_series",    None)
+        a.pop("_ic_series", None)
+
     return selected
 
 
@@ -121,7 +135,8 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
     sota = _select_sota(evaluated)
 
     for a in evaluated:
-        a.pop("_series", None)
+        a.pop("_series",    None)
+        a.pop("_ic_series", None)
 
     n_ok   = sum(1 for a in evaluated if a.get("status") == "OK")
     n_weak = sum(1 for a in evaluated if a.get("status") == "WEAK")

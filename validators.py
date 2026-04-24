@@ -27,7 +27,7 @@ VALID_OPERATORS: Set[str] = {
     "ts_ir", "ts_decayed_linear", "decay_linear",
     "ts_ema", "ts_percentile", "ts_linear_reg",
     # cross-sectional
-    "rank", "cs_rank", "zscore_scale", "winsorize_scale",
+    "rank", "cs_rank", "rank_ts","zscore_scale", "winsorize_scale",
     "normed_rank", "cwise_max", "cwise_min",
     "scale", "signed_power", "indneutralize",
     # group-wise

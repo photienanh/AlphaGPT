@@ -75,19 +75,76 @@ def mutate_wrap_normalize(expr: str) -> str:
     return f"alpha = {template.format(rhs)}"
 
 
+def _extract_subtrees(expr: str) -> list:
+    """
+    Trích xuất tất cả function call subtrees từ expression.
+    Trả về list of (start_idx, end_idx, subtree_string).
+    Xử lý đúng ngoặc lồng nhau.
+    """
+    subtrees = []
+    func_pat = re.compile(
+        r'\b(ts_[a-z_]+|grouped_[a-z_]+|rank|neg|div|add|minus|cwise_mul'
+        r'|cwise_max|cwise_min|abso|sign|log|tanh|relu|greater|less'
+        r'|zscore_scale|normed_rank|scale|shift|delay|delta|stddev'
+        r'|correlation|covariance|product|sum_op|decay_linear)\s*\('
+    )
+    for m in func_pat.finditer(expr):
+        func_end = m.end() - 1
+        depth = 0
+        j = func_end
+        while j < len(expr):
+            if expr[j] == '(':
+                depth += 1
+            elif expr[j] == ')':
+                depth -= 1
+                if depth == 0:
+                    subtrees.append((m.start(), j + 1, expr[m.start():j + 1]))
+                    break
+            j += 1
+    return subtrees
+
+
 def crossover(expr_a: str, expr_b: str) -> str:
-    func_pat = re.compile(r"(ts_[a-z_]+|grouped_[a-z_]+)\(")
-    ops_a = {m.group(1) for m in func_pat.finditer(expr_a)}
-    ops_b = {m.group(1) for m in func_pat.finditer(expr_b)}
-    common = ops_a & ops_b
-    if not common:
+    """
+    Swap một subtree từ expr_b vào vị trí subtree cùng operator trong expr_a.
+    Dùng _extract_subtrees để xử lý đúng ngoặc lồng nhau.
+    Fallback về mutate_window nếu không tìm được operator chung.
+    """
+    if expr_a == expr_b:
         return mutate_window(expr_a)
-    op = random.choice(list(common))
-    m_b = re.search(rf"{op}\(([^)]+)\)", expr_b)
-    m_a = re.search(rf"{op}\(([^)]+)\)", expr_a)
-    if not m_b or not m_a:
+
+    trees_a = _extract_subtrees(expr_a)
+    trees_b = _extract_subtrees(expr_b)
+
+    if not trees_a or not trees_b:
         return mutate_window(expr_a)
-    return expr_a[:m_a.start(1)] + m_b.group(1) + expr_a[m_a.end(1):]
+
+    def _op_name(subtree_str: str) -> str:
+        m = re.match(r'(\w+)\s*\(', subtree_str)
+        return m.group(1) if m else ""
+
+    groups_a = {}
+    for start, end, s in trees_a:
+        op = _op_name(s)
+        if op:
+            groups_a.setdefault(op, []).append((start, end, s))
+
+    groups_b = {}
+    for start, end, s in trees_b:
+        op = _op_name(s)
+        if op:
+            groups_b.setdefault(op, []).append((start, end, s))
+
+    common_ops = list(set(groups_a.keys()) & set(groups_b.keys()))
+    if not common_ops:
+        return mutate_window(expr_a)
+
+    chosen_op = random.choice(common_ops)
+    _, _, src_subtree = random.choice(groups_b[chosen_op])
+    dst_start, dst_end, _ = random.choice(groups_a[chosen_op])
+
+    new_expr = expr_a[:dst_start] + src_subtree + expr_a[dst_end:]
+    return new_expr
 
 
 # ── Cross-sectional fitness ───────────────────────────────────────────
@@ -273,25 +330,97 @@ def enhance_population(
     fwd_ret_multi: pd.DataFrame,
     n_iterations: int = None,
 ) -> List[Dict[str, Any]]:
-    """GP enhancement cho toàn bộ population."""
+    """
+    GP enhancement với shared population và elitist selection.
+    Tất cả seeds tham gia cùng một population → có thể trao đổi
+    genetic material qua crossover.
+    """
     if n_iterations is None:
         n_iterations = DEFAULT_CONFIG.gp_iterations
 
+    sampled_dfs, sampled_fwd = _sample_universe(ticker_dfs, fwd_ret_multi)
+
     seen_expressions: Set[str] = set()
 
-    results = []
+    population = []
     for seed in seeds:
-        try:
-            enhanced = enhance_alpha(
-                seed, ticker_dfs, fwd_ret_multi,
-                n_iterations=n_iterations,
-                seen_expressions=seen_expressions,
-            )
-            enhanced["id"]          = seed.get("id", enhanced.get("id", ""))
-            enhanced["description"] = seed.get("description", "")
-            enhanced["family"]      = seed.get("family", "")
-            results.append(enhanced)
-        except Exception as e:
-            log.warning(f"[GP] Failed for {seed.get('id','?')}: {e}")
-            results.append(seed)
+        expr = seed.get("expression", "")
+        if not expr:
+            continue
+        ic = _compute_cs_fitness(expr, sampled_dfs, sampled_fwd)
+        entry = deepcopy(seed)
+        entry["_ic"] = ic if (ic == ic) else 0.0
+        seen_expressions.add(normalize_expression(expr))
+        population.append(entry)
+
+    if not population:
+        return seeds
+
+    mutation_fns = [mutate_window, mutate_operator, mutate_wrap_normalize]
+    mutation_probs = [0.50, 0.25, 0.15]
+
+    for iteration in range(n_iterations):
+        candidates = []
+        pop_size = max(DEFAULT_CONFIG.population_size, len(population))
+
+        for _ in range(pop_size):
+            tournament = random.sample(population, min(3, len(population)))
+            parent = max(tournament, key=lambda x: x["_ic"])
+
+            r = random.random()
+            cumul = 0.0
+            new_expr = None
+
+            for prob, fn in zip(mutation_probs, mutation_fns):
+                cumul += prob
+                if r < cumul:
+                    new_expr = fn(parent["expression"])
+                    break
+
+            if new_expr is None:
+                others = [p for p in population if p is not parent]
+                if others:
+                    partner = max(
+                        random.sample(others, min(3, len(others))),
+                        key=lambda x: x["_ic"]
+                    )
+                    new_expr = crossover(parent["expression"], partner["expression"])
+                else:
+                    new_expr = mutate_window(parent["expression"])
+
+            if not new_expr:
+                continue
+
+            is_valid, _ = validate_expression(new_expr)
+            if not is_valid:
+                continue
+
+            norm = normalize_expression(new_expr)
+            if norm in seen_expressions:
+                continue
+            seen_expressions.add(norm)
+
+            ic = _compute_cs_fitness(new_expr, sampled_dfs, sampled_fwd)
+            ic_val = ic if (ic == ic) else 0.0
+
+            new_indiv = deepcopy(parent)
+            new_indiv["expression"] = new_expr
+            new_indiv["_ic"] = ic_val
+            candidates.append(new_indiv)
+
+        if candidates:
+            all_indivs = population + candidates
+            all_indivs.sort(key=lambda x: x["_ic"], reverse=True)
+            population = all_indivs[:len(seeds)]
+
+    results = []
+    for i, indiv in enumerate(population):
+        indiv.pop("_ic", None)
+        if i < len(seeds):
+            indiv["id"]          = seeds[i].get("id", indiv.get("id", ""))
+            indiv["description"] = seeds[i].get("description", "")
+            indiv["family"]      = seeds[i].get("family", "")
+        indiv["status"] = "OK" if (indiv.get("ic_is") or 0) > 0 else "WEAK"
+        results.append(indiv)
+
     return results
