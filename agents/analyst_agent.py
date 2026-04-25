@@ -49,7 +49,7 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     for a in ok_alphas:
         ret_str = (f"{a.get('return_oos', 0)*100:+.1f}%" if a.get("return_oos") is not None else "N/A")
         results_text.append(
-            f"- {a['id']} [{a.get('family','?')}] status=OK\n"
+            f"- {a['id']} status=OK\n"
             f"  IC_IS={a.get('ic_is',0):+.4f}  IC_OOS={a.get('ic_oos',0):+.4f}  "
             f"Sharpe={a.get('sharpe_oos',0):+.3f}  Return={ret_str}  "
             f"Turnover={a.get('turnover',0):.3f}\n"
@@ -57,7 +57,7 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         )
     for a in weak_alphas:
         results_text.append(
-            f"- {a['id']} [{a.get('family', '?')}] status=WEAK\n"
+            f"- {a['id']} status=WEAK\n"
             f"  IC_OOS={a.get('ic_oos', 0):+.4f} — {a.get('weak_reason', '')}\n"
             f"  expression: {a.get('expression', '')[:80]}"
         )
@@ -108,7 +108,7 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         }
 
     summary = data.get("round_summary", "")
-    log.info(f"[Analyst] Round {state.iteration}: {summary}")
+    log.info(f"[Analyst Summary] Round {state.iteration}: {summary}")
 
     current_hyp = {
         "iteration":     state.iteration,
@@ -117,6 +117,7 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
             f"IC_OOS={avg_ic_oos:.4f} Sharpe={avg_sharpe:.3f} "
             f"Return={avg_return*100:+.1f}% OK={len(ok_alphas)}/{len(state.evaluated_alphas)}"
         ),
+        "round_summary": summary,
         "weak_alpha_ids": data.get("weak_alpha_ids", []),
         "analyst":        data,
     }
@@ -133,7 +134,6 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     should_continue = (
         state.iteration < state.max_iterations
         and not quality_ok
-        and len(weak_ids) > 0
     )
 
     return {

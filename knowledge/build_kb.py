@@ -28,7 +28,6 @@ def build_descriptions(alphas: list) -> list[str]:
     texts = []
     for a in alphas:
         text = (
-            f"Family: {a.get('family', 'unknown')}. "
             f"Description: {a.get('description', '')}. "
             f"Expression: {a.get('expression', '')}"
         )

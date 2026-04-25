@@ -51,15 +51,32 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
         if len(selected) >= DEFAULT_CONFIG.max_sota:
             break
 
-        ic_cand = cand.get("_ic_series")
         s_cand  = cand.get("_series")
+        ic_cand = cand.get("_ic_series")
         corr_ok = True
 
         for sel in selected:
-            ic_sel = sel.get("_ic_series")
             s_sel  = sel.get("_series")
+            ic_sel = sel.get("_ic_series")
 
-            # Ưu tiên IC-series correlation
+            # Ưu tiên signal-level correlation (nhạy hơn với alpha gần giống)
+            if s_cand is not None and s_sel is not None:
+                try:
+                    merged = pd.concat(
+                        [s_cand.stack(), s_sel.stack()], axis=1
+                    ).dropna()
+                    if len(merged) >= 50:
+                        cv = abs(merged.iloc[:, 0].corr(
+                            merged.iloc[:, 1], method="spearman"
+                        ))
+                        if cv >= DEFAULT_CONFIG.corr_threshold:
+                            corr_ok = False
+                            break
+                        continue  # signal check đủ độ tin cậy, skip IC-series check
+                except Exception:
+                    pass
+
+            # Fallback: IC-series correlation
             if (ic_cand is not None and ic_sel is not None
                     and len(ic_cand) > 0 and len(ic_sel) > 0):
                 merged = pd.concat([ic_cand, ic_sel], axis=1).dropna()
@@ -68,23 +85,6 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
                     if cv >= DEFAULT_CONFIG.corr_threshold:
                         corr_ok = False
                         break
-                    continue
-
-            # Fallback: signal-level correlation
-            if s_cand is not None and s_sel is not None:
-                try:
-                    merged = pd.concat(
-                        [s_cand.stack(), s_sel.stack()], axis=1
-                    ).dropna()
-                    if len(merged) >= 20:
-                        cv = abs(merged.iloc[:, 0].corr(
-                            merged.iloc[:, 1], method="spearman"
-                        ))
-                        if cv >= DEFAULT_CONFIG.corr_threshold:
-                            corr_ok = False
-                            break
-                except Exception:
-                    pass
 
         if corr_ok:
             selected.append(cand)
@@ -113,8 +113,8 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
         result = eval_alpha(cand, ticker_dfs, fwd_ret_multi, full=True)
         result["id"]          = cand.get("id", "")
         result["description"] = cand.get("description", "")
-        result["family"]      = cand.get("family", "")
         result["_series"]     = result.pop("series", None)
+        expression                   = cand.get("expression", "")
         evaluated.append(result)
 
         status = result.get("status", "ERR")
@@ -123,17 +123,17 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
         return_oos    = result.get("return_oos") or 0.0
         if status == "OK":
             log.info(
-                f"  [OK  ] {result['id']} [{result.get('family','?')}] "
-                f"IC_OOS={ic_oos:+.4f} - Sharpe_OOS={sharpe_oos:+.4f} - Return_OOS={return_oos:+.2%}"
+                f"  [OK] {result['id']}: {expression}\n"
+                f"\t\t\tIC_OOS={ic_oos:+.4f} - Sharpe_OOS={sharpe_oos:+.4f} - Return_OOS={return_oos:+.2%}"
             )
         elif status == "WEAK":
             log.info(
-                f"  [WEAK] {result['id']} [{result.get('family','?')}] "
-                f"IC_OOS={ic_oos:+.4f} - Sharpe_OOS={sharpe_oos:+.4f} - Return_OOS={return_oos:+.2%}\n"
+                f"  [WEAK] {result['id']}: {expression}\n"
+                f"\t\t\tIC_OOS={ic_oos:+.4f} - Sharpe_OOS={sharpe_oos:+.4f} - Return_OOS={return_oos:+.2%}\n"
                 f"\t\t\tWeak reason: {result.get('weak_reason','')}"
             )
         else:
-            log.info(f"  [ERR ] {result['id']} — {result.get('error','')[:60]}")
+            log.info(f"  [ERR] {result['id']} — {result.get('error','')[:60]}")
 
     sota = _select_sota(evaluated)
 
@@ -149,7 +149,15 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
         f"| {len(sota)} sota selected"
     )
 
+    # Cộng dồn sota từ các vòng trước với sota mới, dedup theo id, giữ top max_sota
+    existing_sota = {a["id"]: a for a in (state.sota_alphas or [])}
+    for a in sota:
+        existing_sota[a["id"]] = a
+
+    all_sota = sorted(existing_sota.values(), key=lambda x: x.get("ic_oos") or 0, reverse=True)
+    accumulated_sota = all_sota[:DEFAULT_CONFIG.max_sota]
+
     return {
         "evaluated_alphas": evaluated,
-        "sota_alphas":      sota,
+        "sota_alphas":      accumulated_sota,
     }

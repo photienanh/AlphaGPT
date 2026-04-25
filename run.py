@@ -97,7 +97,7 @@ def _print_summary(idea: str, state: dict) -> None:
         for h in history:
             print(f"\n[Vòng {h.get('iteration', '?')}]")
             print(f"  Hypothesis: {h.get('hypothesis', 'N/A')}")
-            print(f"  Summary   : {h.get('alpha_summary', 'N/A')}")
+            print(f"  Summary   : {h.get('round_summary', 'N/A')}")
             
             # Lấy nhận xét của Analyst nếu có
             analyst_data = h.get('analyst', {})
@@ -114,12 +114,12 @@ def _print_summary(idea: str, state: dict) -> None:
             ret = a.get("return_oos")
             ret_str = f"{ret*100:+.1f}%/năm" if ret is not None else "N/A"
             print(
-                f"  [{a.get('family','?')}] {a.get('id','?')}\n"
+                f"    {a.get('id','?')}\n"
                 f"    IC_OOS={a.get('ic_oos','N/A')}  "
                 f"Sharpe={a.get('sharpe_oos','N/A')}  "
                 f"Return={ret_str}\n"
-                f"    {a.get('description','')}\n"
-                f"    expr: {a.get('expression','')[:80]}"
+                f"    Description:    {a.get('description','')}\n"
+                f"    expr: {a.get('expression','')[:80]}\n"
             )
     else:
         print("\nKhông tìm được alpha nào đạt ngưỡng.")

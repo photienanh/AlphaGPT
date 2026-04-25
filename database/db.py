@@ -45,7 +45,6 @@ def init_db(db_path: str = DB_PATH) -> None:
             alpha_id        TEXT NOT NULL,
             expression      TEXT,
             description     TEXT,
-            family          TEXT,
             ic_is           REAL,
             ic_oos          REAL,
             sharpe_oos      REAL,
@@ -136,15 +135,14 @@ class AlphaGPTDB:
             cur = conn.execute("""
                 INSERT INTO alphas
                     (thread_id, hypothesis_id, alpha_id, expression,
-                    description, family, ic_is, ic_oos, sharpe_oos,
+                    description, ic_is, ic_oos, sharpe_oos,
                     return_oos, turnover)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?)
+                VALUES (?,?,?,?,?,?,?,?,?,?)
             """, (
                 thread_id, hypothesis_id,
                 alpha.get("id", ""),
                 alpha.get("expression", ""),
                 alpha.get("description", ""),
-                alpha.get("family", ""),
                 alpha.get("ic_is"),
                 alpha.get("ic_oos"),
                 alpha.get("sharpe_oos"),
@@ -197,7 +195,6 @@ class AlphaGPTDB:
                     a.alpha_id   AS id,
                     a.expression,
                     a.description,
-                    a.family,
                     a.thread_id,
                     b.ic_oos,
                     b.sharpe_oos,

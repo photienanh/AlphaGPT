@@ -119,6 +119,7 @@ def _build_daily_pnl(
     signal_df: pd.DataFrame,
     fwd_ret_df: pd.DataFrame,
     test_dates: list,
+    cost_per_turnover: float = 0.0015,
 ) -> np.ndarray:
     """
     Tính daily portfolio return với rank-based continuous positions.
@@ -142,6 +143,8 @@ def _build_daily_pnl(
     fwd = fwd_ret_df[common_tickers]
 
     daily_pnl = []
+    prev_pos = None
+
     for date in test_dates:
         if date not in sig.index or date not in fwd.index:
             continue
@@ -152,20 +155,25 @@ def _build_daily_pnl(
         if n < 4:
             continue
 
-        # Rank-based continuous positions
-        ranks = row_sig[common_t].rank(ascending=True)        # rank 1..n
-        pos   = (ranks - (n + 1) / 2) / ((n - 1) / 2 + 1e-9) # center, scale [-1,1]
-
+        ranks = row_sig[common_t].rank(ascending=True)
+        pos   = (ranks - (n + 1) / 2) / ((n - 1) / 2 + 1e-9)
         abs_sum = pos.abs().sum()
         if abs_sum < 1e-9:
             continue
-        pos = pos / abs_sum  # normalize: sum(|pos|) = 1
+        pos = pos / abs_sum
 
-        market_ret = row_fwd[common_t].mean()
-        excess_fwd = row_fwd[common_t] - market_ret
+        gross_pnl = float((pos * row_fwd[common_t]).sum())
 
-        pnl = float((pos * excess_fwd).sum())
-        daily_pnl.append(pnl)
+        # Turnover = sum(|pos[t] - pos[t-1]|) / 2
+        if prev_pos is not None:
+            prev_aligned = prev_pos.reindex(common_t).fillna(0)
+            turnover = float((pos - prev_aligned).abs().sum()) / 2
+        else:
+            turnover = float(pos.abs().sum()) / 2
+
+        net_pnl = gross_pnl - cost_per_turnover * turnover
+        daily_pnl.append(net_pnl)
+        prev_pos = pos
 
     return np.array(daily_pnl)
 
@@ -197,38 +205,7 @@ def compute_sharpe_oos(
     sig = signal_df[common_tickers]
     fwd = fwd_ret_df[common_tickers]
 
-    daily_net_pnl = []
-    prev_pos = None
-
-    for date in test_dates:
-        if date not in sig.index or date not in fwd.index:
-            continue
-        row_sig = sig.loc[date].dropna()
-        row_fwd = fwd.loc[date].dropna()
-        common_t = row_sig.index.intersection(row_fwd.index)
-        n = len(common_t)
-        if n < 4:
-            continue
-
-        ranks = row_sig[common_t].rank(ascending=True)
-        pos   = (ranks - (n + 1) / 2) / ((n - 1) / 2 + 1e-9)
-        abs_sum = pos.abs().sum()
-        if abs_sum < 1e-9:
-            continue
-        pos = pos / abs_sum
-
-        gross_pnl = float((pos * row_fwd[common_t]).sum())
-
-        # Turnover = sum(|pos[t] - pos[t-1]|) / 2
-        if prev_pos is not None:
-            prev_aligned = prev_pos.reindex(common_t).fillna(0)
-            turnover = float((pos - prev_aligned).abs().sum()) / 2
-        else:
-            turnover = float(pos.abs().sum()) / 2
-
-        net_pnl = gross_pnl - cost_per_turnover * turnover
-        daily_net_pnl.append(net_pnl)
-        prev_pos = pos
+    daily_net_pnl = _build_daily_pnl(sig, fwd, test_dates, cost_per_turnover)
 
     arr = np.array(daily_net_pnl)
     if len(arr) < 20:
@@ -270,8 +247,7 @@ def compute_return_oos(
 
     n_days = len(arr)
 
-    arr_clipped = np.clip(arr, -0.5, 0.5)
-    total_return = float(np.prod(1.0 + arr_clipped) - 1.0)
+    total_return = float(np.prod(1.0 + arr) - 1.0)
 
     if total_return <= -0.99:
         return float(arr.mean() * 252)

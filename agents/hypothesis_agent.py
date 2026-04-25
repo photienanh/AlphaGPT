@@ -28,26 +28,11 @@ def _format_rag_examples(alphas: list) -> str:
     lines = ["## Relevant alpha examples from knowledge base\n"]
     for a in alphas:
         lines.append(
-            f"- **{a['id']}** [{a.get('family', '?')}]: {a.get('description', '')}\n"
+            f"- **{a['id']}**: {a.get('description', '')}\n"
             f"  `{a.get('expression', '')[:100]}`"
         )
     return "\n".join(lines)
 
-def _get_library_family_distribution() -> dict:
-    """Đọc distribution of families trong alpha_library.json."""
-    library_path = os.environ.get("ALPHA_LIBRARY_PATH", "alpha_library.json")
-    if not os.path.exists(library_path):
-        return {}
-    try:
-        with open(library_path, "r", encoding="utf-8") as f:
-            library = json.load(f)
-        dist = {}
-        for a in library:
-            fam = a.get("family", "unknown")
-            dist[fam] = dist.get(fam, 0) + 1
-        return dist
-    except Exception:
-        return {}
     
 async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     """
@@ -63,18 +48,9 @@ async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, An
     rag_block = _format_rag_examples(rag_alphas)
 
     if is_first:
-        family_dist   = _get_library_family_distribution()
-        overrep       = [f for f, cnt in family_dist.items() if cnt >= 3]
-        avoid_hint    = (
-            f"Lưu ý: Các family sau đã có nhiều alpha trong library, "
-            f"hãy ưu tiên hướng khác nếu có thể: {', '.join(overrep)}"
-            if overrep else ""
-        )
-
         user_prompt = HYPOTHESIS_INITIAL_PROMPT.format(
             trading_idea=state.trading_idea,
             rag_examples=rag_block,
-            avoid_hint=avoid_hint,         # thêm parameter này
             output_format=HYPOTHESIS_OUTPUT_FORMAT,
         )
     else:
@@ -83,6 +59,8 @@ async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, An
             history_text += f"\nVòng {h.get('iteration', i)}: {h.get('hypothesis', '')}\n"
             if h.get("alpha_summary"):
                 history_text += f"  Kết quả: {h['alpha_summary']}\n"
+            if h.get("round_summary"):
+                history_text += f"  Nhận xét: {h['round_summary']}\n"
 
         user_prompt = HYPOTHESIS_ITERATION_PROMPT.format(
             hypothesis_history=history_text,

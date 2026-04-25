@@ -53,6 +53,6 @@ Trả về JSON:
     "direction cụ thể 3"
   ],
   "polisher_feedback": "3-5 câu feedback cho generator: đề cập Return thực tế, hướng cải thiện cụ thể",
-  "round_summary": "1 câu: IC avg={avg_ic_oos:.4f}, Return avg={avg_return:+.1f}%"
+  "round_summary": "1 câu nhận định chính: điểm mạnh/yếu nổi bật nhất của vòng này và hướng cần cải thiện"
 }}
 """

@@ -114,7 +114,6 @@ Trả về JSON:
   "alphas": [
     {{
       "id": "alpha_1",
-      "family": "<momentum|mean_reversion|volume|volatility|technical|pattern>",
       "description": "mô tả ngắn signal này",
       "expression": "alpha = <công thức dùng operators và df['field']>"
     }},
@@ -147,7 +146,6 @@ Trả về JSON:
   "alphas": [
     {{
       "id": "alpha_X",
-      "family": "<family>",
       "description": "mô tả ngắn",
       "expression": "alpha = <công thức>"
     }}

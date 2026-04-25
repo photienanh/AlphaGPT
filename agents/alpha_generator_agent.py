@@ -36,7 +36,6 @@ def _get_fallback_alphas(n: int) -> List[Dict]:
     for a in sampled:
         result.append({
             "id": a.get("id", "fallback"),
-            "family": a.get("family", "unknown"),
             "description": a.get("description", ""),
             "expression": a.get("expression", ""),
         })
@@ -49,7 +48,7 @@ def _format_rag_examples(alphas: list) -> str:
     lines = ["\n## Example alphas from knowledge base (for reference, không copy trực tiếp)\n"]
     for a in alphas:
         lines.append(
-            f"- {a['id']} [{a.get('family', '?')}]: {a.get('description', '')[:80]}\n"
+            f"- {a['id']}: {a.get('description', '')[:80]}\n"
             f"  expression: `{a.get('expression', '')[:100]}`"
         )
     return "\n".join(lines)
@@ -149,7 +148,7 @@ def _format_alpha_for_prompt(a: dict, show_reason: bool) -> str:
     if ret is not None: metrics.append(f"Return={ret*100:+.1f}%")
     if sh  is not None: metrics.append(f"Sharpe={sh:+.3f}")
 
-    line = f"- {a.get('id','?')} [{a.get('family','?')}]: {a.get('description','')[:60]}"
+    line = f"- {a.get('id','?')}: {a.get('description','')[:60]}"
     if metrics:
         line += f" | {' '.join(metrics)}"
     if show_reason and a.get("weak_reason"):

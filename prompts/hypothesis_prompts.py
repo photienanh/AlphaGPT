@@ -17,8 +17,6 @@ Hãy phát triển một giả thuyết toàn diện. Vì đây là vòng lặp 
 
 {rag_examples}
 
-{avoid_hint}
-
 Ràng buộc bắt buộc:
 - Hypothesis PHẢI có thể implement bằng: OHLCV, vwap, adv20, returns, rsi_14, macd, bb, sma_5/20, ema_10, obv, momentum_3/10
 - KHÔNG đề cập VIX, P/E ratio, earnings, fundamental data ngoài danh sách trên

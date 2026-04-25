@@ -104,7 +104,6 @@ def _append_to_library(sota_alphas: List[Dict],
         entry = {
             "no":          next_no,
             "id":          a.get("id", f"alpha_{next_no}"),
-            "family":      a.get("family", "unknown"),
             "description": a.get("description", ""),
             "expression":  expr,
             "ic_oos":      round(float(ic), 6)  if ic  is not None else None,
@@ -159,11 +158,12 @@ async def persist_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         # Log sota alphas iteration này
         for a in (state.sota_alphas or []):
             ic  = a.get("ic_oos")
+            sharpe = a.get("sharpe_oos")
             ret = a.get("return_oos")
             if ic is not None and ret is not None:
                 log.info(
-                    f"  ✓ [{a.get('family','?')}] {a.get('id','?')} "
-                    f"IC_OOS={ic:+.4f} Return={ret*100:+.1f}%/năm"
+                    f"  ✓ {a.get('id','?')} "
+                    f"IC_OOS={ic:+.4f} Sharpe={sharpe:+.3f} Return={ret*100:+.1f}%/năm"
                 )
 
     except Exception as e:
