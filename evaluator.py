@@ -9,7 +9,6 @@ from typing import Dict, Any, Optional
 
 import alpha_operators as op
 from backtester import (
-    compute_ic_cross_sectional,
     compute_ic_cross_sectional_oos,
     compute_sharpe_oos,
     compute_return_oos,
@@ -180,7 +179,7 @@ def eval_alpha(
         result["error"] = str(e)[:120]
         return result
 
-    ic_is, ic_oos, _, _ = compute_ic_cross_sectional_oos(signal_norm, fwd_ret_multi)
+    ic_is, ic_oos       = compute_ic_cross_sectional_oos(signal_norm, fwd_ret_multi)
     sharpe_oos          = compute_sharpe_oos(signal_norm, fwd_ret_multi)
     ann_return          = compute_return_oos(signal_norm, fwd_ret_multi)
     turnover            = compute_turnover(signal_norm)
@@ -195,7 +194,7 @@ def eval_alpha(
     else:
         reasons = []
         if ic_oos_val < IC_SIGNAL_THRESHOLD:
-            reasons.append(f"IC_OOS={ic_oos_val:+.4f} < {IC_SIGNAL_THRESHOLD} (vùng noise)")
+            reasons.append(f"IC_OOS={ic_oos_val:+.4f} < {IC_SIGNAL_THRESHOLD} (IC dương nhưng yếu)")
         if sharpe_val is None or sharpe_val <= SHARPE_MIN_THRESHOLD:
             sv = 0.0 if sharpe_val is None else sharpe_val
             reasons.append(f"Sharpe_OOS={sv:+.4f} <= {SHARPE_MIN_THRESHOLD}")
@@ -204,19 +203,6 @@ def eval_alpha(
             reasons.append(f"Return_OOS={rv:+.4f} <= {RETURN_MIN_THRESHOLD}")
         status      = "WEAK" if reasons else "OK"
         weak_reason = "; ".join(reasons) if reasons else None
-    
-    # Tính IC-series trên OOS period để dùng cho decorrelation
-    common_dates_all = sorted(signal_norm.index.intersection(fwd_ret_multi.index))
-    split_idx_ic     = int(len(common_dates_all) * (1 - DEFAULT_CONFIG.test_ratio))
-    oos_dates_ic     = common_dates_all[split_idx_ic:]
-
-    if len(oos_dates_ic) >= 20:
-        _, _, ic_series_oos = compute_ic_cross_sectional(
-            signal_norm.loc[oos_dates_ic],
-            fwd_ret_multi.loc[oos_dates_ic],
-        )
-    else:
-        ic_series_oos = pd.Series(dtype=float)
 
     result.update({
         "ic_is":       _r(ic_is,      6),
@@ -226,7 +212,6 @@ def eval_alpha(
         "turnover":    _r(turnover,   4),
         "status":      status,
         "series":      signal_norm,
-        "_ic_series":  ic_series_oos,
     })
 
     if weak_reason is not None:

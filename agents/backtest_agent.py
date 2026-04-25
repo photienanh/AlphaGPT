@@ -119,15 +119,18 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
 
         status = result.get("status", "ERR")
         ic_oos = result.get("ic_oos") or 0.0
+        sharpe_oos = result.get("sharpe_oos") or 0.0
+        return_oos    = result.get("return_oos") or 0.0
         if status == "OK":
             log.info(
                 f"  [OK  ] {result['id']} [{result.get('family','?')}] "
-                f"IC_OOS={ic_oos:+.4f}"
+                f"IC_OOS={ic_oos:+.4f} - Sharpe_OOS={sharpe_oos:+.4f} - Return_OOS={return_oos:+.2%}"
             )
         elif status == "WEAK":
             log.info(
                 f"  [WEAK] {result['id']} [{result.get('family','?')}] "
-                f"IC_OOS={ic_oos:+.4f} — {result.get('weak_reason','')}"
+                f"IC_OOS={ic_oos:+.4f} - Sharpe_OOS={sharpe_oos:+.4f} - Return_OOS={return_oos:+.2%}\n"
+                f"\t\t\tWeak reason: {result.get('weak_reason','')}"
             )
         else:
             log.info(f"  [ERR ] {result['id']} — {result.get('error','')[:60]}")

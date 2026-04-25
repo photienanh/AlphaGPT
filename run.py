@@ -38,7 +38,7 @@ async def generate_trading_idea() -> str:
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.8)
     prompt = f"""Bạn là chuyên gia phân tích định lượng chuyên về thị trường chứng khoán Việt Nam.
 
-Đề xuất MỘT trading idea cực ngắn (3-8 từ) cho thị trường HOSE.
+Đề xuất MỘT trading idea cực ngắn (5-10 từ) cho thị trường HOSE.
 Idea chỉ cần đặt tên một hiện tượng thị trường quan sát được, không giải thích cơ chế.
 Chỉ trả về tên hiện tượng, không thêm gì khác.
 **Lưu ý**: Dữ liệu chỉ có giá (open, high, low, close, vwap), volume, adv20, obv, returns, sma_5, sma_20, ema_10, rsi_14, macd, macd_signal, bb_upper/middle/lower, momentum_3/10.
@@ -84,8 +84,24 @@ def _print_summary(idea: str, state: dict) -> None:
     print(f"KẾT QUẢ ALPHA-GPT")
     print(f"{'='*60}")
     print(f"Trading idea : {idea}")
-    print(f"Hypothesis   : {state.get('hypothesis', 'N/A')}")
-    print(f"Iterations   : {state.get('iteration', 0)}")
+    print(f"Total Iterations : {state.get('iteration', 0)}\n")
+
+    # Duyệt qua lịch sử để in báo cáo của từng vòng
+    history = state.get("hypothesis_history", [])
+    if history:
+        print("--- LỊCH SỬ CÁC VÒNG LẶP ---")
+        for h in history:
+            print(f"\n[Vòng {h.get('iteration', '?')}]")
+            print(f"  Hypothesis: {h.get('hypothesis', 'N/A')}")
+            print(f"  Summary   : {h.get('alpha_summary', 'N/A')}")
+            
+            # Lấy nhận xét của Analyst nếu có
+            analyst_data = h.get('analyst', {})
+            if isinstance(analyst_data, dict):
+                print(f"  Analyst   : {analyst_data.get('overall_assessment', 'N/A')}")
+    else:
+        print(f"Hypothesis   : {state.get('hypothesis', 'N/A')}")
+        print(f"Analyst      : {state.get('analyst_summary', 'N/A')}")
 
     sota = state.get("sota_alphas", [])
     if sota:
@@ -103,8 +119,6 @@ def _print_summary(idea: str, state: dict) -> None:
             )
     else:
         print("\nKhông tìm được alpha nào đạt ngưỡng.")
-
-    print(f"\nAnalyst: {state.get('analyst_summary', 'N/A')}")
 
 
 def main():

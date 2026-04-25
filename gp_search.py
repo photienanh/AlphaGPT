@@ -200,7 +200,7 @@ def _compute_cs_fitness(
         axis=1,
     )
 
-    mean_ic, _, _ = compute_ic_cross_sectional(signal_norm, fwd)
+    mean_ic = compute_ic_cross_sectional(signal_norm, fwd)
     return mean_ic if mean_ic is not None and not (mean_ic != mean_ic) else float("nan")
 
 

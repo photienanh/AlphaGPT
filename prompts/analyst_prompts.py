@@ -9,8 +9,8 @@ Ba metrics chính cần phân tích (theo paper Section 2.3):
 
 Phân tích cần actionable:
 - Alpha OK: tại sao IC cao / Return tốt?
-- Alpha WEAK: không vượt qua 1 hoặc nhiều điều kiện (IC, Sharpe, Return),
-  bao gồm cả trường hợp IC_OOS âm hoặc IC_OOS dương nhưng yếu.
+- Alpha WEAK: không vượt qua 1 hoặc nhiều điều kiện (IC, Sharpe, Return), bao gồm cả trường hợp IC_OOS âm hoặc IC_OOS dương nhưng yếu.
+- NẾU IC_OOS dương NHƯNG Return_OOS âm: Lỗi CHẮC CHẮN nằm ở Turnover quá cao (tín hiệu nhiễu, lướt sóng quá nhiều khiến phí giao dịch ăn hết lợi nhuận). Bạn PHẢI yêu cầu Quant Developer tăng các tham số window (chu kỳ) trong các hàm ts_mean, ts_std, delay lên mức 20, 40, hoặc 60 ngày để làm mượt tín hiệu.
 - Alpha EVAL_ERROR: expression có lỗi syntax hoặc dùng field không tồn tại
 - Turnover cao → chi phí giao dịch ăn vào return thực tế
 - IC_IS >> IC_OOS → overfit

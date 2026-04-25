@@ -8,14 +8,14 @@ from dataclasses import dataclass
 @dataclass
 class PipelineConfig:
     # Backtest
-    ic_signal_threshold: float = 0.03
+    ic_signal_threshold: float = 0.02
     sharpe_min_threshold: float = 0.0
     return_min_threshold: float = 0.0
     test_ratio: float = 0.3
 
     # Sota selection
     min_sota: int = 3
-    min_ic: float = 0.03
+    min_ic: float = 0.02
     min_sharpe: float = 0.2
     min_return: float = 0.0
     max_sota: int = 5

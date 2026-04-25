@@ -40,7 +40,7 @@ def _is_constant_series(s: pd.Series) -> bool:
 def compute_ic_cross_sectional(
     signal_df: pd.DataFrame,
     fwd_ret_df: pd.DataFrame,
-) -> Tuple[float, float, pd.Series]:
+) -> float:
     """
     Tính Spearman IC cross-sectional.
     Tại mỗi ngày t: corr(signal[t, :], fwd_ret[t, :]) across tickers.
@@ -79,17 +79,15 @@ def compute_ic_cross_sectional(
 
     ic_series = pd.Series({d: v for d, v in ic_list}, name="ic")
     mean_ic   = float(ic_series.mean())
-    std_ic    = float(ic_series.std())
-    ic_ir     = mean_ic / (std_ic + 1e-9)
 
-    return mean_ic, ic_ir, ic_series
+    return mean_ic
 
 
 def compute_ic_cross_sectional_oos(
     signal_df: pd.DataFrame,
     fwd_ret_df: pd.DataFrame,
     test_ratio: float = None,
-) -> Tuple[float, float, float, float]:
+) -> Tuple[float, float]:
     """
     Walk-forward cross-sectional IC, tách IS/OOS theo thời gian.
     Returns: (mean_ic_is, mean_ic_oos, ic_ir_is, ic_ir_oos)
@@ -99,20 +97,20 @@ def compute_ic_cross_sectional_oos(
 
     common_dates = sorted(signal_df.index.intersection(fwd_ret_df.index))
     if len(common_dates) < 60:
-        ic, ir, _ = compute_ic_cross_sectional(signal_df, fwd_ret_df)
-        return ic, ic, ir, ir
+        ic = compute_ic_cross_sectional(signal_df, fwd_ret_df)
+        return ic, ic
 
     split_idx   = int(len(common_dates) * (1 - test_ratio))
     train_dates = common_dates[:split_idx]
     test_dates  = common_dates[split_idx:]
 
-    ic_is,  ir_is,  _ = compute_ic_cross_sectional(
+    ic_is = compute_ic_cross_sectional(
         signal_df.loc[train_dates], fwd_ret_df.loc[train_dates]
     )
-    ic_oos, ir_oos, _ = compute_ic_cross_sectional(
+    ic_oos = compute_ic_cross_sectional(
         signal_df.loc[test_dates],  fwd_ret_df.loc[test_dates]
     )
-    return ic_is, ic_oos, ir_is, ir_oos
+    return ic_is, ic_oos
 
 
 # ── Portfolio daily PnL helper ────────────────────────────────────────
