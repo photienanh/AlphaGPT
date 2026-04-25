@@ -3,7 +3,6 @@ validators.py
 Kiểm tra và normalize alpha expressions trước khi exec.
 """
 import re
-import ast
 from typing import Tuple, Set
 
 VALID_FIELDS: Set[str] = {

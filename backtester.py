@@ -161,7 +161,10 @@ def _build_daily_pnl(
             continue
         pos = pos / abs_sum  # normalize: sum(|pos|) = 1
 
-        pnl = float((pos * row_fwd[common_t]).sum())
+        market_ret = row_fwd[common_t].mean()
+        excess_fwd = row_fwd[common_t] - market_ret
+
+        pnl = float((pos * excess_fwd).sum())
         daily_pnl.append(pnl)
 
     return np.array(daily_pnl)
@@ -172,11 +175,13 @@ def _build_daily_pnl(
 def compute_sharpe_oos(
     signal_df: pd.DataFrame,
     fwd_ret_df: pd.DataFrame,
+    cost_per_turnover: float = 0.0015,
     test_ratio: float = None,
 ) -> float:
     """
-    Annualized Sharpe của long-short portfolio trên OOS period.
-    Sharpe = mean(daily_pnl) / std(daily_pnl) * sqrt(252)
+    Sharpe sau khi trừ transaction cost ước tính.
+    cost_per_turnover: chi phí mỗi đơn vị turnover (mặc định 0.15% = 15bps mỗi chiều).
+    Công thức: net_pnl[t] = gross_pnl[t] - cost_per_turnover * turnover[t]
     """
     if test_ratio is None:
         test_ratio = DEFAULT_CONFIG.test_ratio
@@ -188,15 +193,50 @@ def compute_sharpe_oos(
     split_idx  = int(len(common_dates) * (1 - test_ratio))
     test_dates = common_dates[split_idx:]
 
-    arr = _build_daily_pnl(signal_df, fwd_ret_df, test_dates)
+    common_tickers = signal_df.columns.intersection(fwd_ret_df.columns)
+    sig = signal_df[common_tickers]
+    fwd = fwd_ret_df[common_tickers]
+
+    daily_net_pnl = []
+    prev_pos = None
+
+    for date in test_dates:
+        if date not in sig.index or date not in fwd.index:
+            continue
+        row_sig = sig.loc[date].dropna()
+        row_fwd = fwd.loc[date].dropna()
+        common_t = row_sig.index.intersection(row_fwd.index)
+        n = len(common_t)
+        if n < 4:
+            continue
+
+        ranks = row_sig[common_t].rank(ascending=True)
+        pos   = (ranks - (n + 1) / 2) / ((n - 1) / 2 + 1e-9)
+        abs_sum = pos.abs().sum()
+        if abs_sum < 1e-9:
+            continue
+        pos = pos / abs_sum
+
+        gross_pnl = float((pos * row_fwd[common_t]).sum())
+
+        # Turnover = sum(|pos[t] - pos[t-1]|) / 2
+        if prev_pos is not None:
+            prev_aligned = prev_pos.reindex(common_t).fillna(0)
+            turnover = float((pos - prev_aligned).abs().sum()) / 2
+        else:
+            turnover = float(pos.abs().sum()) / 2
+
+        net_pnl = gross_pnl - cost_per_turnover * turnover
+        daily_net_pnl.append(net_pnl)
+        prev_pos = pos
+
+    arr = np.array(daily_net_pnl)
     if len(arr) < 20:
         return np.nan
-
     std = arr.std()
     if std < 1e-9:
         return np.nan
     return float(arr.mean() / std * np.sqrt(252))
-
 
 # ── Return ────────────────────────────────────────────────────────────
 

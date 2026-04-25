@@ -15,12 +15,12 @@ from typing import List, Dict, Optional
 
 log = logging.getLogger(__name__)
 
-KB_DIR     = os.path.dirname(os.path.abspath(__file__))
-INDEX_DIR  = os.path.join(KB_DIR, "faiss_index")
+KNOWLEDGE_DIR     = "data/knowledge_base"
+INDEX_DIR  = os.path.join(KNOWLEDGE_DIR, "faiss_index")
 INDEX_PATH = os.path.join(INDEX_DIR, "alpha_index.faiss")
 META_PATH  = os.path.join(INDEX_DIR, "alpha_meta.json")  # metadata song song với index
 
-LIBRARY_PATH = os.environ.get("ALPHA_LIBRARY_PATH", "alpha_library.json")
+LIBRARY_PATH = os.environ.get("ALPHA_LIBRARY_PATH", "data/alpha_library.json")
 
 _index_cache = None
 _meta_cache: Optional[List[Dict]] = None
@@ -69,7 +69,7 @@ def _collect_all_alphas() -> List[Dict]:
     1. Kakushadze KB (alpha_kb_data.py) — luôn có
     2. alpha_library.json — alpha OK từ các run thực
     """
-    sys.path.insert(0, os.path.dirname(KB_DIR))
+    sys.path.insert(0, os.path.dirname(KNOWLEDGE_DIR))
     from knowledge.alpha_kb_data import ALPHA_KB
     all_alphas = list(ALPHA_KB)
 
@@ -203,7 +203,7 @@ def invalidate_cache():
 
 def load_alpha_kb() -> List[Dict]:
     """Load Kakushadze KB (dùng cho fallback alphas)."""
-    sys.path.insert(0, os.path.dirname(KB_DIR))
+    sys.path.insert(0, os.path.dirname(KNOWLEDGE_DIR))
     from knowledge.alpha_kb_data import ALPHA_KB
     return list(ALPHA_KB)
 

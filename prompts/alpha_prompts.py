@@ -115,7 +115,7 @@ Trả về JSON:
     {{
       "id": "alpha_1",
       "family": "<momentum|mean_reversion|volume|volatility|technical|pattern>",
-      "description": "mô tả ngắn signal này capture gì",
+      "description": "mô tả ngắn signal này",
       "expression": "alpha = <công thức dùng operators và df['field']>"
     }},
     ...

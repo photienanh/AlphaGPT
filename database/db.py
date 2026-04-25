@@ -6,9 +6,9 @@ Schema: hypotheses → alphas → backtest_results
 import sqlite3
 import os
 import json
-from typing import Optional, List, Dict, Any
+from typing import List, Dict, Any
 
-DB_PATH = os.environ.get("ALPHAGPT_DB", "alphagpt.db")
+DB_PATH = os.environ.get("ALPHAGPT_DB", "data/alphagpt.db")
 
 
 def _ensure_columns(conn: sqlite3.Connection, table: str,

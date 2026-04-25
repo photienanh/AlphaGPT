@@ -35,7 +35,7 @@ async def data_injector(state: State, config) -> dict:
     if thread_id in DATA_STORE:
         return {"thread_id": thread_id}
 
-    data_dir = os.environ.get("ALPHAGPT_DATA_DIR", "data")
+    data_dir = os.environ.get("ALPHAGPT_DATA_DIR", "data/market_data")
     if os.path.isdir(data_dir):
         df_panel, ticker_dfs, fwd_ret_multi = load_multi_stock(
             data_dir,

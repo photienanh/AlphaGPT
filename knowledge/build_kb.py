@@ -15,11 +15,11 @@ import logging
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-KB_DIR     = os.path.dirname(os.path.abspath(__file__))
-INDEX_DIR  = os.path.join(KB_DIR, "faiss_index")
-KB_JSON    = os.path.join(KB_DIR, "alpha_kb.json")
+KNOWLEDGE_DIR     = "data/knowledge_base"
+INDEX_DIR  = os.path.join(KNOWLEDGE_DIR, "faiss_index")
+KB_JSON    = os.path.join(KNOWLEDGE_DIR, "alpha_kb.json")
 
-sys.path.insert(0, os.path.dirname(KB_DIR))
+sys.path.insert(0, os.path.dirname(KNOWLEDGE_DIR))
 from knowledge.alpha_kb_data import ALPHA_KB
 
 

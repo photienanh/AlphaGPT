@@ -30,21 +30,25 @@ for _noisy_lib in [
 ]:
     logging.getLogger(_noisy_lib).setLevel(logging.WARNING)
     
-DEFAULT_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+DEFAULT_DATA_DIR = os.path.join(os.path.dirname(__file__), "data/market_data")
 
 
 async def generate_trading_idea() -> str:
     from langchain_openai import ChatOpenAI
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.8)
-    prompt = f"""Bạn là chuyên gia phân tích định lượng chuyên về thị trường chứng khoán Việt Nam.
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.9)
+    prompt = """Bạn là chuyên gia phân tích định lượng thị trường chứng khoán Việt Nam (HOSE).
 
-Đề xuất MỘT trading idea cực ngắn (5-10 từ) cho thị trường HOSE.
-Idea chỉ cần đặt tên một hiện tượng thị trường quan sát được, không giải thích cơ chế.
-Chỉ trả về tên hiện tượng, không thêm gì khác.
-**Lưu ý**: Dữ liệu chỉ có giá (open, high, low, close, vwap), volume, adv20, obv, returns, sma_5, sma_20, ema_10, rsi_14, macd, macd_signal, bb_upper/middle/lower, momentum_3/10.
-Không có dữ liệu khối ngoại, fundamental, earnings, P/E, market cap, news, sentiment.
-Hãy đưa ra trading idea sao cho phù hợp với dữ liệu có sẵn, tránh ý tưởng liên quan đến khối ngoại, fundamental, news, sentiment.
-"""
+Đề xuất MỘT trading idea ngắn gọn (tối đa 10 từ) mô tả một hiện tượng giá/khối lượng quan sát được.
+
+Ràng buộc dữ liệu — chỉ được dùng: open, high, low, close, vwap, volume, adv20, obv, returns, sma_5, sma_20, ema_10, rsi_14, macd, macd_signal, bb_upper/middle/lower, momentum_3/10.
+Không có: khối ngoại, fundamental, earnings, P/E, news, sentiment.
+
+Ví dụ hợp lệ:
+- Bứt phá Bollinger Band kèm khối lượng tăng đột biến
+- RSI phân kỳ với giá trong xu hướng ngắn hạn
+- Đảo chiều sau chuỗi nến doji khối lượng thấp
+
+Chỉ trả về tên idea, không giải thích."""
     response = await llm.ainvoke([{"role": "user", "content": prompt}])
     idea = response.content.strip()
     log.info(f"[Run] Auto-generated idea: {idea}")

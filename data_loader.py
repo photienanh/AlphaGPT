@@ -79,10 +79,6 @@ def _load_single_ticker(raw: pd.DataFrame) -> pd.DataFrame:
     raw = raw.copy()
     raw.columns = [c.lower() for c in raw.columns]
 
-    # Rename volumn -> volume nếu cần
-    if "volumn" in raw.columns and "volume" not in raw.columns:
-        raw = raw.rename(columns={"volumn": "volume"})
-
     raw["time"] = pd.to_datetime(raw["time"]).dt.normalize()
     raw = raw.sort_values("time").set_index("time")
 
@@ -115,10 +111,6 @@ def load_multi_stock(data_dir: str, min_history_days: int = 30) -> Tuple[pd.Data
         try:
             raw = pd.read_csv(fpath)
             raw.columns = [c.lower() for c in raw.columns]
-
-            # Rename volumn -> volume nếu cần
-            if "volumn" in raw.columns and "volume" not in raw.columns:
-                raw = raw.rename(columns={"volumn": "volume"})
 
             # Long format: có cột ticker
             if "ticker" in raw.columns:

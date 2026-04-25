@@ -74,9 +74,7 @@ def _exec_on_ticker(expression: str, df_ticker: pd.DataFrame) -> Optional[pd.Ser
     if not isinstance(series, pd.Series):
         return None
     series = series.replace([np.inf, -np.inf], np.nan)
-    exp_mu  = series.expanding(min_periods=20).mean()
-    exp_std = series.expanding(min_periods=20).std()
-    return ((series - exp_mu) / (exp_std + 1e-9)).clip(-5, 5)
+    return series
 
 
 def eval_alpha(

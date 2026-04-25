@@ -18,7 +18,7 @@ from database.db import get_db
 
 log = logging.getLogger(__name__)
 
-LIBRARY_PATH = os.environ.get("ALPHA_LIBRARY_PATH", "alpha_library.json")
+LIBRARY_PATH = os.environ.get("ALPHA_LIBRARY_PATH", "data/alpha_library.json")
 
 
 def _load_library(path: str) -> List[Dict]:
@@ -54,7 +54,7 @@ def _load_existing_ic_series(library: List[Dict]) -> Dict[str, Any]:
                 pass
     return result
 
-def _append_to_library(sota_alphas: List[Dict], thread_id: str,
+def _append_to_library(sota_alphas: List[Dict],
                        hypothesis: str) -> int:
     library = _load_library(LIBRARY_PATH)
     existing_exprs = {
@@ -110,7 +110,6 @@ def _append_to_library(sota_alphas: List[Dict], thread_id: str,
             "ic_oos":      round(float(ic), 6)  if ic  is not None else None,
             "sharpe_oos":  round(float(a.get("sharpe_oos", 0) or 0), 4),
             "return_oos":  round(float(ret), 4) if ret is not None else None,
-            "thread_id":   thread_id,
             "hypothesis":  hypothesis,
             "saved_at":    datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
@@ -175,7 +174,6 @@ async def persist_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         try:
             added = _append_to_library(
                 state.sota_alphas,
-                thread_id=thread_id,
                 hypothesis=state.hypothesis,
             )
             if added > 0:
