@@ -89,7 +89,6 @@ def eval_alpha(
         "sharpe_oos": None, "return_oos": None,
         "turnover": None,
         "status": "EVAL_ERROR", "series": None,
-        "gp_enhanced": False,
     })
 
     expr = alpha_def.get("expression", "")

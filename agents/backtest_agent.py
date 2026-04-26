@@ -52,39 +52,25 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
             break
 
         s_cand  = cand.get("_series")
-        ic_cand = cand.get("_ic_series")
         corr_ok = True
 
         for sel in selected:
-            s_sel  = sel.get("_series")
-            ic_sel = sel.get("_ic_series")
-
-            # Ưu tiên signal-level correlation (nhạy hơn với alpha gần giống)
-            if s_cand is not None and s_sel is not None:
-                try:
-                    merged = pd.concat(
-                        [s_cand.stack(), s_sel.stack()], axis=1
-                    ).dropna()
-                    if len(merged) >= 50:
-                        cv = abs(merged.iloc[:, 0].corr(
-                            merged.iloc[:, 1], method="spearman"
-                        ))
-                        if cv >= DEFAULT_CONFIG.corr_threshold:
-                            corr_ok = False
-                            break
-                        continue  # signal check đủ độ tin cậy, skip IC-series check
-                except Exception:
-                    pass
-
-            # Fallback: IC-series correlation
-            if (ic_cand is not None and ic_sel is not None
-                    and len(ic_cand) > 0 and len(ic_sel) > 0):
-                merged = pd.concat([ic_cand, ic_sel], axis=1).dropna()
-                if len(merged) >= 20:
-                    cv = abs(merged.iloc[:, 0].corr(merged.iloc[:, 1]))
+            s_sel = sel.get("_series")
+            if s_cand is None or s_sel is None:
+                continue
+            try:
+                merged = pd.concat(
+                    [s_cand.stack(), s_sel.stack()], axis=1
+                ).dropna()
+                if len(merged) >= 50:
+                    cv = abs(merged.iloc[:, 0].corr(
+                        merged.iloc[:, 1], method="spearman"
+                    ))
                     if cv >= DEFAULT_CONFIG.corr_threshold:
                         corr_ok = False
                         break
+            except Exception:
+                pass
 
         if corr_ok:
             selected.append(cand)
@@ -113,8 +99,7 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
         result = eval_alpha(cand, ticker_dfs, fwd_ret_multi, full=True)
         result["id"]          = cand.get("id", "")
         result["description"] = cand.get("description", "")
-        result["_series"]     = result.pop("series", None)
-        expression                   = cand.get("expression", "")
+        expression            = result.get("expression", "")
         evaluated.append(result)
 
         status = result.get("status", "ERR")
@@ -138,8 +123,7 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
     sota = _select_sota(evaluated)
 
     for a in evaluated:
-        a.pop("_series",    None)
-        a.pop("_ic_series", None)
+        a.pop("_series", None)
 
     n_ok   = sum(1 for a in evaluated if a.get("status") == "OK")
     n_weak = sum(1 for a in evaluated if a.get("status") == "WEAK")

@@ -15,9 +15,6 @@ class PipelineConfig:
 
     # Sota selection
     min_sota: int = 3
-    min_ic: float = 0.02
-    min_sharpe: float = 1.0
-    min_return: float = 0.0
     max_sota: int = 5
     corr_threshold: float = 0.55
 

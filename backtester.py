@@ -46,8 +46,6 @@ def compute_ic_cross_sectional(
     Tại mỗi ngày t: corr(signal[t, :], fwd_ret[t, :]) across tickers.
     Returns: (mean_ic, ic_ir, ic_series)
       mean_ic:   E[IC_t]
-      ic_ir:     mean_ic / std_ic  — đo tính ổn định của alpha
-      ic_series: Series IC theo ngày
     """
     common_dates   = signal_df.index.intersection(fwd_ret_df.index)
     common_tickers = signal_df.columns.intersection(fwd_ret_df.columns)
@@ -75,7 +73,7 @@ def compute_ic_cross_sectional(
             ic_list.append((date, ic))
 
     if not ic_list:
-        return np.nan, np.nan, pd.Series(dtype=float)
+        return pd.Series(dtype=float)
 
     ic_series = pd.Series({d: v for d, v in ic_list}, name="ic")
     mean_ic   = float(ic_series.mean())
@@ -270,7 +268,7 @@ def compute_turnover(signal_df: pd.DataFrame) -> float:
 
 # ── Legacy single-stock helpers (GP fast path) ───────────────────────
 
-def compute_ic_single(alpha: pd.Series, fwd_ret: pd.Series) -> float:
+def _compute_ic_single(alpha: pd.Series, fwd_ret: pd.Series) -> float:
     c = pd.concat([alpha, fwd_ret], axis=1).dropna()
     if len(c) < 30:
         return np.nan
@@ -289,9 +287,9 @@ def compute_ic_oos_single(
     merged = pd.concat([alpha, fwd_ret], axis=1).dropna()
     n = len(merged)
     if n < 60:
-        ic = compute_ic_single(merged.iloc[:, 0], merged.iloc[:, 1])
+        ic = _compute_ic_single(merged.iloc[:, 0], merged.iloc[:, 1])
         return ic, ic
     split = int(n * (1 - test_ratio))
     train, test = merged.iloc[:split], merged.iloc[split:]
-    return (compute_ic_single(train.iloc[:, 0], train.iloc[:, 1]),
-            compute_ic_single(test.iloc[:, 0],  test.iloc[:, 1]))
+    return (_compute_ic_single(train.iloc[:, 0], train.iloc[:, 1]),
+            _compute_ic_single(test.iloc[:, 0],  test.iloc[:, 1]))
