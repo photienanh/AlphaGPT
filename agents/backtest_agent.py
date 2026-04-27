@@ -9,7 +9,7 @@ import pandas as pd
 from typing import Any, Dict, List
 from langchain_core.runnables import RunnableConfig
 from state import State
-from evaluator import eval_alpha
+from backtester import eval_alpha
 from validators import normalize_expression
 from config import DEFAULT_CONFIG
 
@@ -119,6 +119,9 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
             log.info(f"  [ERR] {result['id']} — {result.get('error','')[:60]}")
 
     sota = _select_sota(evaluated_alphas)
+    
+    for alpha in evaluated_alphas:
+        alpha.pop("signal", None)
 
     n_ok   = sum(1 for alpha in evaluated_alphas if alpha.get("status") == "OK")
     n_weak = sum(1 for alpha in evaluated_alphas if alpha.get("status") == "WEAK")

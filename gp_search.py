@@ -1,8 +1,7 @@
 """
 gp_search.py
 Lightweight GP enhancement — paper Section 2.2, Alpha Compute Framework.
-Fitness = cross-sectional IC trên sampled universe (~20 tickers).
-Nhất quán với final backtest metric, nhanh hơn full 403 tickers.
+Fitness = cross-sectional IC trên toàn bộ universe.
 """
 import re
 import random
@@ -14,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 from validators import validate_expression, normalize_expression
-from backtester import compute_ic_cross_sectional
+from backtester import compute_ic
 from config import DEFAULT_CONFIG
 
 log = logging.getLogger(__name__)
@@ -29,11 +28,6 @@ OPERATOR_FAMILIES = {
     "extreme":       ["ts_max", "ts_min"],
     "correlation":   ["ts_corr", "ts_cov", "correlation", "covariance"],
 }
-
-# Số tickers sample cho GP fitness — đủ để cross-sectional có ý nghĩa,
-# ít hơn full universe để nhanh
-GP_SAMPLE_SIZE = 30
-
 
 # ── Mutation functions ────────────────────────────────────────────────
 
@@ -200,31 +194,19 @@ def _compute_cs_fitness(
         axis=1,
     )
 
-    mean_ic = compute_ic_cross_sectional(signal_norm, fwd)
+    common_dates = sorted(signal_norm.index.intersection(fwd.index))
+    if not common_dates:
+        return float("nan")
+
+    # GP fitness = IC trên 70% ngày đầu (IC_IS).
+    split_idx = int(len(common_dates) * (1 - DEFAULT_CONFIG.test_ratio))
+    train_dates = common_dates[:split_idx] if split_idx > 0 else common_dates
+
+    mean_ic = compute_ic(
+        signal_norm.loc[train_dates],
+        fwd.loc[train_dates],
+    )
     return mean_ic if mean_ic is not None and not (mean_ic != mean_ic) else float("nan")
-
-
-def _sample_universe(
-    df_by_ticker: Dict[str, pd.DataFrame],
-    forward_return: pd.DataFrame,
-    sample_size: int = GP_SAMPLE_SIZE,
-) -> Tuple[Dict[str, pd.DataFrame], pd.DataFrame]:
-    """
-    Sample ngẫu nhiên sample_size tickers từ universe.
-    Ưu tiên tickers có nhiều dữ liệu hơn.
-    """
-    all_tickers = list(df_by_ticker.keys())
-    if len(all_tickers) <= sample_size:
-        return df_by_ticker, forward_return
-
-    # Sort theo số rows giảm dần, lấy top 2*sample_size rồi random sample
-    sorted_tickers = sorted(all_tickers, key=lambda t: len(df_by_ticker[t]), reverse=True)
-    pool = sorted_tickers[:min(len(sorted_tickers), 2 * sample_size)]
-    sampled = random.sample(pool, sample_size)
-
-    sampled_df_by_ticker = {t: df_by_ticker[t] for t in sampled}
-    sampled_forward_return = forward_return[[t for t in sampled if t in forward_return.columns]]
-    return sampled_df_by_ticker, sampled_forward_return
 
 
 # ── Main GP loop ──────────────────────────────────────────────────────
@@ -243,8 +225,6 @@ def enhance_alpha(
     if n_iterations is None:
         n_iterations = DEFAULT_CONFIG.gp_iterations
 
-    sampled_df_by_ticker, sampled_forward_return = _sample_universe(df_by_ticker, forward_return)
-
     seen_expressions: Set[str] = set()
 
     population = []
@@ -252,9 +232,9 @@ def enhance_alpha(
         expr = seed.get("expression", "")
         if not expr:
             continue
-        ic = _compute_cs_fitness(expr, sampled_df_by_ticker, sampled_forward_return)
+        ic_is = _compute_cs_fitness(expr, df_by_ticker, forward_return)
         entry = deepcopy(seed)
-        entry["_ic"] = ic if (ic == ic) else 0.0
+        entry["ic_is"] = round(float(ic_is), 6) if (ic_is == ic_is) else 0.0
         seen_expressions.add(normalize_expression(expr))
         population.append(entry)
 
@@ -270,7 +250,7 @@ def enhance_alpha(
 
         for _ in range(pop_size):
             tournament = random.sample(population, min(3, len(population)))
-            parent = max(tournament, key=lambda x: x["_ic"])
+            parent = max(tournament, key=lambda x: x.get("ic_is", 0.0))
 
             r = random.random()
             cumul = 0.0
@@ -287,7 +267,7 @@ def enhance_alpha(
                 if others:
                     partner = max(
                         random.sample(others, min(3, len(others))),
-                        key=lambda x: x["_ic"]
+                        key=lambda x: x.get("ic_is", 0.0)
                     )
                     new_expr = crossover(parent["expression"], partner["expression"])
                 else:
@@ -305,22 +285,21 @@ def enhance_alpha(
                 continue
             seen_expressions.add(norm)
 
-            ic = _compute_cs_fitness(new_expr, sampled_df_by_ticker, sampled_forward_return)
-            ic_val = ic if (ic == ic) else 0.0
+            ic_is = _compute_cs_fitness(new_expr, df_by_ticker, forward_return)
 
             new_indiv = deepcopy(parent)
             new_indiv["expression"] = new_expr
-            new_indiv["_ic"] = ic_val
+            new_indiv["ic_is"] = round(float(ic_is), 6)
             candidates.append(new_indiv)
 
         if candidates:
             all_indivs = population + candidates
-            all_indivs.sort(key=lambda x: x["_ic"], reverse=True)
+            all_indivs.sort(key=lambda x: x.get("ic_is", 0.0), reverse=True)
             population = all_indivs[:len(seeds)]
 
     results = []
     for i, indiv in enumerate(population):
-        ic_val = indiv.pop("_ic", 0) or 0
+        ic_val = indiv.get("ic_is", 0) or 0
         if i < len(seeds):
             indiv["id"]          = seeds[i].get("id", indiv.get("id", ""))
             indiv["description"] = seeds[i].get("description", "")

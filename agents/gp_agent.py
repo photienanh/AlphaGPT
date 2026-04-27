@@ -1,14 +1,14 @@
 # agents/gp_agent.py
 """
 GP Enhancement agent — paper Section 2.2, Alpha Compute Framework.
-Fitness = cross-sectional IC trên sampled universe (GP_SAMPLE_SIZE tickers).
+Fitness = cross-sectional IC trên toàn bộ universe.
 Nhất quán với final backtest metric.
 """
 import logging
 from typing import Any, Dict
 from langchain_core.runnables import RunnableConfig
 from state import State
-from gp_search import enhance_alpha, GP_SAMPLE_SIZE
+from gp_search import enhance_alpha
 from config import DEFAULT_CONFIG
 
 log = logging.getLogger(__name__)
@@ -27,12 +27,13 @@ async def gp_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     if not df_by_ticker:
         return {"candidate_alphas": state.seed_alphas}
 
-    n_tickers = len(df_by_ticker)
-    sample_size = min(GP_SAMPLE_SIZE, n_tickers)
+    total_days = len(forward_return.index)
+    train_days = int(total_days * (1 - DEFAULT_CONFIG.test_ratio))
+
     log.info(
         f"[GP] Enhancing {len(state.seed_alphas)} seeds × "
         f"{DEFAULT_CONFIG.gp_iterations} iterations "
-        f"| fitness: cross-sectional IC on {sample_size}/{n_tickers} tickers"
+        f"| fitness: cross-sectional IC on first {train_days}/{total_days} days"
     )
 
     candidates = enhance_alpha(
