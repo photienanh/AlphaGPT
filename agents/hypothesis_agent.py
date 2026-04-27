@@ -58,13 +58,13 @@ async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, An
         for i, h in enumerate(state.hypothesis_history[-3:], 1):
             history_text += f"\nVòng {h.get('iteration', i)}: {h.get('hypothesis', '')}\n"
             if h.get("alpha_summary"):
-                history_text += f"  Kết quả: {h['alpha_summary']}\n"
+                history_text += f"  Kết quả sinh alpha:\n{h['alpha_summary']}\n"
             if h.get("round_summary"):
-                history_text += f"  Nhận xét: {h['round_summary']}\n"
+                history_text += f"  Nhận xét vòng này: {h['round_summary']}\n"
 
         user_prompt = HYPOTHESIS_ITERATION_PROMPT.format(
             hypothesis_history=history_text,
-            analyst_feedback=state.analyst_feedback or "Chưa có feedback.",
+            refinement_directions=state.refinement_directions or "Không có nhận xét cụ thể nào",
             rag_examples=rag_block,
             output_format=HYPOTHESIS_OUTPUT_FORMAT,
         )
@@ -83,11 +83,7 @@ async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, An
     log.info(f"[Hypothesis] Iteration {iteration}: {data.get('hypothesis', '')[:80]}")
 
     return {
-        "hypothesis":             data.get("hypothesis", ""),
-        "reason":                 data.get("reason", ""),
-        "concise_reason":         data.get("concise_reason", ""),
-        "concise_observation":    data.get("concise_observation", ""),
-        "concise_justification":  data.get("concise_justification", ""),
-        "concise_knowledge":      data.get("concise_knowledge", ""),
-        "iteration":              iteration,
+        "hypothesis": data.get("hypothesis", ""),
+        "reason": data.get("reason", ""),
+        "iteration": iteration,
     }

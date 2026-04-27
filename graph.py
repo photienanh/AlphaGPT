@@ -37,22 +37,22 @@ async def data_injector(state: State, config) -> dict:
 
     data_dir = os.environ.get("ALPHAGPT_DATA_DIR", "data/market_data")
     if os.path.isdir(data_dir):
-        df_panel, ticker_dfs, fwd_ret_multi = load_multi_stock(
+        df_all, df_by_ticker, forward_return = load_multi_stock(
             data_dir,
             min_history_days=DEFAULT_CONFIG.min_history_days,
         )
-        if ticker_dfs:
-            log.info(f"[DataInjector] Loaded {len(ticker_dfs)} tickers")
+        if df_by_ticker:
+            log.info(f"[DataInjector] Loaded {len(df_by_ticker)} tickers")
         else:
             log.warning("[DataInjector] Không load được ticker nào, dùng synthetic data")
-            ticker_dfs, fwd_ret_multi = make_sample_data_multi(n_days=500, n_tickers=10)
-            df_panel = pd.DataFrame()
+            df_by_ticker, forward_return = make_sample_data_multi(n_days=500, n_tickers=10)
+            df_all = pd.DataFrame()
     else:
         log.warning("[DataInjector] data_dir không tồn tại, dùng synthetic data")
-        ticker_dfs, fwd_ret_multi = make_sample_data_multi(n_days=500, n_tickers=10)
-        df_panel = pd.DataFrame()
+        df_by_ticker, forward_return = make_sample_data_multi(n_days=500, n_tickers=10)
+        df_all = pd.DataFrame()
 
-    DATA_STORE[thread_id] = (df_panel, ticker_dfs, fwd_ret_multi)
+    DATA_STORE[thread_id] = (df_all, df_by_ticker, forward_return)
     return {"thread_id": thread_id}
 
 

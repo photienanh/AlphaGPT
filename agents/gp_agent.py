@@ -8,7 +8,7 @@ import logging
 from typing import Any, Dict
 from langchain_core.runnables import RunnableConfig
 from state import State
-from gp_search import enhance_population, GP_SAMPLE_SIZE
+from gp_search import enhance_alpha, GP_SAMPLE_SIZE
 from config import DEFAULT_CONFIG
 
 log = logging.getLogger(__name__)
@@ -22,12 +22,12 @@ async def gp_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         log.warning("[GP] No data in DATA_STORE, returning seeds as candidates")
         return {"candidate_alphas": state.seed_alphas}
 
-    _, ticker_dfs, fwd_ret_multi = data
+    _, df_by_ticker, forward_return = data
 
-    if not ticker_dfs:
+    if not df_by_ticker:
         return {"candidate_alphas": state.seed_alphas}
 
-    n_tickers = len(ticker_dfs)
+    n_tickers = len(df_by_ticker)
     sample_size = min(GP_SAMPLE_SIZE, n_tickers)
     log.info(
         f"[GP] Enhancing {len(state.seed_alphas)} seeds × "
@@ -35,16 +35,13 @@ async def gp_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         f"| fitness: cross-sectional IC on {sample_size}/{n_tickers} tickers"
     )
 
-    candidates = enhance_population(
+    candidates = enhance_alpha(
         state.seed_alphas,
-        ticker_dfs,
-        fwd_ret_multi,
+        df_by_ticker,
+        forward_return,
         n_iterations=DEFAULT_CONFIG.gp_iterations,
     )
 
     log.info(f"[GP] Done: produced {len(candidates)} candidates")
-
-    for c in candidates:
-        c.pop("series", None)
 
     return {"candidate_alphas": candidates}

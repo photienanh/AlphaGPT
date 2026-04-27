@@ -30,10 +30,6 @@ def init_db(db_path: str = DB_PATH) -> None:
             trading_idea TEXT NOT NULL,
             hypothesis  TEXT NOT NULL,
             reason      TEXT,
-            concise_reason TEXT,
-            concise_observation TEXT,
-            concise_justification TEXT,
-            concise_knowledge TEXT,
             iteration   INTEGER DEFAULT 0,
             created_at  TEXT DEFAULT (datetime('now'))
         );
@@ -102,19 +98,13 @@ class AlphaGPTDB:
         with self._conn() as conn:
             cur = conn.execute("""
                 INSERT INTO hypotheses
-                    (thread_id, trading_idea, hypothesis, reason,
-                     concise_reason, concise_observation,
-                     concise_justification, concise_knowledge, iteration)
-                VALUES (?,?,?,?,?,?,?,?,?)
+                    (thread_id, trading_idea, hypothesis, reason, iteration)
+                VALUES (?,?,?,?,?)
             """, (
                 thread_id,
                 state_data.get("trading_idea", ""),
                 state_data.get("hypothesis", ""),
                 state_data.get("reason", ""),
-                state_data.get("concise_reason", ""),
-                state_data.get("concise_observation", ""),
-                state_data.get("concise_justification", ""),
-                state_data.get("concise_knowledge", ""),
                 state_data.get("iteration", 0),
             ))
             return cur.lastrowid

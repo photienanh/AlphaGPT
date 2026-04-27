@@ -52,7 +52,7 @@ def mutate_window(expr: str) -> str:
 
 
 def mutate_operator(expr: str) -> str:
-    for fam, ops in OPERATOR_FAMILIES.items():
+    for _, ops in OPERATOR_FAMILIES.items():
         for op_name in ops:
             if op_name + "(" in expr:
                 peers = [p for p in ops if p != op_name]
@@ -151,8 +151,8 @@ def crossover(expr_a: str, expr_b: str) -> str:
 
 def _compute_cs_fitness(
     expression: str,
-    ticker_dfs: Dict[str, pd.DataFrame],
-    fwd_ret_multi: pd.DataFrame,
+    df_by_ticker: Dict[str, pd.DataFrame],
+    forward_return: pd.DataFrame,
 ) -> float:
     """
     Tính cross-sectional IC trên sampled universe.
@@ -177,7 +177,7 @@ def _compute_cs_fitness(
         return ((series - mu) / (std + 1e-9)).clip(-5, 5)
 
     signal_parts = {}
-    for ticker, df_t in ticker_dfs.items():
+    for ticker, df_t in df_by_ticker.items():
         try:
             norm = _exec_ticker(expression, df_t)
             if norm is not None and norm.dropna().std() > 1e-9:
@@ -191,7 +191,7 @@ def _compute_cs_fitness(
     signal_df = pd.DataFrame(signal_parts)
     signal_df.index = pd.to_datetime(signal_df.index)
 
-    fwd = fwd_ret_multi.copy()
+    fwd = forward_return.copy()
     fwd.index = pd.to_datetime(fwd.index)
 
     # Cross-sectional normalize mỗi ngày
@@ -205,129 +205,34 @@ def _compute_cs_fitness(
 
 
 def _sample_universe(
-    ticker_dfs: Dict[str, pd.DataFrame],
-    fwd_ret_multi: pd.DataFrame,
+    df_by_ticker: Dict[str, pd.DataFrame],
+    forward_return: pd.DataFrame,
     sample_size: int = GP_SAMPLE_SIZE,
 ) -> Tuple[Dict[str, pd.DataFrame], pd.DataFrame]:
     """
     Sample ngẫu nhiên sample_size tickers từ universe.
     Ưu tiên tickers có nhiều dữ liệu hơn.
     """
-    all_tickers = list(ticker_dfs.keys())
+    all_tickers = list(df_by_ticker.keys())
     if len(all_tickers) <= sample_size:
-        return ticker_dfs, fwd_ret_multi
+        return df_by_ticker, forward_return
 
     # Sort theo số rows giảm dần, lấy top 2*sample_size rồi random sample
-    sorted_tickers = sorted(all_tickers, key=lambda t: len(ticker_dfs[t]), reverse=True)
+    sorted_tickers = sorted(all_tickers, key=lambda t: len(df_by_ticker[t]), reverse=True)
     pool = sorted_tickers[:min(len(sorted_tickers), 2 * sample_size)]
     sampled = random.sample(pool, sample_size)
 
-    sampled_dfs = {t: ticker_dfs[t] for t in sampled}
-    sampled_fwd = fwd_ret_multi[[t for t in sampled if t in fwd_ret_multi.columns]]
-    return sampled_dfs, sampled_fwd
+    sampled_df_by_ticker = {t: df_by_ticker[t] for t in sampled}
+    sampled_forward_return = forward_return[[t for t in sampled if t in forward_return.columns]]
+    return sampled_df_by_ticker, sampled_forward_return
 
 
 # ── Main GP loop ──────────────────────────────────────────────────────
 
 def enhance_alpha(
-    seed: Dict[str, Any],
-    ticker_dfs: Dict[str, pd.DataFrame],
-    fwd_ret_multi: pd.DataFrame,
-    n_iterations: int = None,
-    population_size: int = None,
-    seen_expressions: Set[str] = None,
-) -> Dict[str, Any]:
-    """
-    GP enhancement cho một seed alpha.
-    Fitness = cross-sectional IC trên sampled universe.
-    """
-    if n_iterations is None:
-        n_iterations = DEFAULT_CONFIG.gp_iterations
-    if population_size is None:
-        population_size = DEFAULT_CONFIG.population_size
-    if seen_expressions is None:
-        seen_expressions = set()
-
-    expr = seed.get("expression", "")
-    if not expr:
-        return seed
-
-    # Sample universe cho toàn bộ GP run của seed này
-    sampled_dfs, sampled_fwd = _sample_universe(ticker_dfs, fwd_ret_multi)
-
-    best_ic   = _compute_cs_fitness(expr, sampled_dfs, sampled_fwd)
-    best_expr = expr
-    seen_expressions.add(normalize_expression(expr))
-
-    # Seed không có signal hợp lệ trên sampled universe
-    if best_ic != best_ic:  # isnan
-        best_ic = 0.0
-
-    log.debug(
-        f"[GP] Seed {seed.get('id','?')} "
-        f"baseline IC={best_ic:+.4f} "
-        f"({len(sampled_dfs)} tickers sampled)"
-    )
-
-    best_result = deepcopy(seed)
-    best_result["ic_is"] = round(float(best_ic), 6) if best_ic == best_ic else None
-
-    mutation_fns = [
-        mutate_window,
-        mutate_operator,
-        mutate_wrap_normalize,
-        lambda e: crossover(e, best_expr),
-    ]
-    probs = [0.50, 0.25, 0.15, 0.10]
-
-    for iteration in range(n_iterations):
-        mutants = []
-        for _ in range(population_size):
-            r = random.random()
-            cumul = 0.0
-            chosen_fn = mutation_fns[0]
-            for prob, fn in zip(probs, mutation_fns):
-                cumul += prob
-                if r < cumul:
-                    chosen_fn = fn
-                    break
-            # crossover closure cần capture best_expr tại thời điểm hiện tại
-            if chosen_fn is mutation_fns[3]:
-                new_expr = crossover(best_expr, best_expr)
-            else:
-                new_expr = chosen_fn(best_expr)
-            if not new_expr:
-                continue
-            is_valid, _ = validate_expression(new_expr)
-            if not is_valid:
-                continue
-            norm_expr = normalize_expression(new_expr)
-            if norm_expr in seen_expressions:
-                continue
-            seen_expressions.add(norm_expr)
-            mutants.append(new_expr)
-
-        improved = False
-        for mut_expr in mutants:
-            ic = _compute_cs_fitness(mut_expr, sampled_dfs, sampled_fwd)
-            if ic == ic and ic > best_ic:  # ic không phải NaN và tốt hơn
-                best_ic   = ic
-                best_expr = mut_expr
-                improved  = True
-
-        if improved:
-            log.debug(f"[GP] iter {iteration+1}: IC improved to {best_ic:+.4f}")
-
-    best_result["expression"] = best_expr
-    best_result["ic_is"]      = round(float(best_ic), 6) if best_ic == best_ic else None
-    best_result["status"]     = "OK" if (best_ic == best_ic and best_ic > 0) else "WEAK"
-    return best_result
-
-
-def enhance_population(
     seeds: List[Dict[str, Any]],
-    ticker_dfs: Dict[str, pd.DataFrame],
-    fwd_ret_multi: pd.DataFrame,
+    df_by_ticker: Dict[str, pd.DataFrame],
+    forward_return: pd.DataFrame,
     n_iterations: int = None,
 ) -> List[Dict[str, Any]]:
     """
@@ -338,7 +243,7 @@ def enhance_population(
     if n_iterations is None:
         n_iterations = DEFAULT_CONFIG.gp_iterations
 
-    sampled_dfs, sampled_fwd = _sample_universe(ticker_dfs, fwd_ret_multi)
+    sampled_df_by_ticker, sampled_forward_return = _sample_universe(df_by_ticker, forward_return)
 
     seen_expressions: Set[str] = set()
 
@@ -347,7 +252,7 @@ def enhance_population(
         expr = seed.get("expression", "")
         if not expr:
             continue
-        ic = _compute_cs_fitness(expr, sampled_dfs, sampled_fwd)
+        ic = _compute_cs_fitness(expr, sampled_df_by_ticker, sampled_forward_return)
         entry = deepcopy(seed)
         entry["_ic"] = ic if (ic == ic) else 0.0
         seen_expressions.add(normalize_expression(expr))
@@ -359,7 +264,7 @@ def enhance_population(
     mutation_fns = [mutate_window, mutate_operator, mutate_wrap_normalize]
     mutation_probs = [0.50, 0.25, 0.15]
 
-    for iteration in range(n_iterations):
+    for _ in range(n_iterations):
         candidates = []
         pop_size = max(DEFAULT_CONFIG.population_size, len(population))
 
@@ -400,7 +305,7 @@ def enhance_population(
                 continue
             seen_expressions.add(norm)
 
-            ic = _compute_cs_fitness(new_expr, sampled_dfs, sampled_fwd)
+            ic = _compute_cs_fitness(new_expr, sampled_df_by_ticker, sampled_forward_return)
             ic_val = ic if (ic == ic) else 0.0
 
             new_indiv = deepcopy(parent)
@@ -415,12 +320,11 @@ def enhance_population(
 
     results = []
     for i, indiv in enumerate(population):
-        indiv.pop("_ic", None)
+        ic_val = indiv.pop("_ic", 0) or 0
         if i < len(seeds):
             indiv["id"]          = seeds[i].get("id", indiv.get("id", ""))
             indiv["description"] = seeds[i].get("description", "")
-            indiv["family"]      = seeds[i].get("family", "")
-        indiv["status"] = "OK" if (indiv.get("ic_is") or 0) > 0 else "WEAK"
+        indiv["status"] = "OK" if ic_val > 0 else "WEAK"
         results.append(indiv)
 
     return results

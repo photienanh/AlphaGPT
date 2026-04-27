@@ -38,8 +38,8 @@ def _is_constant_series(s: pd.Series) -> bool:
 # ── Cross-sectional IC ────────────────────────────────────────────────
 
 def compute_ic_cross_sectional(
-    signal_df: pd.DataFrame,
-    fwd_ret_df: pd.DataFrame,
+    signal_all: pd.DataFrame,
+    forward_return: pd.DataFrame,
 ) -> float:
     """
     Tính Spearman IC cross-sectional.
@@ -47,11 +47,11 @@ def compute_ic_cross_sectional(
     Returns: (mean_ic, ic_ir, ic_series)
       mean_ic:   E[IC_t]
     """
-    common_dates   = signal_df.index.intersection(fwd_ret_df.index)
-    common_tickers = signal_df.columns.intersection(fwd_ret_df.columns)
+    common_dates   = signal_all.index.intersection(forward_return.index)
+    common_tickers = signal_all.columns.intersection(forward_return.columns)
 
-    sig = signal_df.loc[common_dates, common_tickers]
-    fwd = fwd_ret_df.loc[common_dates, common_tickers]
+    sig = signal_all.loc[common_dates, common_tickers]
+    fwd = forward_return.loc[common_dates, common_tickers]
 
     # Adaptive min_tickers: 30% universe, floor tại 10
     n_universe = len(common_tickers)
@@ -82,20 +82,20 @@ def compute_ic_cross_sectional(
 
 
 def compute_ic_cross_sectional_oos(
-    signal_df: pd.DataFrame,
-    fwd_ret_df: pd.DataFrame,
+    signal_all: pd.DataFrame,
+    forward_return: pd.DataFrame,
     test_ratio: float = None,
 ) -> Tuple[float, float]:
     """
     Walk-forward cross-sectional IC, tách IS/OOS theo thời gian.
-    Returns: (mean_ic_is, mean_ic_oos, ic_ir_is, ic_ir_oos)
+    Returns: (mean_ic_is, mean_ic_oos)
     """
     if test_ratio is None:
         test_ratio = DEFAULT_CONFIG.test_ratio
 
-    common_dates = sorted(signal_df.index.intersection(fwd_ret_df.index))
+    common_dates = sorted(signal_all.index.intersection(forward_return.index))
     if len(common_dates) < 60:
-        ic = compute_ic_cross_sectional(signal_df, fwd_ret_df)
+        ic = compute_ic_cross_sectional(signal_all, forward_return)
         return ic, ic
 
     split_idx   = int(len(common_dates) * (1 - test_ratio))
@@ -103,10 +103,10 @@ def compute_ic_cross_sectional_oos(
     test_dates  = common_dates[split_idx:]
 
     ic_is = compute_ic_cross_sectional(
-        signal_df.loc[train_dates], fwd_ret_df.loc[train_dates]
+        signal_all.loc[train_dates], forward_return.loc[train_dates]
     )
     ic_oos = compute_ic_cross_sectional(
-        signal_df.loc[test_dates],  fwd_ret_df.loc[test_dates]
+        signal_all.loc[test_dates],  forward_return.loc[test_dates]
     )
     return ic_is, ic_oos
 
@@ -114,8 +114,8 @@ def compute_ic_cross_sectional_oos(
 # ── Portfolio daily PnL helper ────────────────────────────────────────
 
 def _build_daily_pnl(
-    signal_df: pd.DataFrame,
-    fwd_ret_df: pd.DataFrame,
+    signal_all: pd.DataFrame,
+    forward_return: pd.DataFrame,
     test_dates: list,
     cost_per_turnover: float = 0.0015,
 ) -> np.ndarray:
@@ -136,9 +136,9 @@ def _build_daily_pnl(
       - Signal mạnh → position lớn, signal yếu → position nhỏ
       - Liên tục, không bị mất thông tin như binary +1/-1
     """
-    common_tickers = signal_df.columns.intersection(fwd_ret_df.columns)
-    sig = signal_df[common_tickers]
-    fwd = fwd_ret_df[common_tickers]
+    common_tickers = signal_all.columns.intersection(forward_return.columns)
+    sig = signal_all[common_tickers]
+    fwd = forward_return[common_tickers]
 
     daily_pnl = []
     prev_pos = None
@@ -179,8 +179,8 @@ def _build_daily_pnl(
 # ── Sharpe ratio ──────────────────────────────────────────────────────
 
 def compute_sharpe_oos(
-    signal_df: pd.DataFrame,
-    fwd_ret_df: pd.DataFrame,
+    signal_all: pd.DataFrame,
+    forward_return: pd.DataFrame,
     cost_per_turnover: float = 0.0015,
     test_ratio: float = None,
 ) -> float:
@@ -192,16 +192,16 @@ def compute_sharpe_oos(
     if test_ratio is None:
         test_ratio = DEFAULT_CONFIG.test_ratio
 
-    common_dates = sorted(signal_df.index.intersection(fwd_ret_df.index))
+    common_dates = sorted(signal_all.index.intersection(forward_return.index))
     if len(common_dates) < 60:
         return np.nan
 
     split_idx  = int(len(common_dates) * (1 - test_ratio))
     test_dates = common_dates[split_idx:]
 
-    common_tickers = signal_df.columns.intersection(fwd_ret_df.columns)
-    sig = signal_df[common_tickers]
-    fwd = fwd_ret_df[common_tickers]
+    common_tickers = signal_all.columns.intersection(forward_return.columns)
+    sig = signal_all[common_tickers]
+    fwd = forward_return[common_tickers]
 
     daily_net_pnl = _build_daily_pnl(sig, fwd, test_dates, cost_per_turnover)
 
@@ -216,8 +216,8 @@ def compute_sharpe_oos(
 # ── Return ────────────────────────────────────────────────────────────
 
 def compute_return_oos(
-    signal_df: pd.DataFrame,
-    fwd_ret_df: pd.DataFrame,
+    signal_all: pd.DataFrame,
+    forward_return: pd.DataFrame,
     test_ratio: float = None,
 ) -> float:
     """
@@ -232,14 +232,14 @@ def compute_return_oos(
     if test_ratio is None:
         test_ratio = DEFAULT_CONFIG.test_ratio
 
-    common_dates = sorted(signal_df.index.intersection(fwd_ret_df.index))
+    common_dates = sorted(signal_all.index.intersection(forward_return.index))
     if len(common_dates) < 60:
         return np.nan
 
     split_idx  = int(len(common_dates) * (1 - test_ratio))
     test_dates = common_dates[split_idx:]
 
-    arr = _build_daily_pnl(signal_df, fwd_ret_df, test_dates)
+    arr = _build_daily_pnl(signal_all, forward_return, test_dates)
     if len(arr) < 20:
         return np.nan
 
@@ -256,40 +256,11 @@ def compute_return_oos(
 
 # ── Turnover ──────────────────────────────────────────────────────────
 
-def compute_turnover(signal_df: pd.DataFrame) -> float:
+def compute_turnover(signal_al: pd.DataFrame) -> float:
     """
     Tốc độ thay đổi signal — proxy cho transaction costs.
     Turnover = mean(|signal[t] - signal[t-1]|) / mean(|signal[t]|)
     """
-    diffs = signal_df.diff().abs().mean(axis=1)
-    scale = signal_df.abs().mean(axis=1)
+    diffs = signal_al.diff().abs().mean(axis=1)
+    scale = signal_al.abs().mean(axis=1)
     return float((diffs / (scale + 1e-9)).mean())
-
-
-# ── Legacy single-stock helpers (GP fast path) ───────────────────────
-
-def _compute_ic_single(alpha: pd.Series, fwd_ret: pd.Series) -> float:
-    c = pd.concat([alpha, fwd_ret], axis=1).dropna()
-    if len(c) < 30:
-        return np.nan
-    if _is_constant_series(c.iloc[:, 0]) or _is_constant_series(c.iloc[:, 1]):
-        return np.nan
-    return float(c.iloc[:, 0].corr(c.iloc[:, 1], method="spearman"))
-
-
-def compute_ic_oos_single(
-    alpha: pd.Series,
-    fwd_ret: pd.Series,
-    test_ratio: float = None,
-) -> Tuple[float, float]:
-    if test_ratio is None:
-        test_ratio = DEFAULT_CONFIG.test_ratio
-    merged = pd.concat([alpha, fwd_ret], axis=1).dropna()
-    n = len(merged)
-    if n < 60:
-        ic = _compute_ic_single(merged.iloc[:, 0], merged.iloc[:, 1])
-        return ic, ic
-    split = int(n * (1 - test_ratio))
-    train, test = merged.iloc[:split], merged.iloc[split:]
-    return (_compute_ic_single(train.iloc[:, 0], train.iloc[:, 1]),
-            _compute_ic_single(test.iloc[:, 0],  test.iloc[:, 1]))

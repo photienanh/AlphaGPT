@@ -24,12 +24,7 @@ ANALYST_PROMPT = """
 ## Kết quả Alpha — Vòng {round_num}
 
 {alpha_results}
-
-Tóm tắt:
-- OK: {n_ok}/{n_total}  |  WEAK: {n_weak}/{n_total}  |  ERR: {n_err}/{n_total}
-- Avg IC_OOS: {avg_ic_oos:.4f}
-- Avg Sharpe_OOS: {avg_sharpe:.3f}
-- Avg Return_OOS: {avg_return:+.1f}%/năm
+Chất lượng Alpha:  OK: {n_ok}/{n_total}  |  WEAK: {n_weak}/{n_total}  |  ERR: {n_err}/{n_total}
 
 Lưu ý: WEAK bao gồm cả trường hợp IC_OOS ≤ 0 hoặc không đạt ngưỡng Sharpe/Return.
 KHÔNG đảo chiều signal máy móc — phân tích lý do và đề xuất viết lại.
@@ -37,22 +32,19 @@ KHÔNG đảo chiều signal máy móc — phân tích lý do và đề xuất v
 Trả về JSON:
 {{
   "overall_assessment": "2-3 câu đánh giá tổng quan bao gồm return thực tế",
-  "market_behavior": "momentum/mean_reversion/mixed + lý do từ IC và Return",
   "alpha_analyses": [
     {{
       "alpha_id": "...",
-      "status": "ok/weak/error",
-      "explanation": "tại sao IC/Return cao hoặc tại sao sai chiều"
+      "status": "OK/WEAK/ERROR",
+      "explanation": "tại sao IC/Sharpe/Return tốt hoặc tại sao yếu/sai chiều"
     }}
   ],
   "weak_alpha_ids": ["id chính xác của alpha cần thay thế — WEAK và ERR"],
-  "weak_diagnosis": "giải thích tại sao các alpha WEAK bị sai chiều",
   "refinement_directions": [
-    "direction cụ thể 1 dựa trên IC và Return đã thấy",
-    "direction cụ thể 2",
-    "direction cụ thể 3"
+    "Định hướng cải thiện cụ thể 1 dựa trên IC, Sharpe, Return đã thấy",
+    "Định hướng cải thiện cụ thể 2",
+    "Định hướng cải thiện cụ thể 3"
   ],
-  "polisher_feedback": "3-5 câu feedback cho generator: đề cập Return thực tế, hướng cải thiện cụ thể",
-  "round_summary": "1 câu nhận định chính: điểm mạnh/yếu nổi bật nhất của vòng này và hướng cần cải thiện"
+  "round_summary": "1 câu nhận định chính: điểm mạnh/yếu của vòng này và hướng cần cải thiện"
 }}
 """

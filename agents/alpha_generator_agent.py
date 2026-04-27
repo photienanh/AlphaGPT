@@ -94,9 +94,9 @@ async def alpha_generator_agent(state: State, config: RunnableConfig) -> Dict[st
 
         prompt = ALPHA_ITERATION_PROMPT.format(
             hypothesis=state.hypothesis,
-            analyst_feedback=state.analyst_feedback or "",
             weak_alphas=weak_text,
             good_alphas=good_text,
+            refinement_directions=state.refinement_directions or "",
             num_factors=num_to_generate,
             data_fields=DATA_FIELDS_BLOCK,
             operators=OPERATOR_SIGNATURES,
@@ -121,7 +121,7 @@ async def alpha_generator_agent(state: State, config: RunnableConfig) -> Dict[st
 
     # Force unique ID theo iteration để tránh trùng ID giữa các round
     # state.iteration đã được hypothesis_agent cập nhật trước đó
-    iter_prefix = f"r{state.iteration}"
+    iter_prefix = f"thr:{state.thread_id}_r{state.iteration}"
     for i, a in enumerate(alphas):
         raw_id = a.get("id", f"alpha_{i+1}")
         if not raw_id.startswith(iter_prefix):

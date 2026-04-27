@@ -1,11 +1,10 @@
 # state.py
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 
 @dataclass
 class State:
-    """State cho Alpha-GPT pipeline theo paper (Section 2, 3.1, 4)."""
 
     # ── Input ────────────────────────────────────────────────────────
     trading_idea: str = ""
@@ -13,10 +12,6 @@ class State:
     # ── Hypothesis (Ideation stage) ──────────────────────────────────
     hypothesis: str = ""
     reason: str = ""
-    concise_reason: str = ""
-    concise_observation: str = ""
-    concise_justification: str = ""
-    concise_knowledge: str = ""
     iteration: int = 0
 
     # ── Implementation stage ─────────────────────────────────────────
@@ -27,7 +22,7 @@ class State:
     evaluated_alphas: List[Dict[str, Any]] = field(default_factory=list)
     sota_alphas: List[Dict[str, Any]] = field(default_factory=list)
     analyst_summary: str = ""
-    analyst_feedback: str = ""
+    refinement_directions: str = ""
     analyst_weak_ids: List[str] = field(default_factory=list)
 
     # ── Loop control ─────────────────────────────────────────────────

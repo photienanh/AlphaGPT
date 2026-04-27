@@ -93,10 +93,6 @@ async def persist_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
             "trading_idea":          state.trading_idea,
             "hypothesis":            state.hypothesis,
             "reason":                state.reason,
-            "concise_reason":        state.concise_reason,
-            "concise_observation":   state.concise_observation,
-            "concise_justification": state.concise_justification,
-            "concise_knowledge":     state.concise_knowledge,
             "iteration":             state.iteration,
         })
 

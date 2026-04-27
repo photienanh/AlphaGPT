@@ -91,10 +91,6 @@ Nguyên tắc bắt buộc:
 7. ts_zscore_scale(s, w) LUÔN cần đúng 2 args
 8. Field names phải lowercase: df['close'] không phải df['Close']
 
-Ví dụ expression hợp lệ:
-  alpha = ts_zscore_scale(neg(ts_corr(rank(df['volume']), rank(df['vwap']), 5)), 20)
-  alpha = tanh(minus(rank(df['vwap']), ts_rank(df['close'], 10)))
-
 Phản hồi BẮT BUỘC là JSON hợp lệ."""
 
 ALPHA_INITIAL_PROMPT = """
@@ -125,14 +121,14 @@ Trả về JSON:
 ALPHA_ITERATION_PROMPT = """
 Hypothesis: {hypothesis}
 
-Analyst feedback từ vòng trước:
-{analyst_feedback}
-
 Alphas yếu cần thay thế:
 {weak_alphas}
 
 Alphas tốt đang giữ (tránh trùng lặp):
 {good_alphas}
+
+Định hướng cải thiện từ analyst:
+{refinement_directions}
 
 {rag_examples}
 

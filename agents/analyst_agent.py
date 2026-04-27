@@ -37,37 +37,37 @@ def _classify_eval_error(err: str) -> str:
 async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
 
-    ok_alphas   = [a for a in state.evaluated_alphas if a.get("status") == "OK"]
-    weak_alphas = [a for a in state.evaluated_alphas if a.get("status") == "WEAK"]
-    err_alphas  = [a for a in state.evaluated_alphas if a.get("status") == "EVAL_ERROR"]
-
-    avg_ic_oos = (np.mean([abs(a.get("ic_oos") or 0) for a in ok_alphas]) if ok_alphas else 0.0)
-    avg_sharpe = (np.mean([a.get("sharpe_oos") or 0 for a in ok_alphas]) if ok_alphas else 0.0)
-    avg_return = (np.mean([a.get("return_oos") or 0 for a in ok_alphas]) if ok_alphas else 0.0)
+    ok_alphas   = [alpha for alpha in state.evaluated_alphas if alpha.get("status") == "OK"]
+    weak_alphas = [alpha for alpha in state.evaluated_alphas if alpha.get("status") == "WEAK"]
+    err_alphas  = [alpha for alpha in state.evaluated_alphas if alpha.get("status") == "EVAL_ERROR"]
 
     results_text = []
-    for a in ok_alphas:
-        ret_str = (f"{a.get('return_oos', 0)*100:+.1f}%" if a.get("return_oos") is not None else "N/A")
+    for alpha in ok_alphas:
+        return_str = (f"{alpha.get('return_oos', 0)*100:+.1f}%" if alpha.get("return_oos") is not None else "N/A")
         results_text.append(
-            f"- {a['id']} status=OK\n"
-            f"  IC_IS={a.get('ic_is',0):+.4f}  IC_OOS={a.get('ic_oos',0):+.4f}  "
-            f"Sharpe={a.get('sharpe_oos',0):+.3f}  Return={ret_str}  "
-            f"Turnover={a.get('turnover',0):.3f}\n"
-            f"  {a.get('description','')[:80]}"
+            f"- {alpha['id']} status=OK\n"
+            f"  IC_IS={alpha.get('ic_is',0):+.4f}  IC_OOS={alpha.get('ic_oos',0):+.4f}  "
+            f"Sharpe={alpha.get('sharpe_oos',0):+.3f}  Return={return_str}  "
+            f"Turnover={alpha.get('turnover',0):.3f}\n"
+            f"  {alpha.get('description','')[:80]}"
         )
-    for a in weak_alphas:
+    for alpha in weak_alphas:
+        return_str = (f"{alpha.get('return_oos', 0)*100:+.1f}%" if alpha.get("return_oos") is not None else "N/A")
         results_text.append(
-            f"- {a['id']} status=WEAK\n"
-            f"  IC_OOS={a.get('ic_oos', 0):+.4f} — {a.get('weak_reason', '')}\n"
-            f"  expression: {a.get('expression', '')[:80]}"
+            f"- {alpha['id']} status=WEAK\n"
+            f"  IC_OOS={alpha.get('ic_oos', 0):+.4f}  "
+            f"Sharpe={alpha.get('sharpe_oos',0):+.3f}  Return={return_str}  "
+            f"Turnover={alpha.get('turnover',0):.3f}\n"
+            f"  Weak Reason: {alpha.get('weak_reason', '')}\n"
+            f"  expression: {alpha.get('expression', '')[:80]}"
         )
-    for a in err_alphas:
-        results_text.append(f"- {a['id']} [EVAL_ERROR]: {a.get('error', '')[:60]}")
+    for alpha in err_alphas:
+        results_text.append(f"- {alpha['id']} [EVAL_ERROR]: {alpha.get('error', '')[:60]}")
 
     error_groups = {}
-    for a in err_alphas:
-        category = _classify_eval_error(a.get("error", ""))
-        error_groups.setdefault(category, []).append(a.get("id", "?"))
+    for alpha in err_alphas:
+        category = _classify_eval_error(alpha.get("error", ""))
+        error_groups.setdefault(category, []).append(alpha.get("id", "?"))
     if error_groups:
         diag_lines = [f"- {cat}: {', '.join(ids)}" for cat, ids in sorted(error_groups.items())]
         results_text.append(
@@ -81,9 +81,6 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         n_weak=len(weak_alphas),
         n_err=len(err_alphas),
         n_total=len(state.evaluated_alphas),
-        avg_ic_oos=avg_ic_oos,
-        avg_sharpe=avg_sharpe,
-        avg_return=avg_return * 100,
     )
 
     try:
@@ -99,7 +96,6 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
         log.warning(f"[Analyst] LLM failed: {e}")
         data = {
             "overall_assessment": "Analysis unavailable",
-            "market_behavior": "unknown",
             "alpha_analyses": [],
             "weak_alpha_ids": [a["id"] for a in weak_alphas + err_alphas],
             "refinement_directions": [],
@@ -107,39 +103,55 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
             "round_summary": f"Round {state.iteration} completed",
         }
 
-    summary = data.get("round_summary", "")
-    log.info(f"[Analyst Summary] Round {state.iteration}: {summary}")
+    round_summary = data.get("round_summary", "")
+    weak_ids = data.get("weak_alpha_ids", [])
+    data.pop("weak_alpha_ids", None)
+    log.info(f"[Analyst Summary] Round {state.iteration}: {round_summary}")
+
+    alpha_summary = ""
+    for alpha in data.get("alpha_analyses", []):
+        alpha_summary += f"Alpha id: {alpha.get('alpha_id', '?')}: {alpha.get('status', '?')} - Phân tích: {alpha.get('explanation', '')}\n"
+
+    refinement_directions = ""
+    for direction in data.get("refinement_directions", []):
+        refinement_directions += f"   - {direction}\n"
 
     current_hyp = {
         "iteration":     state.iteration,
         "hypothesis":    state.hypothesis,
-        "alpha_summary": (
-            f"IC_OOS={avg_ic_oos:.4f} Sharpe={avg_sharpe:.3f} "
-            f"Return={avg_return*100:+.1f}% OK={len(ok_alphas)}/{len(state.evaluated_alphas)}"
-        ),
-        "round_summary": summary,
-        "weak_alpha_ids": data.get("weak_alpha_ids", []),
-        "analyst":        data,
+        "alpha_summary": alpha_summary,
+        "round_summary": round_summary,
     }
     updated_history = list(state.hypothesis_history) + [current_hyp]
 
-    sota_count = len(state.sota_alphas or [])
+    def _passes_quality(alpha: Dict[str, Any]) -> bool:
+        ic_oos = alpha.get("ic_oos")
+        sharpe = alpha.get("sharpe_oos")
+        ret = alpha.get("return_oos")
+        if ic_oos is None or sharpe is None or ret is None:
+            return False
+        return (
+            ic_oos >= DEFAULT_CONFIG.ic_signal_threshold
+            and sharpe > DEFAULT_CONFIG.sharpe_min_threshold
+            and ret > DEFAULT_CONFIG.return_min_threshold
+        )
+
+    sota_alphas = state.sota_alphas or []
+    sota_count = len(sota_alphas)
     quality_ok = (
         sota_count >= DEFAULT_CONFIG.min_sota
-        and avg_ic_oos >= DEFAULT_CONFIG.min_ic
-        and avg_sharpe >= DEFAULT_CONFIG.min_sharpe
-        and avg_return >= DEFAULT_CONFIG.min_return
+        and all(_passes_quality(alpha) for alpha in sota_alphas)
     )
-    weak_ids = data.get("weak_alpha_ids", [])
+    
     should_continue = (
         state.iteration < state.max_iterations
         and not quality_ok
     )
 
     return {
-        "analyst_summary":    data.get("overall_assessment", ""),
-        "analyst_feedback":   data.get("polisher_feedback", ""),
-        "analyst_weak_ids":   weak_ids,
+        "analyst_summary": data.get("overall_assessment", ""),
+        "refinement_directions": refinement_directions,
+        "analyst_weak_ids": weak_ids,
         "hypothesis_history": updated_history,
-        "should_continue":    should_continue,
+        "should_continue": should_continue,
     }

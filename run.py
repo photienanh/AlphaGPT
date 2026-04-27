@@ -2,7 +2,7 @@
 run.py — CLI entry point cho Alpha-GPT pipeline.
 
 Usage:
-    python run.py --idea "Phân kỳ khối lượng và giá"
+    python run.py --idea "Mua vào khi giá giảm liên tục nhiều ngày"
     python run.py
     python run.py --data-dir ./my_data
     python run.py --iterations 5
@@ -11,6 +11,7 @@ import asyncio
 import argparse
 import logging
 import os
+import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -59,7 +60,6 @@ async def run_pipeline(
     data_dir: str,
     idea: str = "",
     max_iterations: int = 3,
-    thread_id: str = "main",
 ) -> dict:
     from graph import graph
     from state import State
@@ -72,6 +72,7 @@ async def run_pipeline(
         trading_idea=trading_idea,
         max_iterations=max_iterations,
     )
+    thread_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     config = {"configurable": {"thread_id": thread_id}}
 
     log.info(f"[Run] Trading idea: {trading_idea}")
@@ -143,8 +144,6 @@ Ví dụ:
                         help="Số vòng lặp tối đa (mặc định: 3)")
     parser.add_argument("--data-dir", type=str, default=DEFAULT_DATA_DIR, metavar="DIR",
                         help="Thư mục chứa CSV files")
-    parser.add_argument("--thread-id", type=str, default="main", metavar="ID",
-                        help="Thread ID cho checkpoint (mặc định: main)")
     args = parser.parse_args()
 
     os.makedirs(args.data_dir, exist_ok=True)
@@ -152,7 +151,6 @@ Ví dụ:
         data_dir=args.data_dir,
         idea=args.idea,
         max_iterations=args.iterations,
-        thread_id=args.thread_id,
     ))
 
 

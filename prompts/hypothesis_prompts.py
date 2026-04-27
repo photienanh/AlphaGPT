@@ -18,7 +18,7 @@ Hãy phát triển một giả thuyết toàn diện. Vì đây là vòng lặp 
 {rag_examples}
 
 Ràng buộc bắt buộc:
-- Hypothesis PHẢI có thể implement bằng: OHLCV, vwap, adv20, returns, rsi_14, macd, bb, sma_5/20, ema_10, obv, momentum_3/10
+- Hypothesis PHẢI có thể implement bằng: open, close, high, low, volume, vwap, adv20, returns, rsi_14, macd, bb, sma_5/20, ema_10, obv, momentum_3/10
 - KHÔNG đề cập VIX, P/E ratio, earnings, fundamental data ngoài danh sách trên
 - Tập trung vào price-volume patterns
 
@@ -29,7 +29,8 @@ HYPOTHESIS_ITERATION_PROMPT = """
 Lịch sử và kết quả các vòng trước:
 {hypothesis_history}
 
-Analyst feedback: {analyst_feedback}
+Định hướng cải thiện từ analyst:
+{refinement_directions}
 
 {rag_examples}
 
@@ -43,9 +44,5 @@ Phản hồi của bạn phải tuân theo chính xác định dạng JSON sau:
 {
    "hypothesis": "Phát biểu giả thuyết đầy đủ giải thích phi hiệu quả thị trường và cách tiếp cận",
    "reason": "Giải thích toàn diện cho lập luận của bạn, bao gồm lý thuyết tài chính, cơ chế thị trường và hành vi kỳ vọng",
-   "concise_reason": "Tóm tắt 2 dòng: dòng đầu biện minh cho cách tiếp cận, dòng sau nêu nguyên lý tổng quát",
-   "concise_observation": "Một dòng mô tả quan sát thị trường then chốt thúc đẩy giả thuyết này",
-   "concise_justification": "Một dòng kết nối giả thuyết với lý thuyết tài chính đã được xác lập",
-   "concise_knowledge": "Một dòng nêu tri thức có thể chuyển giao bằng ngữ pháp điều kiện (If/When)"
 }
 """

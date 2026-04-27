@@ -34,33 +34,33 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
                 and sharpe > DEFAULT_CONFIG.sharpe_min_threshold
                 and ret   > DEFAULT_CONFIG.return_min_threshold)
 
-    ok = [a for a in evaluated
+    alpha_ok = [a for a in evaluated
           if a.get("status") == "OK" and _is_stable(a) and _passes_quality(a)]
-    ok.sort(key=lambda x: (x.get("ic_oos") or 0, x.get("sharpe_oos") or 0), reverse=True)
+    alpha_ok.sort(key=lambda x: (x.get("ic_oos") or 0, x.get("sharpe_oos") or 0), reverse=True)
 
     seen_exprs = set()
     deduped = []
-    for a in ok:
-        norm = normalize_expression(a.get("expression", ""))
-        if norm not in seen_exprs:
-            seen_exprs.add(norm)
-            deduped.append(a)
+    for alpha in alpha_ok:
+        expression = normalize_expression(alpha.get("expression", ""))
+        if expression not in seen_exprs:
+            seen_exprs.add(expression)
+            deduped.append(alpha)
 
     selected = []
-    for cand in deduped:
+    for alpha in deduped:
         if len(selected) >= DEFAULT_CONFIG.max_sota:
             break
 
-        s_cand  = cand.get("_series")
+        this_signal  = alpha.get("signal")
         corr_ok = True
 
         for sel in selected:
-            s_sel = sel.get("_series")
-            if s_cand is None or s_sel is None:
+            sel_signal = sel.get("signal")
+            if this_signal is None or sel_signal is None:
                 continue
             try:
                 merged = pd.concat(
-                    [s_cand.stack(), s_sel.stack()], axis=1
+                    [this_signal.stack(), sel_signal.stack()], axis=1
                 ).dropna()
                 if len(merged) >= 50:
                     cv = abs(merged.iloc[:, 0].corr(
@@ -73,11 +73,10 @@ def _select_sota(evaluated: List[Dict]) -> List[Dict]:
                 pass
 
         if corr_ok:
-            selected.append(cand)
+            selected.append(alpha)
 
-    for a in selected:
-        a.pop("_series",    None)
-        a.pop("_ic_series", None)
+    for alpha in selected:
+        alpha.pop("signal", None)
 
     return selected
 
@@ -92,17 +91,16 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
         log.warning("[Backtest] No data in DATA_STORE, skipping")
         return {"evaluated_alphas": state.candidate_alphas, "sota_alphas": []}
 
-    _, ticker_dfs, fwd_ret_multi = data
+    _, df_by_ticker, forward_return = data
 
-    evaluated = []
-    for cand in state.candidate_alphas:
-        result = eval_alpha(cand, ticker_dfs, fwd_ret_multi, full=True)
-        result["id"]          = cand.get("id", "")
-        result["description"] = cand.get("description", "")
+    evaluated_alphas = []
+    for alpha in state.candidate_alphas:
+        result = eval_alpha(alpha, df_by_ticker, forward_return)
+        result["id"]          = alpha.get("id", "")
         expression            = result.get("expression", "")
-        evaluated.append(result)
+        evaluated_alphas.append(result)
 
-        status = result.get("status", "ERR")
+        status = result.get("status", "EVAL_ERROR")
         ic_oos = result.get("ic_oos") or 0.0
         sharpe_oos = result.get("sharpe_oos") or 0.0
         return_oos    = result.get("return_oos") or 0.0
@@ -120,14 +118,11 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
         else:
             log.info(f"  [ERR] {result['id']} — {result.get('error','')[:60]}")
 
-    sota = _select_sota(evaluated)
+    sota = _select_sota(evaluated_alphas)
 
-    for a in evaluated:
-        a.pop("_series", None)
-
-    n_ok   = sum(1 for a in evaluated if a.get("status") == "OK")
-    n_weak = sum(1 for a in evaluated if a.get("status") == "WEAK")
-    n_err  = sum(1 for a in evaluated if a.get("status") == "EVAL_ERROR")
+    n_ok   = sum(1 for alpha in evaluated_alphas if alpha.get("status") == "OK")
+    n_weak = sum(1 for alpha in evaluated_alphas if alpha.get("status") == "WEAK")
+    n_err  = sum(1 for alpha in evaluated_alphas if alpha.get("status") == "EVAL_ERROR")
     log.info(
         f"[Backtest] OK={n_ok} WEAK={n_weak} ERR={n_err} "
         f"| {len(sota)} sota selected"
@@ -142,6 +137,6 @@ async def backtest_agent(state: State, config: RunnableConfig) -> Dict[str, Any]
     accumulated_sota = all_sota[:DEFAULT_CONFIG.max_sota]
 
     return {
-        "evaluated_alphas": evaluated,
+        "evaluated_alphas": evaluated_alphas,
         "sota_alphas":      accumulated_sota,
     }
