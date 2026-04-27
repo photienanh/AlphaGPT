@@ -43,7 +43,7 @@ async def hypothesis_agent(state: State, config: RunnableConfig) -> Dict[str, An
     is_first = not state.hypothesis_history
 
     # RAG: retrieve similar alphas
-    query = state.trading_idea if is_first else (state.analyst_feedback or state.trading_idea)
+    query = state.trading_idea if is_first else (state.refinement_directions or state.trading_idea)
     rag_alphas = retrieve_similar_alphas(query, top_k=DEFAULT_CONFIG.rag_top_k)
     rag_block = _format_rag_examples(rag_alphas)
 

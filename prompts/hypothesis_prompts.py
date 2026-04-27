@@ -43,6 +43,6 @@ HYPOTHESIS_OUTPUT_FORMAT = """
 Phản hồi của bạn phải tuân theo chính xác định dạng JSON sau:
 {
    "hypothesis": "Phát biểu giả thuyết đầy đủ giải thích phi hiệu quả thị trường và cách tiếp cận",
-   "reason": "Giải thích toàn diện cho lập luận của bạn, bao gồm lý thuyết tài chính, cơ chế thị trường và hành vi kỳ vọng",
+   "reason": "Giải thích toàn diện cho lập luận của bạn, bao gồm lý thuyết tài chính, cơ chế thị trường và hành vi kỳ vọng"
 }
 """

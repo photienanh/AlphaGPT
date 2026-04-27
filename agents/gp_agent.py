@@ -33,7 +33,7 @@ async def gp_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     log.info(
         f"[GP] Enhancing {len(state.seed_alphas)} seeds × "
         f"{DEFAULT_CONFIG.gp_iterations} iterations "
-        f"| fitness: cross-sectional IC on first {train_days}/{total_days} days"
+        f"trên {train_days}/{total_days} ngày dữ liệu"
     )
 
     candidates = enhance_alpha(

@@ -89,38 +89,34 @@ def _print_summary(idea: str, state: dict) -> None:
     print(f"KẾT QUẢ ALPHA-GPT")
     print(f"{'='*60}")
     print(f"Trading idea : {idea}")
-    print(f"Total Iterations : {state.get('iteration', 0)}\n")
+    print(f"Iterations   : {state.get('iteration', 0)}/{state.get('max_iterations', 0)}\n")
 
-    # Duyệt qua lịch sử để in báo cáo của từng vòng
     history = state.get("hypothesis_history", [])
     if history:
         print("--- LỊCH SỬ CÁC VÒNG LẶP ---")
         for h in history:
             print(f"\n[Vòng {h.get('iteration', '?')}]")
             print(f"  Hypothesis: {h.get('hypothesis', 'N/A')}")
+            if h.get("alpha_summary"):
+                print(f"  Alphas    :\n{h['alpha_summary']}")
             print(f"  Summary   : {h.get('round_summary', 'N/A')}")
-            
-            # Lấy nhận xét của Analyst nếu có
-            analyst_data = h.get('analyst', {})
-            if isinstance(analyst_data, dict):
-                print(f"  Analyst   : {analyst_data.get('overall_assessment', 'N/A')}")
     else:
         print(f"Hypothesis   : {state.get('hypothesis', 'N/A')}")
         print(f"Analyst      : {state.get('analyst_summary', 'N/A')}")
 
     sota = state.get("sota_alphas", [])
     if sota:
-        print(f"\nTop {len(sota)} alphas:")
+        print(f"\nTop {len(sota)} SOTA alphas:")
         for a in sota:
             ret = a.get("return_oos")
             ret_str = f"{ret*100:+.1f}%/năm" if ret is not None else "N/A"
             print(
-                f"    {a.get('id','?')}\n"
-                f"    IC_OOS={a.get('ic_oos','N/A')}  "
+                f"  {a.get('id','?')}\n"
+                f"  IC_OOS={a.get('ic_oos','N/A')}  "
                 f"Sharpe={a.get('sharpe_oos','N/A')}  "
                 f"Return={ret_str}\n"
-                f"    Description:    {a.get('description','')}\n"
-                f"    expr: {a.get('expression','')[:80]}\n"
+                f"  Description: {a.get('description','')}\n"
+                f"  Expression : {a.get('expression','')[:80]}\n"
             )
     else:
         print("\nKhông tìm được alpha nào đạt ngưỡng.")

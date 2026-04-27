@@ -121,10 +121,10 @@ Trả về JSON:
 ALPHA_ITERATION_PROMPT = """
 Hypothesis: {hypothesis}
 
-Alphas yếu cần thay thế:
+Alphas yếu cần thay thế (alpha seed của vòng trước, chưa qua GP):
 {weak_alphas}
 
-Alphas tốt đang giữ (tránh trùng lặp):
+Alphas tốt đang giữ (tránh trùng lặp) (alpha seed của vòng trước, chưa qua GP):
 {good_alphas}
 
 Định hướng cải thiện từ analyst:

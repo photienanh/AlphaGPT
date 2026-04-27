@@ -217,15 +217,11 @@ def enhance_alpha(
     forward_return: pd.DataFrame,
     n_iterations: int = None,
 ) -> List[Dict[str, Any]]:
-    """
-    GP enhancement với shared population và elitist selection.
-    Tất cả seeds tham gia cùng một population → có thể trao đổi
-    genetic material qua crossover.
-    """
     if n_iterations is None:
         n_iterations = DEFAULT_CONFIG.gp_iterations
 
     seen_expressions: Set[str] = set()
+    seed_ic_map: Dict[str, float] = {}  # origin_id → ic_is của seed gốc
 
     population = []
     for seed in seeds:
@@ -233,8 +229,12 @@ def enhance_alpha(
         if not expr:
             continue
         ic_is = _compute_cs_fitness(expr, df_by_ticker, forward_return)
+        ic_val = round(float(ic_is), 6) if (ic_is == ic_is) else 0.0
         entry = deepcopy(seed)
-        entry["ic_is"] = round(float(ic_is), 6) if (ic_is == ic_is) else 0.0
+        entry["ic_is"] = ic_val
+        entry["_origin_id"] = seed.get("id", "")
+        entry["_origin_desc"] = seed.get("description", "")
+        seed_ic_map[seed.get("id", "")] = ic_val
         seen_expressions.add(normalize_expression(expr))
         population.append(entry)
 
@@ -295,15 +295,61 @@ def enhance_alpha(
         if candidates:
             all_indivs = population + candidates
             all_indivs.sort(key=lambda x: x.get("ic_is", 0.0), reverse=True)
-            population = all_indivs[:len(seeds)]
+
+            # Đảm bảo mỗi origin_id luôn có ít nhất 1 đại diện trong population
+            kept_origins: Set[str] = set()
+            new_population = []
+            for indiv in all_indivs:
+                origin_id = indiv.get("_origin_id", "")
+                if origin_id not in kept_origins:
+                    new_population.append(indiv)
+                    kept_origins.add(origin_id)
+            for indiv in all_indivs:
+                if len(new_population) >= len(seeds):
+                    break
+                if indiv not in new_population:
+                    new_population.append(indiv)
+            population = new_population
+
+    # Map best result về từng seed theo _origin_id
+    best_by_origin: Dict[str, Any] = {}
+    for indiv in population:
+        origin_id = indiv.get("_origin_id", "")
+        if not origin_id:
+            continue
+        current_best = best_by_origin.get(origin_id)
+        if current_best is None or indiv.get("ic_is", 0.0) > current_best.get("ic_is", 0.0):
+            best_by_origin[origin_id] = indiv
 
     results = []
-    for i, indiv in enumerate(population):
-        ic_val = indiv.get("ic_is", 0) or 0
-        if i < len(seeds):
-            indiv["id"]          = seeds[i].get("id", indiv.get("id", ""))
-            indiv["description"] = seeds[i].get("description", "")
-        indiv["status"] = "OK" if ic_val > 0 else "WEAK"
-        results.append(indiv)
+    for seed in seeds:
+        seed_id = seed.get("id", "")
+        best = best_by_origin.get(seed_id)
+
+        if best is None:
+            # Seed không có expression hợp lệ để chạy GP
+            results.append(deepcopy(seed))
+            continue
+
+        origin_ic = seed_ic_map.get(seed_id, 0.0)
+        best_ic = best.get("ic_is", 0.0)
+
+        is_gp_improved = (
+            normalize_expression(best.get("expression", "")) != normalize_expression(seed.get("expression", ""))
+            and best_ic > origin_ic
+        )
+
+        if is_gp_improved:
+            result = deepcopy(best)
+            result["id"] = seed_id
+            result["description"] = f"GP from {seed_id}: {seed.get('description', '')}"
+            result.pop("_origin_id", None)
+            result.pop("_origin_desc", None)
+        else:
+            result = deepcopy(seed)
+            result["ic_is"] = origin_ic
+
+        result["status"] = "OK" if (result.get("ic_is") or 0) > 0 else "WEAK"
+        results.append(result)
 
     return results

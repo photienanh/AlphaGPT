@@ -37,6 +37,8 @@ def _classify_eval_error(err: str) -> str:
 async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
 
+    seed_map = {a.get("id"): a for a in (state.seed_alphas or [])}
+
     ok_alphas   = [alpha for alpha in state.evaluated_alphas if alpha.get("status") == "OK"]
     weak_alphas = [alpha for alpha in state.evaluated_alphas if alpha.get("status") == "WEAK"]
     err_alphas  = [alpha for alpha in state.evaluated_alphas if alpha.get("status") == "EVAL_ERROR"]
@@ -44,15 +46,20 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
     results_text = []
     for alpha in ok_alphas:
         return_str = (f"{alpha.get('return_oos', 0)*100:+.1f}%" if alpha.get("return_oos") is not None else "N/A")
+        seed = seed_map.get(alpha["id"])
+        seed_line = f"\n  Seed expr: {seed.get('expression','')[:80]}" if seed and seed.get("expression") != alpha.get("expression") else ""
         results_text.append(
             f"- {alpha['id']} status=OK\n"
             f"  IC_IS={alpha.get('ic_is',0):+.4f}  IC_OOS={alpha.get('ic_oos',0):+.4f}  "
             f"Sharpe={alpha.get('sharpe_oos',0):+.3f}  Return={return_str}  "
             f"Turnover={alpha.get('turnover',0):.3f}\n"
             f"  {alpha.get('description','')[:80]}"
+            f"{seed_line}"
         )
     for alpha in weak_alphas:
         return_str = (f"{alpha.get('return_oos', 0)*100:+.1f}%" if alpha.get("return_oos") is not None else "N/A")
+        seed = seed_map.get(alpha["id"])
+        seed_line = f"\n  Seed expr: {seed.get('expression','')[:80]}" if seed and seed.get("expression") != alpha.get("expression") else ""
         results_text.append(
             f"- {alpha['id']} status=WEAK\n"
             f"  IC_OOS={alpha.get('ic_oos', 0):+.4f}  "
@@ -60,6 +67,7 @@ async def analyst_agent(state: State, config: RunnableConfig) -> Dict[str, Any]:
             f"Turnover={alpha.get('turnover',0):.3f}\n"
             f"  Weak Reason: {alpha.get('weak_reason', '')}\n"
             f"  expression: {alpha.get('expression', '')[:80]}"
+            f"{seed_line}"
         )
     for alpha in err_alphas:
         results_text.append(f"- {alpha['id']} [EVAL_ERROR]: {alpha.get('error', '')[:60]}")
